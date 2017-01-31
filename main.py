@@ -3,10 +3,10 @@ import tempfile
 import os
 import subprocess
 import sys
-from zipfile import ZipFile
+from zipfile import ZipFile, ZipInfo, BadZipFile
 from json import loads
 
-from slpp import slpp
+from natsort.natsort import natsorted
 from custom_logging import make_logger
 from custom_path import Path
 
@@ -31,6 +31,9 @@ re_obj_start = re.compile(r'\s*(?P<key>\[?.*\]?) =$')
 re_obj_start_par = re.compile(r'\s*\{$')
 re_obj_end = re.compile(r'\s*\},? -- end of (?P<key>\[?.*\]?)$')
 re_value = re.compile(r'\s*(?P<key>\[.*\]) = .*,$')
+re_long_string_start = re.compile(r'\s*(?P<key>\[.*\]) = .*\\$')
+re_long_string_cont = re.compile(r'\s*.*\\$')
+re_long_string_end = re.compile(r'.*\",$')
 
 
 class Group:
@@ -42,6 +45,7 @@ class Group:
         self.parent = parent
         if isinstance(self.parent, Group):
             self.parent.add_group(self)
+        self.__long_string = None
 
     @property
     def name(self):
@@ -59,36 +63,55 @@ class Group:
         return self.l3
 
     def add_value(self, l):
+        # if self.__long_string is not None:
+        #     self.__long_string['l'].append(l)
+        #     self.o[self.__long_string['k']] = '\n'.join(self.__long_string['l'])
+        #     self.__long_string = None
         value_k = re_value.match(l).group('key')
         self.o[value_k] = l
+
+    def start_long_string(self, l):
+        long_string_k = re_long_string_start.match(l).group('key')
+        self.__long_string = {'k': long_string_k, 'l': [l]}
+
+    def cont_long_string(self, l):
+        if self.__long_string is None:
+            raise ValueError('expected long string: {}'.format(l))
+        self.__long_string['l'].append(l)
+
+    def end_long_string(self, l):
+        if self.__long_string is None:
+            raise ValueError('expected long string: {}'.format(l))
+        self.__long_string['l'].append(l)
+        self.o[self.__long_string['k']] = '\n'.join(self.__long_string['l'])
+        self.__long_string = None
 
     def add_group(self, group):
         self.o[group.name] = group
 
     def __str__(self):
         out = [self.start]
-        for k in sorted(self.o.keys()):
+        for k in natsorted(self.o.keys()):
             v = self.o[k]
-            # print(type(v))
             if isinstance(v, Group):
                 out.append(str(v))
             else:
                 out.append(v)
-        # print(out)
         out.append(self.stop)
         return '\n'.join(out)
 
 
 class Miz:
-    def __init__(self, path_to_miz_file, temp_dir=None):
-        self.miz_path = os.path.abspath(path_to_miz_file)
-        if not os.path.exists(self.miz_path):
+    def __init__(self, path_to_miz_file, temp_dir=None, remove_temp=True):
+        self.miz_path = Path(path_to_miz_file)
+        if not self.miz_path.exists():
             raise FileNotFoundError(os.path.abspath(path_to_miz_file))
-        logger.debug('making new Mission object based on miz file: {}'.format(self.miz_path))
-        self.temp_dir_path = temp_dir or tempfile.mkdtemp()
+        logger.debug('making new Mission object based on miz file: {}'.format(self.miz_path.abspath()))
+        self.temp_dir_path = Path(temp_dir or tempfile.mkdtemp())
         logger.debug('temporary directory for this mission object: {}'.format(self.temp_dir_path))
         self.files_in_zip = []
         self.__unzipped = False
+        self.__remove_temp = remove_temp
 
     def __enter__(self):
         logger.debug('unzipping MIZ file')
@@ -103,7 +126,8 @@ class Miz:
             print(exc_type, exc_val)
             return False
         else:
-            self.remove_temp_dir()
+            if self.__remove_temp:
+                self.remove_temp_dir()
 
     @property
     def is_unzipped(self):
@@ -115,131 +139,113 @@ class Miz:
 
     @property
     def mission(self):
-        return Path(self.temp_dir_path).joinpath('l10n', 'DEFAULT', 'mission')
-
-    def decode(self):
-        self.logger.debug('reading Mission files from disk')
-        self.decode_ln10()
-        self.decode_mission(self.ln10)
+        return Path(self.temp_dir_path).joinpath('mission')
 
     def unzip(self, force=False):
         """Extracts MIZ file into temp dir"""
-        self.logger.debug('unzipping miz into temp dir: "{}" -> {}'.format(self.miz_path, self.temp_dir_path))
-        with ZipFile(self.miz_path) as zip_file:
+        logger.debug('unzipping miz into temp dir: "{}" -> {}'.format(self.miz_path.abspath(), self.temp_dir_path.abspath()))
+        with ZipFile(self.miz_path.abspath()) as zip_file:
             try:
-                self.logger.debug('reading infolist')
+                logger.debug('reading infolist')
                 zip_content = zip_file.infolist()
                 self.files_in_zip = [f.filename for f in zip_content]
                 for item in zip_content:  # not using ZipFile.extractall() for security reasons
                     assert isinstance(item, ZipInfo)
-                    self.logger.debug('unzipping item: {}'.format(item.filename))
+                    logger.debug('unzipping item: {}'.format(item.filename))
                     try:
                         zip_file.extract(item, self.temp_dir_path)
                     except RuntimeError:
-                        raise MizErrors.ExtractError(item)
+                        logger.exception('filed to extract: {}'.format(item.filename))
+                        raise
             except BadZipFile:
-                raise MizErrors.CorruptedMizError(self.miz_path)
-            except:
-                self.logger.exception('error while unzipping miz file: {}'.format(self.miz_path))
+                logger.exception('error extracting zip file: {}'.format(self.miz_path.abspath()))
                 raise
-        self.logger.debug('checking miz content')
-        for miz_item in map(join, [self.temp_dir_path],
+            except:
+                logger.exception('error while unzipping miz file: {}'.format(self.miz_path.abspath()))
+                raise
+        logger.debug('checking miz content')
+        for miz_item in map(os.path.join, [self.temp_dir_path],
                             ['./mission', './options', './warehouses', './l10n/DEFAULT/dictionary',
                              './l10n/DEFAULT/mapResource']):
-            if not exists(miz_item):
-                self.logger.error('missing file in miz: {}'.format(miz_item))
-                raise MizErrors.MissingFileInMizError(miz_item)
-        self.logger.debug('all files have been found, miz successfully unzipped')
+            if not Path(miz_item).exists():
+                logger.error('missing file in miz: {}'.format(miz_item))
+                raise FileNotFoundError(Path(miz_item).abspath())
+        logger.debug('all files have been found, miz successfully unzipped')
         self.__unzipped = True
 
-    def __encode_mission(self):
-        self.logger.debug('writing mission dictionary to mission file: {}'.format(self.mission_file_path))
-        parser = SLPP()
-        try:
-            self.logger.debug('encoding dictionary to lua table')
-            raw_text = parser.encode(self.__mission.d)
-        except:
-            self.logger.exception('error while encoding')
-            raise
-        try:
-            self.logger.debug('overwriting mission file')
-            with open(self.mission_file_path, mode="w", encoding='iso8859_15') as _f:
-                _f.write('mission = ')
-                raw_text = re_sub(RE_SPACE_AFTER_EQUAL_SIGN, "= \n", raw_text)
-                _f.write(raw_text)
-        except:
-            self.logger.exception('error while writing mission file: {}'.format(self.mission_file_path))
-            raise
+    def reorder_lua_tables(self):
+        self.__reorder_lua_table(self.mission)
+        self.__reorder_lua_table(self.l10n)
 
-    def __encode_ln10(self):
-        self.logger.debug('writing ln10 to: {}'.format(self.ln10_file_path))
-        parser = SLPP()
-        try:
-            self.logger.debug('encoding dictionary to lua table')
-            raw_text = parser.encode(self.ln10)
-        except:
-            self.logger.exception('error while encoding')
-            raise
-        try:
-            self.logger.debug('overwriting mission file')
-            with open(self.ln10_file_path, mode="w") as _f:
-                _f.write('dictionary = ')
-                raw_text = re_sub(RE_SPACE_AFTER_EQUAL_SIGN, "= \n", raw_text)
-                _f.write(raw_text)
-        except:
-            self.logger.exception('error while writing ln10 file: {}'.format(self.ln10_file_path))
-            raise
-
-    def zip(self):
-        self.__encode_mission()
-        self.__encode_ln10()
-        out_file = abspath('{}_ESME.miz'.format(self.miz_path[:-4])).replace('\\', '/')
-        try:
-            self.logger.debug('zipping mission into: {}'.format(out_file))
-            with ZipFile(out_file, mode='w', compression=8) as _z:
-                for f in self.files_in_zip:
-                    full_path = abspath(join(self.temp_dir_path, f)).replace('\\', '/')
-                    self.logger.debug("injecting in zip file: {}".format(full_path))
-                    _z.write(full_path, arcname=f)
-        except:
-            self.logger.exception('error while zipping miz file')
-            raise
+    @staticmethod
+    def __reorder_lua_table(in_file: Path or str, out_file: Path or str = None):
+        in_file = Path(in_file)
+        out_file = Path(out_file) if out_file else Path(in_file)
+        with open(in_file.abspath(), encoding='iso8859_15') as f:
+            lines = f.readlines()
+        start_length = len(lines)
+        current_group = None
+        while lines:
+            line = _next(lines)
+            if re_obj_start.match(line):
+                current_group = Group(line, lines.pop(0).rstrip(), current_group)
+            elif re_obj_end.match(line):
+                current_group.close(line)
+                if current_group.parent:
+                    current_group = current_group.parent
+            elif re_long_string_start.match(line):
+                current_group.start_long_string(line)
+            elif re_long_string_cont.match(line):
+                current_group.cont_long_string(line)
+            elif re_value.match(line):
+                current_group.add_value(line)
+            elif re_long_string_end.match(line):
+                current_group.end_long_string(line)
+            elif re_obj_start_par.match(line):
+                pass
+            else:
+                raise ValueError('PARSING ERROR: ', line)
+        with open(out_file.abspath(), encoding='iso8859_15', mode='w') as f:
+            f.write(current_group.__str__())
+        with open(out_file.abspath(), encoding='iso8859_15', mode='r') as f:
+            if not start_length == len(f.readlines()):
+                raise RuntimeError('there was an error during the re-ordering process')
 
     def wipe_temp_dir(self):
         """Removes all files & folders from temp_dir, wiping it clean"""
         files = []
         folders = []
-        self.logger.debug('wiping temporary directory')
-        for root, _folders, _files in walk(self.temp_dir_path, topdown=False):
+        logger.debug('wiping temporary directory')
+        for root, _folders, _files in os.walk(self.temp_dir_path.abspath(), topdown=False):
             for f in _folders:
-                folders.append(join(root, f))
+                folders.append(os.path.join(root, f))
             for f in _files:
-                files.append(join(root, f))
-        self.logger.debug('removing files')
+                files.append(os.path.join(root, f))
+        logger.debug('removing files')
         for f in files:
-            self.logger.debug('removing: {}'.format(f))
+            logger.debug('removing: {}'.format(f))
             try:
-                remove(f)
+                os.remove(f)
             except:
-                self.logger.exception('could not remove: {}'.format(f))
+                logger.exception('could not remove: {}'.format(f))
                 raise
-        self.logger.debug('removing folders')
+        logger.debug('removing folders')
         for f in folders:
-            self.logger.debug('removing: {}'.format(f))
+            logger.debug('removing: {}'.format(f))
             try:
-                rmdir(f)
+                os.rmdir(f)
             except:
-                self.logger.exception('could not remove: {}'.format(f))
+                logger.exception('could not remove: {}'.format(f))
                 raise
 
     def remove_temp_dir(self):
         """Deletes the temporary directory"""
-        self.logger.debug('removing temporary directory: {}'.format(self.temp_dir_path))
+        logger.debug('removing temporary directory: {}'.format(self.temp_dir_path))
         self.wipe_temp_dir()
         try:
-            rmdir(self.temp_dir_path)
+            os.rmdir(self.temp_dir_path)
         except:
-            self.logger.exception('could not remove: {}'.format(self.temp_dir_path))
+            logger.exception('could not remove: {}'.format(self.temp_dir_path))
             raise
 
 
@@ -257,64 +263,12 @@ def _next(_lines):
     return _lines.pop(0).rstrip()
 
 
-def obj(_line, _lines):
-    _o = {}
-    _k = re_obj_start.match(_line).group('key')
-    _start = [_line]
-    print('START', _k, '||', _line)
-    _line = _next(_lines)
-    assert re_obj_start_par.match(_line), _line
-    _start.append(_line)
-    _o['__start'] = '\n'.join(_start)
-    while not '-- end of {}'.format(_k) in _line:
-        _line = _next(_lines)
-        print('uh', _line)
-        if re_obj_start.match(line):
-            _kk = re_obj_start.match(line).group('key')
-            o[_kk] = obj(line, lines)
-
-    return _o
-
-class Value:
-
-    def __init__(self, l):
-        self.l = l
-
-
 if __name__ == '__main__':
-    # fp = r'C:\Users\bob\Saved Games\DCS\Missions\132nd\DEVEL\TRMT\l10n\DEFAULT\dictionary'
-    fp = r'C:\Users\bob\Saved Games\DCS\Missions\132nd\DEVEL\TRMT\mission'
-    op = r'C:\Users\bob\Saved Games\DCS\Missions\132nd\DEVEL\TRMT\mission3'
-    parser = slpp.SLPP()
-    with open(fp, encoding='iso8859_15') as f:
-        lines = f.readlines()
-    # assert lines.pop(0) == 'mission = \n'
-    # assert lines.pop(0) == '{\n'
-    # assert lines.pop() == '} -- end of mission\n'
-    # o = {}
-    # mission = Group(lines.pop(0), None)
-    current_group = None
-    while lines:
-        line = _next(lines)
-        if re_obj_start.match(line):
-            current_group = Group(line, lines.pop(0).rstrip(), current_group)
-            # k = re_obj_start.match(line).group('key')
-            # o[k] = obj(line, lines)
-        elif re_obj_end.match(line):
-            current_group.close(line)
-            if current_group.parent:
-                current_group = current_group.parent
-            # k = re_obj_end.match(line).group('key')
-            # print('END', k, '||', line)
-        elif re_value.match(line):
-            current_group.add_value(line)
-            # k = re_value.match(line).group('key')
-            # print('VAL', k, '||', line)
-        elif re_obj_start_par.match(line):
-            pass
-        else:
-            raise ValueError(line)
-    print(current_group.name)
-    with open(op, encoding='iso8859_15', mode='w') as f:
-        f.write(current_group.__str__())
+    miz_file = r'C:\Users\bob\Saved Games\DCS\Missions\132nd\TRMT_2.3.1.81.miz'
+    with Miz(miz_file, './temp', remove_temp=False) as miz:
+        miz.unzip()
+        for f in miz.files_in_zip:
+            print(f)
+        miz.reorder_lua_tables()
+    exit(0)
     # print(current_group)
