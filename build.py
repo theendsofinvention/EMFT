@@ -2,7 +2,6 @@
 """
 Runs a process in an external thread and logs the output to a standard Python logger
 """
-from zipfile import ZipFile
 import os
 import subprocess
 import threading
@@ -18,32 +17,28 @@ from src.utils.custom_path import Path
 logger = make_logger(__name__)
 logger.setLevel(DEBUG)
 
+
 # noinspection PyPep8Naming
 class __LogPipe(threading.Thread):
-    def __init__(self, logger, level):
-        """Setup the object with a logger and a loglevel and start the thread"""
+    def __init__(self, logger_, level):
         threading.Thread.__init__(self)
         self.daemon = True
         self.level = level
-        self.logger = logger
+        self.logger = logger_
         self.fdRead, self.fdWrite = os.pipe()
         self.pipeReader = os.fdopen(self.fdRead)
         self.start()
 
     def fileno(self):
-        """Return the write file descriptor of the pipe"""
         return self.fdWrite
 
     def run(self):
-        """Run the thread, logging everything"""
         for line in iter(self.pipeReader.readline, ''):
-            # print(line.strip(os.linesep))
             self.logger.error(line.strip('\n'))
 
         self.pipeReader.close()
 
     def close(self):
-        """Close the write end of the pipe"""
         os.close(self.fdWrite)
 
 
@@ -69,10 +64,8 @@ def run_piped_process(args, logger, level=DEBUG, cwd=None, env=None, exe=None):
 def patch_exe(path_to_exe: str or Path,
               version: str,
               app_name: str,
-              app_long_name: str,
               wkdir: str or Path,
               build: str):
-
     path_to_exe = Path(path_to_exe)
     wkdir = Path(wkdir)
 
@@ -93,16 +86,13 @@ def patch_exe(path_to_exe: str or Path,
         path_to_exe,
         '/high',
         version,
-        # '{}'.format(version),
         '/va',
         '/pv', version,
-        # '/s', 'description', app_long_name,
         '/s', 'product', app_name,
         '/s', 'copyright', '2017 etcher',
         '/s', 'company', 'etcher',
         '/s', 'build', str(build),
         '/s', 'PrivateBuild', str(build),
-        # '/sc', 'some comments',
         '/langid', '1033',
     ]
     run_piped_process(cmd, logger=logger, cwd=wkdir)
@@ -113,10 +103,8 @@ def pre_build(env):
     run_piped_process(
         args=[
             os.path.join(env, r'scripts\pyrcc5.exe'),
-            # str(Path('./src/ui/qt_resources.qrc').abspath()),
             './src/ui/qt_resource.qrc',
             '-o',
-            # str(Path('./src/ui/qt_resources.py').abspath())
             './src/ui/qt_resource.py'
         ],
         logger=logger,
@@ -133,7 +121,6 @@ def build(env):
     run_piped_process([
         os.path.join(env, 'python.exe'),
         '-m', 'PyInstaller',
-        # os.path.join(env, r'scripts/pyupdater.exe'), 'build',
         '--noconfirm',
         '--onefile',
         '--clean',
@@ -146,35 +133,39 @@ def build(env):
         '--distpath', './dist',
         '--windowed',
         './main.py',
-        # '--app-version={}'.format(version.get('SemVer')),
-        # '-k',
-        # '--clean',
     ], logger=logger, cwd='.')
     logger.info('patching exe resources')
     patch_exe(
         path_to_exe=Path('./dist/EMFT.exe'),
         version=version.get('SemVer'),
         app_name=_global.APP_SHORT_NAME,
-        app_long_name=_global.APP_FULL_NAME,
         wkdir=Path('.'),
         build=version.get('InformationalVersion'),
     )
-    # with ZipFile(Path('./pyu-data/new').joinpath('EMFT-win-{}.zip'.format(version.get('LegacySemVer'))), mode='w') as z:
-    #     z.write('./pyu-data/new/win.exe', arcname='EMFT.exe')
-    # run_piped_process([
-    #     os.path.join(env, r'scripts/pyupdater.exe'), 'pkg', '-p'
-    # ], logger=logger, cwd='.')
-    # run_piped_process([
-    #     os.path.join(env, r'scripts/pyupdater.exe'), 'upload', '--service', 'scp'
-    # ], logger=logger, cwd='.')
 
     logger.info('all done')
+
+
+def build_requirements(env):
+    requirements = subprocess.Popen(
+        [os.path.join(env, 'scripts/pip.exe'), 'freeze'],
+        stdout=subprocess.PIPE
+    ).stdout.read().decode('utf8')
+    requirements = requirements.rstrip()
+    requirements = requirements.replace('\r\n', '\n')
+    requirements = requirements.replace(r'PyInstaller==3.3.dev0+gb78bfe5',
+                                        r'git+https://github.com/132nd-etcher/pyinstaller.git#egg=PyInstaller')
+    Path('requirements.txt').write_text(requirements)
 
 
 @click.command()
 @click.argument('env', type=click.Path(exists=True, file_okay=False, dir_okay=True, readable=True))
 @click.option('-p', '--pre', is_flag=True, help='Pre build only')
-def main(env, pre):
+@click.option('-r', '--req', is_flag=True, help='Req build only')
+def main(env, pre, req):
+    if req:
+        build_requirements(env)
+        return
     pre_build(env)
     if pre:
         exit(0)
