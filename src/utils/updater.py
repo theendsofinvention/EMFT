@@ -112,6 +112,16 @@ class Updater:
                 logger.debug('this version is newer: {}'.format(version))
                 self._candidates[version] = release
 
+        if self._candidates:
+
+            logger.debug('new version found, following up')
+            return True
+
+        else:
+
+            logger.debug('no new version found')
+            return False
+
     def _process_candidates(self):
 
         if self._candidates:
@@ -130,11 +140,15 @@ class Updater:
                     self._latest_release = release
 
         else:
+
+            logger.debug('no release candidate')
+
             if self._cancel_update_func:
                 self._cancel_update_func()
 
-    @staticmethod
-    def _progress_hook(data):
+    def _download_latest_release(self):
+
+        def _progress_hook(data):
             label = 'Time left: {} ({}/{})'.format(
                 data['time'],
                 humanize.naturalsize(data['downloaded']),
@@ -142,8 +156,6 @@ class Updater:
             )
             Progress.set_label(label)
             Progress.set_value(data['downloaded'] / data['total'] * 100)
-
-    def _download_latest_release(self):
 
         if self._latest_release:
 
@@ -158,12 +170,15 @@ class Updater:
                     d = Downloader(
                         url=asset.browser_download_url,
                         filename='./update',
-                        progress_hooks=[self._progress_hook],
+                        progress_hooks=[_progress_hook],
                     )
                     if d.download():
                         self._update_ready_to_install = True
 
         else:
+
+            logger.debug('no release to download')
+
             if self._cancel_update_func:
                 self._cancel_update_func()
 
@@ -196,15 +211,25 @@ class Updater:
             os._exit(0)
 
         else:
+
+            logger.debug('no update to install')
+
             if self._cancel_update_func:
                 self._cancel_update_func()
 
+    def _version_check_follow_up(self, new_version_found: bool):
+
+        if new_version_found:
+
+            logger.debug('new version found, proceeding')
+
+            self.pool.queue_task(self._process_candidates, _err_callback=self._cancel_update_func)
+            self.pool.queue_task(self._download_latest_release, _err_callback=self._cancel_update_func)
+            self.pool.queue_task(self._install_update, _err_callback=self._cancel_update_func)
+
     def version_check(self):
 
-        self.pool.queue_task(self._version_check, _err_callback=self._cancel_update_func)
-
-        self.pool.queue_task(self._process_candidates, _err_callback=self._cancel_update_func)
-
-        self.pool.queue_task(self._download_latest_release, _err_callback=self._cancel_update_func)
-
-        self.pool.queue_task(self._install_update, _err_callback=self._cancel_update_func)
+        self.pool.queue_task(
+            task=self._version_check,
+            _task_callback=self._version_check_follow_up,
+            _err_callback=self._cancel_update_func)
