@@ -1,4 +1,11 @@
-
+__pycache__
 .idea/
-__pycache__/
 /temp/
+/output/
+*.config
+*.debug
+*.spec
+/.pyupdater/
+/pyu-data/
+/build/
+/dist/
