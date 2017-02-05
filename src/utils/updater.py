@@ -13,7 +13,7 @@ import subprocess
 from .threadpool import ThreadPool
 
 # noinspection PyPep8Naming
-from src.utils.gh import GHSessionError, GHRelease, GHAnonymousSession as GH
+from src.utils.gh import GHRelease, GHSession as GH
 
 from src.utils.custom_logging import make_logger
 
