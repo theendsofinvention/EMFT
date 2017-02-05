@@ -92,5 +92,5 @@ def start_ui():
     _global.MAIN_UI.add_tab(TabLog())
     _global.MAIN_UI.show()
     updater = Updater(_global.APP_VERSION, '132nd-etcher', 'test', 'EMFT.exe', I.hide, I.show)
-    updater.version_check()
+    updater.version_check('alpha')
     sys.exit(_global.QT_APP.exec())

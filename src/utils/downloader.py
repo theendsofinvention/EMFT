@@ -243,11 +243,13 @@ class Downloader:
 
     def download(self):
 
+        logger.debug('downloading to memory')
         self._download_to_memory()
 
         check = self._check_hash()
 
         if check is True or check is None:
+            logger.debug('writing to file')
             self._write_to_file()
             return True
 

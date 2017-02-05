@@ -1,62 +1,107 @@
 # coding=utf-8
-import semver
 
-# noinspection PyProtectedMember
-from src import _global
-import humanize
-from .progress import Progress
-from .downloader import Downloader
-from src.ui.main_ui_interface import I
 import io
 import os
 import subprocess
-from .threadpool import ThreadPool
+from re import compile
 
-# noinspection PyPep8Naming
-from src.utils.gh import GHRelease, GHSession as GH
+import humanize
+import semver
 
+from src import _global
 from src.utils.custom_logging import make_logger
+from src.utils.gh import GHRelease, GHSession as GH
+from .downloader import Downloader
+from .progress import Progress
+from .threadpool import ThreadPool
 
 gh = GH()
 
 logger = make_logger(__name__)
 
 
+class _Version:
+    re_branch = compile(r'.*\.(?P<branch>.*)\..*')
+
+    def __init__(self, version_str: str):
+        try:
+            semver.parse(version_str)
+        except ValueError:
+            raise ValueError(version_str)
+        self._version_str = version_str
+        self._info = semver.parse_version_info(version_str)
+        self._channel = None
+        self._branch = None
+
+        self._parse()
+
+    def _parse(self):
+        if self._info.prerelease is None:
+            self._channel = 'stable'
+        elif self._info.prerelease.startswith('alpha.'):
+            self._channel = 'alpha'
+            self._branch = self.re_branch.match(self._info.prerelease).group('branch')
+        elif self._info.prerelease.startswith('beta.'):
+            self._channel = 'beta'
+            self._branch = self.re_branch.match(self._info.prerelease).group('branch')
+        elif self._info.prerelease.startswith('dev.'):
+            self._channel = 'dev'
+        elif self._info.prerelease.startswith('rc.'):
+            self._channel = 'rc'
+        else:
+            raise ValueError(self._info.prerelease)
+
+    @property
+    def branch(self) -> str or None:
+        return self._branch
+
+    @property
+    def channel(self) -> str:
+        return self._channel
+
+    @property
+    def version_str(self):
+        return self._version_str
+
+    def __gt__(self, other):
+        return semver.compare(self.version_str, other.version_str) > 0
+
+    def __lt__(self, other):
+        return semver.compare(self.version_str, other.version_str) < 0
+
+    def __eq__(self, other):
+        return semver.compare(self.version_str, other.version_str) == 0
+
+    def __str__(self):
+        return self._version_str
+
+
 class _Release:
     def __init__(self, gh_release: GHRelease):
         self._gh_release = gh_release
-        self._channel = None
+        self._version = _Version(self._gh_release.version)
 
     @property
     def version(self):
-        return self._gh_release.version
+        return self._version
 
     @property
     def assets(self):
         return self._gh_release.assets()
 
     @property
-    def channel(self) -> str or None:
-        if self._channel is None:
-            v = semver.parse_version_info(self._gh_release.version)
-            if v.prerelease is None:
-                self._channel = 'stable'
-            elif v.prerelease.startswith('a.'):
-                self._channel = 'alpha'
-            elif v.prerelease.startswith('b.'):
-                self._channel = 'beta'
-            elif v.prerelease.startswith('dev'):
-                self._channel = 'dev'
-            elif v.prerelease.startswith('dev'):
-                self._channel = 'dev'
+    def channel(self) -> str:
+        return self._version.channel
 
-        return self._channel
+    @property
+    def branch(self) -> str or None:
+        return self._version.branch
 
 
 class Updater:
     def __init__(
             self,
-            current: str,
+            current_version: str,
             gh_user: str,
             gh_repo: str,
             asset_filename: str,
@@ -65,7 +110,7 @@ class Updater:
     ):
 
         self._latest = None
-        self._current = current
+        self._current = _Version(current_version)
         self._gh_user = gh_user
         self._gh_repo = gh_repo
         self._available = {}
@@ -97,20 +142,48 @@ class Updater:
     def latest(self) -> _Release or None:
         return self._latest
 
-    def _version_check(self):
+    def _version_check(self, channel: str):
 
         logger.info('checking for new version')
 
         self._get_available_releases()
 
         for version, release in self._available.items():
+
+            skip = []
+
+            if channel == 'alpha':
+                pass
+            elif channel == 'beta':
+                skip.append('alpha')
+            elif channel == 'dev':
+                skip.append('beta')
+            elif channel == 'rc':
+                skip.append('dev')
+            elif channel == 'stable':
+                skip.append('rc')
+            else:
+                raise ValueError(channel)
+
             assert isinstance(release, _Release)
 
             logger.debug('comparing current with remote: "{}" vs "{}"'.format(self._current, version))
 
-            if semver.compare(version, self._current) > 0:
+            version = _Version(version)
+
+            if version.channel in skip:
+                logger.debug('skipping release with channel: {}'.format(version.channel))
+                continue
+
+            if version.channel in ['alpha', 'beta']:
+
+                logger.debug('comparing branch name')
+                if not self._current.branch == version.branch:
+                    logger.debug('skipping branch: {}'.format(version.branch))
+
+            if version > self._current:
                 logger.debug('this version is newer: {}'.format(version))
-                self._candidates[version] = release
+                self._candidates[version.version_str] = release
 
         if self._candidates:
 
@@ -134,7 +207,9 @@ class Updater:
             for version, release in self._candidates.items():
                 logger.debug('comparing "{}" and "{}"'.format(latest, version))
 
-                if semver.compare(version, latest) > 0:
+                version = _Version(version)
+
+                if version > self._current:
                     logger.debug('{} is newer'.format(version))
                     latest = version
                     self._latest_release = release
@@ -164,8 +239,14 @@ class Updater:
             assert isinstance(self._latest_release, _Release)
             assets = self._latest_release.assets
 
+            logger.debug('found {} assets'.format(len(assets)))
+
             for asset in assets:
-                if asset.name == self._asset_filename:
+
+                logger.debug('checking asset: {}'.format(asset.name))
+
+                if asset.name.lower() == self._asset_filename.lower():
+
                     Progress.start('Downloading latest version', 100, '')
                     d = Downloader(
                         url=asset.browser_download_url,
@@ -220,16 +301,18 @@ class Updater:
     def _version_check_follow_up(self, new_version_found: bool):
 
         if new_version_found:
-
             logger.debug('new version found, proceeding')
 
             self.pool.queue_task(self._process_candidates, _err_callback=self._cancel_update_func)
             self.pool.queue_task(self._download_latest_release, _err_callback=self._cancel_update_func)
             self.pool.queue_task(self._install_update, _err_callback=self._cancel_update_func)
 
-    def version_check(self):
+    def version_check(self, channel: str):
 
         self.pool.queue_task(
             task=self._version_check,
+            kwargs=dict(
+                channel=channel
+            ),
             _task_callback=self._version_check_follow_up,
             _err_callback=self._cancel_update_func)

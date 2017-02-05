@@ -36,7 +36,7 @@ cache:
   - C:\Users\appveyor\AppData\Local\pip\cache
   - C:\ProgramData\chocolatey\bin -> appveyor.yml
   - C:\ProgramData\chocolatey\lib -> appveyor.yml
-  - C:\Python35 -> requirement*.txt
+#  - C:\Python35 -> requirement*.txt
   - '%APPDATA%\pip\Cache'
 
 install:
@@ -69,7 +69,7 @@ before_build:
 
 build_script:
   - set PATH="c:\projects\verpatch";%PATH%
-  - "%PYTHON%/python.exe -m PyInstaller ./src/main.py --noconfirm --onefile --clean --icon src/ui/resources/app.ico --workpath ./build/build --paths %PYTHON%/Lib/site-packages/PyQt5/Qt/bin --name EMFT --distpath ./dist --windowed --log-level=WARN"
+  - "%PYTHON%/python.exe -m PyInstaller main.py --noconfirm --onefile --clean --icon src/ui/app.ico --workpath ./build --paths %PYTHON%/Lib/site-packages/PyQt5/Qt/bin --name EMFT --distpath ./dist --windowed --log-level=WARN"
   - cmd: verpatch.exe %APPVEYOR_BUILD_FOLDER%\dist\emft.exe /high %GitVersion_SemVer% /va /pv %GitVersion_SemVer% /s product EMFT /s copyright "2017 etcher" /s build %GitVersion_Sha% /langid 1033 /s PrivateBuild %APPVEYOR_BUILD_NUMBER%
 #  - git config --global credential.helper store
 #  - ps: Add-Content "$env:USERPROFILE\.git-credentials" "https://$($env:GH_PAGES_TOKEN):x-oauth-basic@github.com`n"
@@ -99,13 +99,14 @@ deploy:
     artifact: emft
     draft: false
     prerelease: false
+    tag: $(GitVersion_SemVer)
     auth_token:
       secure: T9LMiMzikVwlfnYhxlIpzhmfotDN75SUmEv1FSGLHZ/vMHMCMT3SEapSOH1iPdaD
     on:
-      branch: master
+#      branch: master
       appveyor_repo_tag: false
 
-skip_tags: false
+skip_tags: true
 
 skip_branch_with_pr: false
 

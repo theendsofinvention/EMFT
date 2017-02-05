@@ -5,7 +5,7 @@ branches:
   feature:
     regex: features?[/-]
     mode: ContinuousDelivery
-    tag: a.{BranchName}
+    tag: alpha.{BranchName}
     increment: Patch
     prevent-increment-of-merged-branch-version: false
     track-merge-target: false
@@ -13,7 +13,7 @@ branches:
   pull-request:
     regex: (pull|pull\-requests|pr)[/-]
     mode: ContinuousDelivery
-    tag: b.{BranchName}
+    tag: beta.{BranchName}
     increment: Patch
     prevent-increment-of-merged-branch-version: false
     tag-number-pattern: '[/-](?<number>\d+)[-/]'
