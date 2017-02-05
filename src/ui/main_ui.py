@@ -71,9 +71,6 @@ class MainUi(QMainWindow, MainGuiThreading, MainUiProgress):
 
         self.raise_()
 
-        updater = Updater(_global.APP_VERSION, '132nd-etcher', 'test', 'EMFT.exe', I.hide, I.show)
-        updater.version_check()
-
     @staticmethod
     def exit(code=0):
         if _global.QT_APP:
@@ -94,4 +91,6 @@ def start_ui():
     _global.MAIN_UI.add_tab(TabReorder())
     _global.MAIN_UI.add_tab(TabLog())
     _global.MAIN_UI.show()
+    updater = Updater(_global.APP_VERSION, '132nd-etcher', 'test', 'EMFT.exe', I.hide, I.show)
+    updater.version_check()
     sys.exit(_global.QT_APP.exec())
