@@ -4,10 +4,8 @@ import sys
 from json import loads
 
 import click
-# from everett.manager import ConfigManager, ConfigIniEnv, ConfigDictEnv
 from natsort.natsort import natsorted
 
-from src.miz import Miz
 from src.utils.custom_logging import make_logger, DEBUG, INFO
 from src.utils.custom_path import Path
 
@@ -48,13 +46,6 @@ def check_cert():
     logger.info('certificate: checked')
 
 
-def print_status_info(info):
-    total = info.get(u'total')
-    downloaded = info.get(u'downloaded')
-    status = info.get(u'status')
-    print(downloaded, total, status)
-
-
 @click.command()
 @click.option('-m', '--mizfile', nargs=1, type=str, default=None, help='Source MIZ file.')
 @click.option('-o', '--output', nargs=1, default='./output', help='Directory to store the results in.')
@@ -62,14 +53,11 @@ def print_status_info(info):
               help='Folder that contains the TRMT files; the latest will be picked automatically.')
 @click.option('-v', '--verbose', is_flag=True, help='Outputs debug messages')
 def main(mizfile, output, latest, verbose):
-
     if verbose:
         from src.utils.custom_logging import CH
         CH.setLevel(DEBUG)
 
     check_cert()
-
-
 
     from src.ui.main_ui import start_ui
     start_ui()
