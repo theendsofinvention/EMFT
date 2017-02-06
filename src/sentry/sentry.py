@@ -44,6 +44,7 @@ class Sentry(raven.Client, metaclass=Singleton):
 
     def register_context(self, context_name: str, context_provider: ISentryContextProvider):
         """Registers a context to be read when a crash occurs; obj must implement get_context()"""
+        logger.debug('registering context with Sentry: {}'.format(context_name))
         self.registered_contexts[context_name] = context_provider
 
     @staticmethod
@@ -74,7 +75,9 @@ class Sentry(raven.Client, metaclass=Singleton):
         super(Sentry, self).captureException(exc_info, **kwargs)
 
 
+logger.info('SENTRY: initializing')
 SENTRY = Sentry()
+logger.info('SENTRY: initialized')
 
 
 # noinspection PyUnusedLocal
