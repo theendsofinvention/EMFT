@@ -2,11 +2,11 @@
 
 import path
 
-from src.cfg.cfg_prop import CfgProperty
+from src.meta.meta_property import MetaProperty
 
 
 class ConfigValues:
-    @CfgProperty(None, str)
+    @MetaProperty(None, str)
     def saved_games_path(self, value: str):
         """Path to the Saved Games folder"""
         p = path.Path(value)
@@ -16,7 +16,7 @@ class ConfigValues:
             raise TypeError('path is not a directory: {}'.format(p.abspath()))
         return str(p.abspath())
 
-    @CfgProperty(None, str)
+    @MetaProperty(None, str)
     def single_miz_output_folder(self, value: str):
         p = path.Path(value)
         if not p.exists():
@@ -25,7 +25,7 @@ class ConfigValues:
             return None
         return str(p.abspath())
 
-    @CfgProperty(None, str)
+    @MetaProperty(None, str)
     def auto_source_folder(self, value: str):
         p = path.Path(value)
         if not p.exists():
@@ -34,7 +34,7 @@ class ConfigValues:
             return None
         return str(p.abspath())
 
-    @CfgProperty(None, str)
+    @MetaProperty(None, str)
     def auto_output_folder(self, value: str):
         p = path.Path(value)
         if not p.exists():
@@ -43,7 +43,7 @@ class ConfigValues:
             return None
         return str(p.abspath())
 
-    @CfgProperty(None, str)
+    @MetaProperty(None, str)
     def single_miz_last(self, value: str):
         p = path.Path(value)
         if not p.exists():
@@ -54,11 +54,11 @@ class ConfigValues:
             return None
         return str(p.abspath())
 
-    @CfgProperty(False, bool)
+    @MetaProperty(False, bool)
     def auto_mode(self, value: bool):
         return value
 
-    @CfgProperty('INFO', str)
+    @MetaProperty('INFO', str)
     def log_level(self, value: str):
         if value not in ['DEBUG', 'INFO', 'WARNING', 'ERROR']:
             raise ValueError(value)
