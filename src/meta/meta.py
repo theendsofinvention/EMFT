@@ -34,24 +34,43 @@ class Meta(AbstractMeta):
     def meta_header(self):
         """"""
 
+    @property
+    @abc.abstractproperty
+    def meta_version(self):
+        """"""
+
+    @abc.abstractmethod
+    def meta_version_upgrade(self, from_version):
+        """"""
+
     def __init__(self, path: str or Path, init_dict: OrderedDict = None, auto_read=True, encrypted=False):
         self.free = True
         self.encrypt = encrypted
+
         if init_dict is None:
             self._data = OrderedDict()
+
         else:
+
             if not isinstance(init_dict, OrderedDict):
                 raise TypeError('expected a OrderedDict, got "{}"'.format(type(init_dict)))
+
             self._data = init_dict
+
         self._values, self._keys, self._items = None, None, None
         self._init_views()
+
         if isinstance(path, Path):
             pass
+
         elif isinstance(path, str):
             path = Path(path)
+
         else:
             raise TypeError('expected a Path or a str, got: {}'.format(type(path)))
+
         self._path = path
+
         if auto_read:
             self.read()
 
@@ -61,12 +80,16 @@ class Meta(AbstractMeta):
 
     @path.setter
     def path(self, value: str or Path):
+
         if isinstance(value, Path):
             pass
+
         elif isinstance(value, str):
             value = Path(value)
+
         else:
             raise TypeError('expected Path or str, got: {}'.format(type(value)))
+
         self._path = value
 
     def _init_views(self):
@@ -79,13 +102,14 @@ class Meta(AbstractMeta):
         return self._data
 
     def get_context(self):
-        """Used to populate Sentry context"""
         return self.data
 
     @data.setter
     def data(self, value: OrderedDict):
+
         if not isinstance(value, OrderedDict):
             raise TypeError('expected a OrderedDict, got "{}"'.format(type(value)))
+
         self._data = value
         self._init_views()
 
@@ -101,16 +125,17 @@ class Meta(AbstractMeta):
 
     def __delitem__(self, key, _write=False):
         del self.data[key]
+
         if _write:
             self.write()
 
     def __setitem__(self, key, value, _write=False):
         self.data[key] = value
+
         if _write:
             self.write()
 
     def __getitem__(self, key):
-        # return self._data.__getitem__(key)
         return self._data.get(key, None)
 
     def __str__(self):
@@ -123,10 +148,6 @@ class Meta(AbstractMeta):
         return self._data.get(key, default)
 
     def keys(self):
-        """
-        Shadows default dict().keys() method
-        :return: keys
-        """
         return self._keys
 
     def values(self):
@@ -143,80 +164,114 @@ class Meta(AbstractMeta):
 
     def dump(self):
         return ydump(self.data, Dumper=RoundTripDumper, default_flow_style=False)
-        # return jdumps(self.data, indent=True, sort_keys=True)
 
     def load(self, data):
         self.data = yload(data)
-        # return jloads(data)
 
     def read(self):
-        """
-        Reads the local Config file
-        """
-        # self.debug('reading file')
+
         self.wait_for_lock()
+
+        meta_updated = False
+
         try:
+
             if self.path.exists():
+
                 if self.path.getsize() == 0:
                     self.debug('{}: removing existing empty file: {}'.format(self.__class__.__name__, self.path))
                     self.path.remove()
+
                     return
+
                 try:
+
                     if self.encrypt:
                         self.load(self.path.bytes())
+
                     else:
                         self.load(self.path.text(encoding='utf8'))
-                    # self.debug('file read successful')
+
                 except ValueError:
                     raise ValueError('{}: metadata file corrupted'.format(self.path.abspath()))
+
                 else:
                     try:
-                        if not self.data['header'] == self.meta_header:
-                            raise TypeError('meta-header mismatch, expected: "{}", got: "{}" on file: {}'.format(
-                                self.meta_header, self.data['header'], self.path.abspath()
+                        if not self.data['meta_header'] == self.meta_header:
+                            raise TypeError('meta header mismatch, expected: "{}", got: "{}" on file: {}'.format(
+                                self.meta_header, self.data['meta_header'], self.path.abspath()
                             ))
                         else:
-                            del self.data['header']
+                            del self.data['meta_header']
+
                     except KeyError:
                         pass
+
+                    meta_updated = self.data['meta_version'] < self.meta_version
+
+                    while self.data['meta_version'] < self.meta_version:
+                        current_version = self.data['meta_version']
+                        next_version = self.data['meta_version'] + 1
+                        logger.debug('upgrading meta from version "{}"'.format(current_version))
+
+                        if not self.meta_version_upgrade(current_version):
+                            raise RuntimeError('failed to upgrade metadata to version "{}"'.format(next_version))
+
+                        else:
+                            logger.debug('successfully upgraded meta to version "{}"'.format(next_version))
+
+                        self.data['meta_version'] = next_version
+
         except OSError:
             self.exception('error while reading metadata file')
+
         finally:
             self.free = True
 
+            if meta_updated:
+                self.write()
+
     def write(self):
-        """
-        Writes the current config to the local Config file
-        """
         if len(self._data) == 0:
             raise ValueError('no data to write')
-        # self.debug('writing file')
+
         self.wait_for_lock()
-        self.data['header'] = self.meta_header
+        self.data['meta_header'] = self.meta_header
+        self.data['meta_version'] = self.meta_version
+
         try:
+
             if self.encrypt:
                 self.path.write_bytes(self.dump())
+
             else:
                 self.path.write_text(self.dump(), encoding='utf8')
+
         except OSError:
             self.exception('error while writing metadata to file')
+
         finally:
             self.free = True
 
     def wait_for_lock(self):
         i = 0
+
         while not self.free:
             time.sleep(0.1)
             i += 1
+
             if i == 10:
                 self.debug('waiting for resource lock')
                 i = 0
+
         self.free = False
 
     @staticmethod
     def read_header(path):
+
         path = Path(path)
         data = yload(path.text(encoding='utf8'))
+
         return data['header']
 
 

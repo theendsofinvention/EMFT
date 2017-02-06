@@ -33,5 +33,14 @@ class MetaSingleton(Meta, metaclass=_MetaSingleton):
     def meta_header(self):
         """"""
 
+    @property
+    @abc.abstractproperty
+    def meta_version(self):
+        """"""
+
+    @abc.abstractmethod
+    def meta_version_upgrade(self, from_version):
+        """"""
+
     def __init__(self, path: Path or str, init_dict: dict = None, auto_read=True):
         Meta.__init__(self, path, init_dict, auto_read)

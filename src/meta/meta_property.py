@@ -1,5 +1,4 @@
 # coding=utf-8
-
 from src.meta.abstract import AbstractMeta
 
 
@@ -11,8 +10,6 @@ class _MetaProperty:
     with "default", "type", "__doc__", "key" and "func".
 
     """
-
-    # __slots__ = ['func', 'default', 'type', '__doc__']
 
     def __init__(self, func: callable, default: object, _type: object):
         """
@@ -50,8 +47,11 @@ class _MetaProperty:
             # Not set yet, returns default
             return self.default
         else:
+            # Check the value against the setter (I'm being paranoid here)
+            value = self.func(instance, instance.__getitem__(self.func.__name__))
+
             # Return actual value
-            return instance.__getitem__(self.func.__name__)
+            return value
 
     def __set__(self, instance, value):
         """
@@ -118,5 +118,4 @@ class MetaProperty:
         :return: decorated function as a descriptor instance of _MetaProperty
         :rtype: _MetaProperty
         """
-        dec = _MetaProperty(func, self.default, self.type)
-        return dec
+        return _MetaProperty(func, self.default, self.type)
