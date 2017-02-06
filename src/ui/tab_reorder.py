@@ -226,8 +226,8 @@ class _AutoLayout:
             auto_help,
             40,
             auto_folder_layout,
-            scan_layout,
             output_layout,
+            scan_layout,
             auto_btn_layout
         ])
 
