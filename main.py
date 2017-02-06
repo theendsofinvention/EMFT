@@ -18,7 +18,8 @@ if __name__ == '__main__':
 
     """Init Sentry"""
     # noinspection PyUnresolvedReferences
-    from src.sentry import sentry
+    from src.sentry import SENTRY
+    SENTRY.register_context('config', Config())
 
     """Intercept SIGINT"""
     import signal as core_sig
