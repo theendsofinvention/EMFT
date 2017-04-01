@@ -32,7 +32,7 @@ try:
     semver.parse(__version__)
 except ValueError:
     import re
-    m = re.match(r'(?P<version>[0-9]+\.[0-9]+\.[0-9])+\.[0-9]', __version__)
+    m = re.match(r'(?P<version>[0-9]+\.[0-9]+\.[0-9])+\.0', __version__)
     if m:
         __version__ = m.group('version')
     else:
