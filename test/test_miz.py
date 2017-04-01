@@ -2,7 +2,7 @@
 
 import pytest
 import os
-from src.miz.miz import MizPath, Miz
+from src.miz.miz import Miz
 from src.miz.mission import Mission
 from utils import Path
 
