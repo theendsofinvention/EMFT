@@ -1,9 +1,10 @@
 # coding=utf-8
 from PyQt5.QtCore import QObject, pyqtSignal, QThread
 
-from src.utils.custom_logging import make_logger
+from utils.custom_logging import make_logger
 
 logger = make_logger(__name__)
+
 
 class MainGuiWorker(QObject):
     """
@@ -23,7 +24,7 @@ class MainGuiWorker(QObject):
             self.signal.emit(obj_name, func, args, kwargs)
 
 
-class MainGuiThreading:
+class MainUiThreading:
     """
     Encapsulates calls to the MainUi inside a Qt thread.
 
@@ -89,6 +90,7 @@ class MainGuiThreading:
     def do(cls, obj_name, func, *args, **kwargs):
         """
         Executes a Gui method inside the Qt main loop
+
         :param obj_name: attribute of MainUi instance that has the "func" method
         :param func: name of the method to run
         :param args: argument of the method

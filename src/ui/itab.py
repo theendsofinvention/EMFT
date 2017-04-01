@@ -11,7 +11,7 @@ class iTab(QWidget):
 
     def __init__(self, parent=None):
         QWidget.__init__(self, parent, flags=Qt.Widget)
-        self.setContentsMargins(20,20,20,20)
+        self.setContentsMargins(20, 20, 20, 20)
 
     @property
     @abc.abstractproperty

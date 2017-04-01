@@ -22,5 +22,7 @@ APP_STATUS = 'ALPHA'
 APP_RELEASE_NAME = 'Refreshingly Unconcerned With the Vulgar Exigencies of Veracity'
 APP_WEBSITE = r'https://github.com/132nd-etcher/EMFT'
 
+ENCODING = 'iso8859_15'
+
 QT_APP = None
 MAIN_UI = None

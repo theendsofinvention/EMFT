@@ -3,6 +3,7 @@
 Runs a process in an external thread and logs the output to a standard Python logger
 """
 import os
+import re
 import subprocess
 import threading
 from json import loads
@@ -10,9 +11,9 @@ from json import loads
 import certifi
 import click
 
-from src import _global
-from src.utils.custom_logging import DEBUG, make_logger
-from src.utils.custom_path import Path
+from src import global_
+from utils.custom_logging import DEBUG, make_logger
+from utils.custom_path import Path
 
 logger = make_logger(__name__)
 logger.setLevel(DEBUG)
@@ -42,21 +43,21 @@ class __LogPipe(threading.Thread):
         os.close(self.fdWrite)
 
 
-def run_piped_process(args, logger, level=DEBUG, cwd=None, env=None, exe=None):
+def run_piped_process(args, logger_, level=DEBUG, cwd=None, env=None, exe=None):
     """
     Runs a standard process and pipes its output to a Python logger
     :param args: process and arguments ias a list
-    :param logger: logger to send data to
+    :param logger_: logger to send data to
     :param level: logging level, defaults to DEBUG
     :param cwd: working dir to spawn the process in (defaults to current)
     """
-    log_pipe = __LogPipe(logger, level)
+    log_pipe = __LogPipe(logger_, level)
 
-    logger.info('running: {} {} (in {})'.format(exe, ' '.join(args), cwd))
+    logger_.info('running: {} {} (in {})'.format(exe, ' '.join(args), cwd))
     with subprocess.Popen(args, stdout=log_pipe, stderr=log_pipe, cwd=cwd, env=env, executable=exe) as p:
         p.communicate()
         if p.returncode != 0:
-            logger.error('return code: {}'.format(p.returncode))
+            logger_.error('return code: {}'.format(p.returncode))
             raise RuntimeError('command failed: {}'.format(args))
         log_pipe.close()
 
@@ -95,7 +96,7 @@ def patch_exe(path_to_exe: str or Path,
         '/s', 'PrivateBuild', str(build),
         '/langid', '1033',
     ]
-    run_piped_process(cmd, logger=logger, cwd=wkdir)
+    run_piped_process(cmd, logger_=logger, cwd=wkdir)
 
 
 def pre_build(env):
@@ -107,7 +108,7 @@ def pre_build(env):
             '-o',
             './src/ui/qt_resource.py'
         ],
-        logger=logger,
+        logger_=logger,
     )
 
 
@@ -129,16 +130,16 @@ def build(env):
         '--paths', os.path.join(env, r'Lib\site-packages\PyQt5\Qt\bin'),
         '--log-level=WARN',
         '--add-data', '{};{}'.format(certifi.where(), '.'),
-        '--name', _global.APP_SHORT_NAME,
+        '--name', global_.APP_SHORT_NAME,
         '--distpath', './dist',
         '--windowed',
-        './main.py',
-    ], logger=logger, cwd='.')
+        './src/main.py',
+    ], logger_=logger, cwd='.')
     logger.info('patching exe resources')
     patch_exe(
         path_to_exe=Path('./dist/EMFT.exe'),
         version=version.get('SemVer'),
-        app_name=_global.APP_SHORT_NAME,
+        app_name=global_.APP_SHORT_NAME,
         wkdir=Path('.'),
         build=version.get('InformationalVersion'),
     )
@@ -155,7 +156,14 @@ def build_requirements(env):
     requirements = requirements.replace('\r\n', '\n')
     requirements = requirements.replace(r'PyInstaller==3.3.dev0+gb78bfe5',
                                         r'git+https://github.com/132nd-etcher/pyinstaller.git#egg=PyInstaller')
+    requirements = re.sub(r'SLTP==\d+.\d+.\d+\n', r'', requirements)
+    requirements = re.sub(r'utils==\d+.\d+.\d+\n', r'', requirements)
     Path('requirements.txt').write_text(requirements)
+    own_requirements = [
+        'git+https://github.com/132nd-etcher/sltp.git#egg=sltp',
+        'git+https://github.com/132nd-etcher/utils.git#egg=utils'
+    ]
+    Path('own_requirements.txt').write_text('\n'.join(own_requirements))
 
 
 @click.command()

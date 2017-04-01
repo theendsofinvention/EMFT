@@ -4,7 +4,7 @@ import abc
 from PyQt5.QtCore import Qt
 from PyQt5.QtGui import QKeySequence
 from PyQt5.QtWidgets import QGroupBox, QBoxLayout, QSpacerItem, QWidget, QHBoxLayout, QVBoxLayout, QPushButton, \
-    QRadioButton, QComboBox, QShortcut
+    QRadioButton, QComboBox, QShortcut, QCheckBox, QLineEdit
 
 
 class Widget(QWidget):
@@ -77,6 +77,14 @@ class PushButton(QPushButton):
         self.clicked.connect(func)
 
 
+class Checkbox(QCheckBox):
+    def __init__(self, text, func: callable = None):
+        QCheckBox.__init__(self, text)
+        if func:
+            # noinspection PyUnresolvedReferences
+            self.toggled.connect(func)
+
+
 class Radio(QRadioButton):
     def __init__(self, text, func: callable):
         QRadioButton.__init__(self, text)
@@ -105,3 +113,10 @@ class Shortcut(QShortcut):
         # noinspection PyUnresolvedReferences
         self.activated.connect(func)
 
+
+class LineEdit(QLineEdit):
+    def __init__(self, text, func: callable = None):
+        QLineEdit.__init__(self, text)
+        if func:
+            # noinspection PyUnresolvedReferences
+            self.textChanged.connect(func)

@@ -3,10 +3,10 @@
 Convenience module for storing/restoring per-user configuration values
 """
 # noinspection PyProtectedMember
-from src import _global
+from src import global_
 from src.meta.meta import Meta
-from src.utils.custom_logging import make_logger
-from src.utils.singleton import Singleton
+from utils.custom_logging import make_logger
+from utils.singleton import Singleton
 from .values import ConfigValues
 
 logger = make_logger(__name__)
@@ -16,7 +16,7 @@ class Config(Meta, ConfigValues, metaclass=Singleton):
     def __init__(self, config_file_path=None):
 
         if config_file_path is None:
-            config_file_path = _global.PATH_CONFIG_FILE
+            config_file_path = global_.PATH_CONFIG_FILE
 
         Meta.__init__(self, path=config_file_path)
         ConfigValues.__init__(self)
@@ -43,7 +43,7 @@ class Config(Meta, ConfigValues, metaclass=Singleton):
             self.write()
 
     def write(self):
-        if _global.TESTING:
+        if global_.TESTING:
             return
         super(Config, self).write()
 

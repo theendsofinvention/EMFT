@@ -6,15 +6,15 @@ import webbrowser
 
 from PyQt5.QtWidgets import QLineEdit, QSpacerItem, QSizePolicy, QLabel
 from natsort import natsorted
+from utils.custom_logging import make_logger
+from utils.custom_path import Path
+from utils.threadpool import ThreadPool
 
-from src import miz
 from src.cfg.cfg import Config
-from src.ui.base import GroupBox, HLayout, VLayout, PushButton, Radio
+from src.miz.miz import Miz
+from src.ui.base import GroupBox, HLayout, VLayout, PushButton, Radio, Checkbox, LineEdit
 from src.ui.dialog_browse import BrowseDialog
 from src.ui.itab import iTab
-from src.utils.custom_logging import make_logger
-from src.utils.custom_path import Path
-from src.utils.threadpool import ThreadPool
 
 try:
     import winreg
@@ -156,15 +156,17 @@ class _SingleLayout:
 
     def single_reorder(self):
         if self.single_miz_path and self.single_miz_output_folder_path:
-            self.reorder_miz(self.single_miz_path, self.single_miz_output_folder_path)
+            self.reorder_miz(self.single_miz_path, self.single_miz_output_folder_path, self.skip_options_file)
 
     @abc.abstractmethod
-    def reorder_miz(self, miz_file, output_dir):
+    def reorder_miz(self, miz_file, output_dir, skip_options_file):
         """"""
 
+    @property
     @abc.abstractmethod
-    def toggle_radios(self, miz_file, output_dir):
+    def skip_options_file(self) -> bool:
         """"""
+
 
 
 class _AutoLayout:
@@ -174,6 +176,14 @@ class _AutoLayout:
         auto_help = QLabel('Looks for the latest TRMT MIZ (must be named "TRMT_*.miz") in the source folder.')
 
         self._latest_trmt = None
+
+        self.auto_av_token_le = LineEdit(Config().av_token, self.av_token_updated)
+        self.auto_av_token_get_btn = PushButton('Get token', self.get_av_token)
+        auto_av_token_layout = HLayout([
+            QLabel('AppVeyor token:'),
+            self.auto_av_token_le,
+            self.auto_av_token_get_btn
+        ])
 
         self.auto_src_le = QLineEdit()
         if Config().auto_source_folder:
@@ -224,6 +234,8 @@ class _AutoLayout:
         self.auto_layout = VLayout([
             20,
             auto_help,
+            20,
+            auto_av_token_layout,
             40,
             auto_folder_layout,
             output_layout,
@@ -240,9 +252,12 @@ class _AutoLayout:
 
         self.scan()
 
+    def av_token_updated(self):
+        Config().av_token = self.auto_av_token_le.text()
+
     def auto_reorder(self):
         if self.latest_trmt and self.auto_out_path:
-            self.reorder_miz(self.latest_trmt, self.auto_out_path)
+            self.reorder_miz(self.latest_trmt, self.auto_out_path, self.skip_options_file)
 
     def auto_out_open(self):
         if self.auto_out_path.exists():
@@ -276,6 +291,11 @@ class _AutoLayout:
                 self.auto_scan_label.setText('No TRMT MIZ file found.')
             else:
                 self.auto_scan_label.setText(Path(self._latest_trmt).name)
+
+    @staticmethod
+    def get_av_token():
+        # noinspection SpellCheckingInspection
+        webbrowser.open_new_tab(r'https://ci.appveyor.com/api-token')
 
     @staticmethod
     def download():
@@ -313,7 +333,12 @@ class _AutoLayout:
         return self._latest_trmt
 
     @abc.abstractmethod
-    def reorder_miz(self, miz_file, output_dir):
+    def reorder_miz(self, miz_file, output_dir, skip_options_file):
+        """"""
+
+    @property
+    @abc.abstractmethod
+    def skip_options_file(self) -> bool:
         """"""
 
 
@@ -329,12 +354,20 @@ class TabReorder(iTab, _SingleLayout, _AutoLayout):
                            'This lets you reorder them alphabetically before you push them in a SCM.\n\n'
                            'It is recommended to set the "Output folder" to your local SCM repository.')
 
+        self.check_skip_options = Checkbox('Skip "options" file', self.toggle_skip_options)
+        skip_options_help_text = QLabel(
+            'The "options" file at the root of the MIZ is player-specific, and is of very relative import for the MIZ'
+            ' file itself. To avoid having irrelevant changes in the SCM, it can be safely skipped during reordering.')
+
         self.radio_single = Radio('Specific MIZ file', self.toggle_radios)
         self.radio_auto = Radio('Latest TRMT', self.toggle_radios)
 
         layout = VLayout([
             QSpacerItem(1, 10, QSizePolicy.Expanding, QSizePolicy.Expanding),
             help_text,
+            QSpacerItem(1, 10, QSizePolicy.Expanding, QSizePolicy.Expanding),
+            self.check_skip_options,
+            skip_options_help_text,
             QSpacerItem(1, 10, QSizePolicy.Expanding, QSizePolicy.Expanding),
             self.radio_single,
             self.single_group,
@@ -348,7 +381,11 @@ class TabReorder(iTab, _SingleLayout, _AutoLayout):
 
         self.radio_single.setChecked(not Config().auto_mode)
         self.radio_auto.setChecked(Config().auto_mode)
+        self.check_skip_options.setChecked(Config().skip_options_file)
         self.toggle_radios()
+
+    def toggle_skip_options(self, *_):
+        Config().skip_options_file = self.check_skip_options.isChecked()
 
     def toggle_radios(self, *_):
         self.single_group.setEnabled(self.radio_single.isChecked())
@@ -359,12 +396,16 @@ class TabReorder(iTab, _SingleLayout, _AutoLayout):
     def tab_title(self):
         return 'Reorder lua tables'
 
-    def reorder_miz(self, miz_file, output_dir):
+    @property
+    def skip_options_file(self) -> bool:
+        return self.check_skip_options.isChecked()
+
+    def reorder_miz(self, miz_file, output_dir, skip_options_file):
         self.pool.queue_task(
-            miz.reorder_miz_file,
+            Miz.reorder,
             [
                 miz_file,
                 output_dir,
-                False,
+                skip_options_file,
             ]
         )

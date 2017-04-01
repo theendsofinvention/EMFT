@@ -54,6 +54,14 @@ class ConfigValues:
             return None
         return str(p.abspath())
 
+    @MetaProperty(True, bool)
+    def skip_options_file(self, value: bool):
+        return value
+
+    @MetaProperty(None, str)
+    def av_token(self, value: str):
+        return value
+
     @MetaProperty(False, bool)
     def auto_mode(self, value: bool):
         return value

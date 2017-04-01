@@ -6,8 +6,8 @@ from collections import OrderedDict
 from ruamel.yaml import dump as ydump, load as yload, RoundTripDumper, resolver, add_constructor, add_representer
 
 from src.meta.abstract import AbstractMeta
-from src.utils.custom_logging import make_logger
-from src.utils.custom_path import Path
+from utils.custom_logging import make_logger
+from utils.custom_path import Path
 
 logger = make_logger(__name__)
 
