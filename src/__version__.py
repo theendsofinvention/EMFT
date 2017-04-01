@@ -29,7 +29,8 @@ else:
         __version__ = 'ERROR'
 
 try:
-    semver.parse(__version__)
+    if not __version__ == 'ERROR':
+        semver.parse(__version__)
 except ValueError:
     import re
     m = re.match(r'(?P<version>[0-9]+\.[0-9]+\.[0-9])+\.0', __version__)
