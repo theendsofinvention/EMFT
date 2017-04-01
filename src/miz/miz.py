@@ -1,14 +1,11 @@
 ﻿# coding=utf-8
 import tempfile
-from collections import OrderedDict
-from os import walk, remove, rmdir
-from shutil import copy2
 from filecmp import dircmp
 from os.path import exists, join
 from zipfile import ZipFile, BadZipFile, ZipInfo
 
 from sltp import SLTP
-from utils import make_logger, Path
+from utils import make_logger, Path, Progress
 
 from src.dummy_miz import dummy_miz
 from src.global_ import ENCODING
@@ -117,7 +114,7 @@ class Miz:
         def compare_and_copy_diff(_diff):
             assert isinstance(_diff, dircmp)
             for file in _diff.left_only + _diff.diff_files:
-                logger.debug('copying: ', file)
+                logger.debug('copying: {}'.format('file'))
                 Path(_diff.left).joinpath(file).copy2(_diff.right)
             for sub in _diff.subdirs.values():
                 compare_and_copy_diff(sub)
@@ -137,43 +134,59 @@ class Miz:
 
     def _decode(self):
 
-        logger.debug('decoding mission table')
+        logger.info('decoding lua tables')
 
         if not self.zip_content:
             self.unzip(overwrite=False)
 
-        logger.debug('reading map resource file')
+        Progress.start('Decoding MIZ file', length=3)
 
+        Progress.set_label('Decoding map resource')
+        logger.debug('reading map resource file')
         with open(self.map_res_file, encoding=ENCODING) as f:
             self._map_res, self._map_res_qual = SLTP().decode(f.read())
+        Progress.set_value(1)
 
+        Progress.set_label('Decoding dictionary file')
         logger.debug('reading l10n file')
-
         with open(self.dictionary_file, encoding=ENCODING) as f:
             self._l10n, self._l10n_qual = SLTP().decode(f.read())
+        Progress.set_value(2)
 
+        Progress.set_label('Decoding mission file')
         logger.debug('reading mission file')
-
         with open(self.mission_file, encoding=ENCODING) as f:
             mission_data, self._mission_qual = SLTP().decode(f.read())
             self._mission = Mission(mission_data, self._l10n)
+        Progress.set_value(3)
+
+        logger.info('decoding done')
 
     def _encode(self):
 
-        logger.debug('encoding map resource')
+        logger.info('encoding lua tables')
 
+        Progress.start('Decoding MIZ file', length=3)
+
+        Progress.set_label('Encoding map resource')
+        logger.debug('encoding map resource')
         with open(self.map_res_file, mode='w', encoding=ENCODING) as f:
             f.write(SLTP().encode(self._map_res, self._map_res_qual))
+        Progress.set_value(1)
 
+        Progress.set_label('Encoding map resource')
         logger.debug('encoding l10n dictionary')
-
         with open(self.dictionary_file, mode='w', encoding=ENCODING) as f:
             f.write(SLTP().encode(self.l10n, self._l10n_qual))
+        Progress.set_value(2)
 
+        Progress.set_label('Encoding map resource')
         logger.debug('encoding mission dictionary')
-
         with open(self.mission_file, mode='w', encoding=ENCODING) as f:
             f.write(SLTP().encode(self.mission.d, self._mission_qual))
+        Progress.set_value(3)
+
+        logger.info('encoding done')
 
     def unzip(self, overwrite: bool = False):
 
