@@ -4,7 +4,7 @@ import abc
 from PyQt5.QtCore import Qt
 from PyQt5.QtGui import QKeySequence
 from PyQt5.QtWidgets import QGroupBox, QBoxLayout, QSpacerItem, QWidget, QHBoxLayout, QVBoxLayout, QPushButton, \
-    QRadioButton, QComboBox, QShortcut, QCheckBox, QLineEdit
+    QRadioButton, QComboBox, QShortcut, QCheckBox, QLineEdit, QLabel
 
 
 class Widget(QWidget):
@@ -120,3 +120,21 @@ class LineEdit(QLineEdit):
         if func:
             # noinspection PyUnresolvedReferences
             self.textChanged.connect(func)
+
+
+class Label(QLabel):
+    def __init__(self, text, text_color='black', bg_color='rgba(255, 255, 255, 10)'):
+        QLabel.__init__(self, text)
+        self.text_color = text_color
+        self.bg_color = bg_color
+
+    def __update_style_sheet(self):
+        self.setStyleSheet('QLabel {{ background-color : {}; color : {}; }}'.format(self.bg_color, self.text_color))
+
+    def set_text_color(self, color):
+        self.text_color = color
+        self.__update_style_sheet()
+
+    def set_bg_color(self, color):
+        self.bg_color = color
+        self.__update_style_sheet()
