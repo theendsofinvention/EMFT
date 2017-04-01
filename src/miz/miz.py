@@ -63,6 +63,7 @@ class Miz:
     def __enter__(self):
         logger.debug('instantiating new Mission object as a context')
         self.unzip()
+        self._decode()
         return self
 
     def __exit__(self, exc_type, exc_val, exc_tb):
