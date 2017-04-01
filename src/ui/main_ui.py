@@ -111,7 +111,7 @@ def start_ui():
         executable_name='EMFT.exe',
         current_version=global_.APP_VERSION,
         gh_user='132nd-etcher',
-        gh_repo='test',
+        gh_repo='EMFT',
         asset_filename='EMFT.exe',
         pre_update_func=pre_update_hook,
         cancel_update_func=I.show)
