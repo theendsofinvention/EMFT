@@ -1,0 +1,93 @@
+
+version: pending.{build}
+max_jobs: 1
+
+
+environment:
+    GIT_DAEMON_PATH:   "C:\\Program Files\\Git\\mingw64\\libexec\\git-core"
+    CYGWIN_GIT_PATH:   "C:\\cygwin\\bin;%GIT_DAEMON_PATH%"
+    CYGWIN64_GIT_PATH: "C:\\cygwin64\\bin;%GIT_DAEMON_PATH%"
+    PYTHON: "C:\\Python35"
+    PYTHON_VERSION: "3.5.2"
+    GIT_PATH: "%GIT_DAEMON_PATH%"
+
+matrix:
+    fast_finish: true
+
+init:
+  - cmd: echo %PYTHON% %PYTHON_VERSION% %PYTHON_ARCH%
+  - cmd: appveyor UpdateBuild -Version "%APPVEYOR_REPO_BRANCH%.%APPVEYOR_REPO_COMMIT%.%APPVEYOR_BUILD_NUMBER%"
+
+cache:
+  - C:\Users\appveyor\AppData\Local\pip\cache
+  - C:\ProgramData\chocolatey\bin -> appveyor.yml
+  - C:\ProgramData\chocolatey\lib -> appveyor.yml
+  - '%APPDATA%\pip\Cache'
+
+install:
+  - "%PYTHON%/Scripts/pip.exe install --disable-pip-version-check --user --upgrade pip"
+  - "%PYTHON%/Scripts/pip.exe install --upgrade coverage"
+  - "%PYTHON%/Scripts/pip.exe install -r requirements.txt"
+  - "%PYTHON%/Scripts/pip.exe install -r own_requirements.txt --upgrade"
+  - choco install gitversion.portable -pre -y
+  - choco install gitversion.portable -y
+  - git clone --branch=master https://github.com/132nd-etcher/verpatch.git C:\projects\verpatch
+  - curl -O http://esrg.sourceforge.net/utils_win_up/md5sum/crc32.exe
+
+
+before_build:
+  - ps: C:\ProgramData\chocolatey\bin\gitversion /l console /output buildserver /updateassemblyinfo /b (get-item env:APPVEYOR_REPO_BRANCH).Value
+  - cmd: appveyor UpdateBuild -Version %GitVersion_InformationalVersion%.%APPVEYOR_BUILD_NUMBER%
+  - "%PYTHON%/python -m pytest --cov=src --cov-config .coveragerc --cov-report xml -c test/.pytest"
+#  - "%PYTHON%/Scripts/pip.exe install git+https://github.com/132nd-etcher/ocular.py.git"
+#  - "%PYTHON%/Scripts/ocular.exe --access-token %SCRUTINIZER%"
+#  - "%PYTHON%/Scripts/pip.exe install codacy-coverage"
+#  - "%PYTHON%/Scripts/python-codacy-coverage.exe -r coverage.xml"
+#  - "%PYTHON%/Scripts/pip.exe install coveralls"
+#  - "%PYTHON%/Scripts/coveralls.exe"
+#  - "%PYTHON%/Scripts/pip.exe install codecov"
+#  - "%PYTHON%/Scripts/codecov.exe"
+
+build_script:
+  - set PATH="c:\projects\verpatch";%PATH%
+  - "%PYTHON%/python.exe -m PyInstaller src/main.py --noconfirm --onefile --clean --icon src/ui/app.ico --workpath ./build --paths %PYTHON%/Lib/site-packages/PyQt5/Qt/bin --name EMFT --distpath ./dist --windowed --log-level=WARN"
+  - cmd: verpatch.exe %APPVEYOR_BUILD_FOLDER%\dist\emft.exe /high %GitVersion_SemVer% /va /pv %GitVersion_SemVer% /s product EMFT /s copyright "2017 etcher" /s build %GitVersion_Sha% /langid 1033 /s PrivateBuild %APPVEYOR_BUILD_NUMBER%
+
+artifacts:
+  - path: ./dist/*.exe
+    name: emft
+
+branches:
+  only:
+    - master
+    - develop
+    - /release/.*/
+    - /pull/.*/
+    - /hotfix/.*/
+    - /feature/.*/
+
+  except:
+    - gh-pages
+
+deploy:
+  - provider: GitHub
+    artifact: emft
+    draft: false
+    prerelease: false
+    tag: $(GitVersion_SemVer)
+    auth_token:
+      secure: T9LMiMzikVwlfnYhxlIpzhmfotDN75SUmEv1FSGLHZ/vMHMCMT3SEapSOH1iPdaD
+    on:
+#      branch: master
+      appveyor_repo_tag: false
+
+skip_tags: true
+
+skip_branch_with_pr: true
+
+skip_commits:
+  files:
+    - docs/*
+    - '**/*.html'
+  message: /.*\[nobuild\].*/
+

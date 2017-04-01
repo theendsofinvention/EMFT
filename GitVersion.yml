@@ -4,17 +4,17 @@ mode: Mainline
 branches:
   feature:
     regex: features?[/-]
-    mode: ContinuousDelivery
+    mode: ContinuousDeployment
     tag: alpha.{BranchName}
-    increment: Inherit
+    increment: Patch
     prevent-increment-of-merged-branch-version: false
     track-merge-target: false
     is-release-branch: false
   pull-request:
     regex: (pull|pull\-requests|pr)[/-]
-    mode: ContinuousDelivery
+    mode: ContinuousDeployment
     tag: beta.{BranchName}
-    increment: Inherit
+    increment: Patch
     prevent-increment-of-merged-branch-version: false
     tag-number-pattern: '[/-](?<number>\d+)[-/]'
     track-merge-target: false
@@ -23,15 +23,15 @@ branches:
     regex: dev(elop)?(ment)?$
     mode: ContinuousDeployment
     tag: dev
-    increment: Inherit
+    increment: Patch
     prevent-increment-of-merged-branch-version: false
     track-merge-target: true
     is-release-branch: false
   release:
     regex: releases?[/-]
-    mode: ContinuousDelivery
+    mode: ContinuousDeployment
     tag: rc
-    increment: Inherit
+    increment: Patch
     prevent-increment-of-merged-branch-version: true
     track-merge-target: false
     is-release-branch: true
@@ -45,15 +45,15 @@ branches:
     is-mainline: true
   hotfix:
     regex: hotfix(es)?[/-]
-    mode: ContinuousDelivery
-    tag: patch
+    mode: ContinuousDeployment
+    tag: ''
     increment: Patch
     prevent-increment-of-merged-branch-version: false
     track-merge-target: false
     is-release-branch: false
   support:
     regex: support[/-]
-    mode: ContinuousDelivery
+    mode: ContinuousDeployment
     tag: ''
     increment: Patch
     prevent-increment-of-merged-branch-version: true
