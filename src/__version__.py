@@ -1,6 +1,7 @@
 # coding=utf-8
 
 import os
+import semver
 import subprocess
 import sys
 from json import loads, JSONDecodeError
@@ -26,5 +27,15 @@ else:
         __version__ = loads(subprocess.getoutput(['gitversion']).rstrip()).get('SemVer')
     except JSONDecodeError:
         __version__ = 'ERROR'
+
+try:
+    semver.parse(__version__)
+except ValueError:
+    import re
+    m = re.match(r'(?P<version>[0-9]+\.[0-9]+\.[0-9])+\.[0-9]', __version__)
+    if m:
+        __version__ = m.group('version')
+    else:
+        raise
 
 __guid__ = '4ae6dbb7-5b26-43c6-b797-2272f5a074f3'
