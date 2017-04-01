@@ -3,6 +3,7 @@
 import abc
 import os
 import webbrowser
+from distutils.version import LooseVersion
 
 from PyQt5.QtWidgets import QLineEdit, QSpacerItem, QSizePolicy, QLabel
 from natsort import natsorted
@@ -11,8 +12,9 @@ from utils.custom_path import Path
 from utils.threadpool import ThreadPool
 
 from src.cfg.cfg import Config
+from src.misc import appveyor, downloader
 from src.miz.miz import Miz
-from src.ui.base import GroupBox, HLayout, VLayout, PushButton, Radio, Checkbox, LineEdit
+from src.ui.base import GroupBox, HLayout, VLayout, PushButton, Radio, Checkbox, Label
 from src.ui.dialog_browse import BrowseDialog
 from src.ui.itab import iTab
 
@@ -168,7 +170,6 @@ class _SingleLayout:
         """"""
 
 
-
 class _AutoLayout:
     def __init__(self):
 
@@ -176,14 +177,6 @@ class _AutoLayout:
         auto_help = QLabel('Looks for the latest TRMT MIZ (must be named "TRMT_*.miz") in the source folder.')
 
         self._latest_trmt = None
-
-        self.auto_av_token_le = LineEdit(Config().av_token, self.av_token_updated)
-        self.auto_av_token_get_btn = PushButton('Get token', self.get_av_token)
-        auto_av_token_layout = HLayout([
-            QLabel('AppVeyor token:'),
-            self.auto_av_token_le,
-            self.auto_av_token_get_btn
-        ])
 
         self.auto_src_le = QLineEdit()
         if Config().auto_source_folder:
@@ -200,9 +193,10 @@ class _AutoLayout:
         ])
 
         # scan_layout.setContentsMargins(source_folder_label.width(), 0, 0, 0)
-        self.auto_scan_label = QLabel('')
+        self.auto_scan_label_local = QLabel('')
+        self.auto_scan_label_remote = Label('')
         # self.scan_label.setMinimumWidth(self.auto_folder_path.width())
-        self.auto_scan_btn = PushButton('Rescan', self.scan)
+        self.auto_scan_btn = PushButton('Refresh', self.scan)
         self.auto_scan_download_btn = PushButton('Download', self.download)
 
         self.auto_out_le = QLineEdit()
@@ -218,8 +212,10 @@ class _AutoLayout:
         ])
 
         scan_layout = HLayout([
-            QLabel('Latest TRMT found:'),
-            (self.auto_scan_label, dict(stretch=1)),
+            QLabel('Latest local version of the TRMT:'),
+            (self.auto_scan_label_local, dict(stretch=1)),
+            QLabel('Latest remote version of the TRMT:'),
+            (self.auto_scan_label_remote, dict(stretch=1)),
             self.auto_scan_btn,
             self.auto_scan_download_btn,
         ])
@@ -234,8 +230,6 @@ class _AutoLayout:
         self.auto_layout = VLayout([
             20,
             auto_help,
-            20,
-            auto_av_token_layout,
             40,
             auto_folder_layout,
             output_layout,
@@ -249,11 +243,6 @@ class _AutoLayout:
             self.auto_out_le.setText(Config().auto_output_folder)
         if Config().auto_source_folder:
             self.auto_src_le.setText(Config().auto_source_folder)
-
-        self.scan()
-
-    def av_token_updated(self):
-        Config().av_token = self.auto_av_token_le.text()
 
     def auto_reorder(self):
         if self.latest_trmt and self.auto_out_path:
@@ -281,29 +270,28 @@ class _AutoLayout:
             return Path(t)
         return None
 
+    @abc.abstractmethod
     def scan(self):
-        if self.auto_src_path:
-            try:
-                self._latest_trmt = natsorted(
-                    [Path(f).abspath() for f in Path(self.auto_src_path).listdir('TRMT_*.miz')]).pop()
-            except IndexError:
-                self._latest_trmt = None
-                self.auto_scan_label.setText('No TRMT MIZ file found.')
-            else:
-                self.auto_scan_label.setText(Path(self._latest_trmt).name)
+        """"""
+
+    @property
+    @abc.abstractmethod
+    def pool(self) -> ThreadPool:
+        """"""
 
     @staticmethod
     def get_av_token():
         # noinspection SpellCheckingInspection
         webbrowser.open_new_tab(r'https://ci.appveyor.com/api-token')
 
-    @staticmethod
-    def download():
-        # noinspection SpellCheckingInspection
-        webbrowser.open_new_tab(r'https://ci.appveyor.com/project/'
-                                r'132nd-Entropy/'
-                                r'132nd-virtual-wing-training-mission-tblisi/'
-                                r'build/artifacts')
+    def _download(self):
+        dl_url, local_file_name = appveyor.latest_version_download_url()
+        local_file = Path(self.auto_src_path).joinpath(local_file_name).abspath()
+        downloader.download(dl_url, local_file, 'Downloading {}'.format(local_file))
+
+    def download(self):
+        self.pool.queue_task(self._download)
+        self.scan()
 
     @property
     def auto_src_path(self) -> Path or None:
@@ -348,7 +336,7 @@ class TabReorder(iTab, _SingleLayout, _AutoLayout):
         _SingleLayout.__init__(self)
         _AutoLayout.__init__(self)
 
-        self.pool = ThreadPool(_basename='REORDER', _num_threads=1, _daemon=True)
+        self._pool = ThreadPool(_basename='REORDER', _num_threads=1, _daemon=True)
 
         help_text = QLabel('By design, LUA tables are unordered, which makes tracking changes extremely difficult.\n\n'
                            'This lets you reorder them alphabetically before you push them in a SCM.\n\n'
@@ -383,6 +371,11 @@ class TabReorder(iTab, _SingleLayout, _AutoLayout):
         self.radio_auto.setChecked(Config().auto_mode)
         self.check_skip_options.setChecked(Config().skip_options_file)
         self.toggle_radios()
+        self.scan()
+
+    @property
+    def pool(self) -> ThreadPool:
+        return self._pool
 
     def toggle_skip_options(self, *_):
         Config().skip_options_file = self.check_skip_options.isChecked()
@@ -409,3 +402,37 @@ class TabReorder(iTab, _SingleLayout, _AutoLayout):
                 skip_options_file,
             ]
         )
+
+    def _scan(self):
+
+        self.auto_scan_label_remote.set_text_color('black')
+        self.auto_scan_label_remote.setText('Probing...')
+
+        if self.auto_src_path:
+            try:
+                self._latest_trmt = natsorted(
+                    [Path(f).abspath() for f in Path(self.auto_src_path).listdir('TRMT_*.miz')]).pop()
+            except IndexError:
+                self._latest_trmt = None
+                local_version = None
+                self.auto_scan_label_local.setText('No TRMT local MIZ file found.')
+            else:
+                local_version = Path(self._latest_trmt).namebase.replace('TRMT_', '')
+                self.auto_scan_label_local.setText(local_version)
+
+            try:
+                remote_version = appveyor.get_latest_remote_version()
+                self.auto_scan_label_remote.setText(remote_version)
+            except:
+                remote_version = None
+
+            if remote_version:
+                if local_version:
+                    if LooseVersion(local_version) < LooseVersion(remote_version):
+                        self.auto_scan_label_remote.set_text_color('green')
+                else:
+                    self.auto_scan_label_remote.set_text_color('green')
+
+    def scan(self):
+
+        self.pool.queue_task(task=self._scan)
