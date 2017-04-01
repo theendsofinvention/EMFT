@@ -108,7 +108,7 @@ def start_ui():
 
     from utils import Updater
     updater = Updater(
-        executable_name='EMFT.exe',
+        executable_name='EMFT',
         current_version=global_.APP_VERSION,
         gh_user='132nd-etcher',
         gh_repo='EMFT',
