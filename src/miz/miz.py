@@ -59,6 +59,8 @@ class Miz:
         self._mission_qual = None
         self._l10n = None
         self._l10n_qual = None
+        self._map_res = None
+        self._map_res_qual = None
 
     def __enter__(self):
         logger.debug('instantiating new Mission object as a context')
@@ -87,6 +89,10 @@ class Miz:
         return self.tmpdir.joinpath('l10n', 'DEFAULT', 'dictionary')
 
     @property
+    def map_res_file(self):
+        return self.tmpdir.joinpath('l10n', 'DEFAULT', 'mapResource')
+
+    @property
     def mission(self) -> Mission:
         if self._mission is None:
             raise RuntimeError()
@@ -98,16 +104,22 @@ class Miz:
             raise RuntimeError()
         return self._l10n
 
+    @property
+    def map_res(self) -> dict:
+        if self._map_res is None:
+            raise RuntimeError()
+        return self._map_res
+
     @staticmethod
     def reorder(miz_file_path, target_dir, skip_options_file):
         m = Miz(miz_file_path)
 
-        def compare_and_copy_diff(diff):
-            assert isinstance(diff, dircmp)
-            for file in diff.left_only + diff.diff_files:
-                print('copying ', file)
-                Path(diff.left).joinpath(file).copy2(diff.right)
-            for sub in diff.subdirs.values():
+        def compare_and_copy_diff(_diff):
+            assert isinstance(_diff, dircmp)
+            for file in _diff.left_only + _diff.diff_files:
+                logger.debug('copying: ', file)
+                Path(_diff.left).joinpath(file).copy2(_diff.right)
+            for sub in _diff.subdirs.values():
                 compare_and_copy_diff(sub)
 
         m.unzip(overwrite=True)
@@ -130,6 +142,11 @@ class Miz:
         if not self.zip_content:
             self.unzip(overwrite=False)
 
+        logger.debug('reading map resource file')
+
+        with open(self.map_res_file, encoding=ENCODING) as f:
+            self._map_res, self._map_res_qual = SLTP().decode(f.read())
+
         logger.debug('reading l10n file')
 
         with open(self.dictionary_file, encoding=ENCODING) as f:
@@ -142,6 +159,11 @@ class Miz:
             self._mission = Mission(mission_data, self._l10n)
 
     def _encode(self):
+
+        logger.debug('encoding map resource')
+
+        with open(self.map_res_file, mode='w', encoding=ENCODING) as f:
+            f.write(SLTP().encode(self._map_res, self._map_res_qual))
 
         logger.debug('encoding l10n dictionary')
 
