@@ -3,8 +3,6 @@ from calendar import timegm
 from itertools import chain
 from time import strftime, gmtime, strptime
 
-import utils.tests
-
 from utils import make_logger
 from utils import Logged, valid_str, valid_positive_int, Validator, valid_bool, valid_int, valid_float
 
