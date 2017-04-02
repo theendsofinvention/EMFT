@@ -421,8 +421,8 @@ class TabReorder(iTab, _SingleLayout, _AutoLayout):
                 self.auto_scan_label_local.setText(local_version)
 
             try:
-                remote_version = appveyor.get_latest_remote_version()
-                self.auto_scan_label_remote.setText(remote_version)
+                remote_version, remote_branch = appveyor.get_latest_remote_version()
+                self.auto_scan_label_remote.setText('{} ({})'.format(remote_version, remote_branch))
             except:
                 remote_version = None
 
