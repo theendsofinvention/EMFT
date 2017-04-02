@@ -18,8 +18,9 @@ def get_latest_remote_version():
         __url('projects', '132nd-Entropy', '132nd-virtual-wing-training-mission-tblisi'),
     )
     latest = req.json()['build']['version']
+    branch = req.json()['build']['branch']
     logger.debug('latest version found on AV: {}'.format(latest))
-    return latest
+    return latest, branch
 
 
 def latest_version_download_url():
