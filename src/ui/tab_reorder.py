@@ -12,9 +12,9 @@ from utils.custom_path import Path
 from utils.threadpool import ThreadPool
 
 from src.cfg.cfg import Config
-from src.misc import appveyor, downloader
+from src.misc import appveyor, downloader, github
 from src.miz.miz import Miz
-from src.ui.base import GroupBox, HLayout, VLayout, PushButton, Radio, Checkbox, Label
+from src.ui.base import GroupBox, HLayout, VLayout, PushButton, Radio, Checkbox, Label, Combo
 from src.ui.dialog_browse import BrowseDialog
 from src.ui.itab import iTab
 
@@ -171,6 +171,7 @@ class _SingleLayout:
 
 
 class _AutoLayout:
+
     def __init__(self):
 
         self.auto_group = GroupBox()
@@ -196,6 +197,12 @@ class _AutoLayout:
         self.auto_scan_label_local = QLabel('')
         self.auto_scan_label_remote = Label('')
         # self.scan_label.setMinimumWidth(self.auto_folder_path.width())
+        self.auto_scan_combo_branch = Combo(self._branch_changed, ['All'] + github.get_available_branches())
+        try:
+            self.auto_scan_combo_branch.set_index_from_text(Config().selected_branch)
+        except ValueError:
+            pass
+
         self.auto_scan_btn = PushButton('Refresh', self.scan)
         self.auto_scan_download_btn = PushButton('Download', self.download)
 
@@ -215,6 +222,7 @@ class _AutoLayout:
             QLabel('Latest local version of the TRMT:'),
             (self.auto_scan_label_local, dict(stretch=1)),
             QLabel('Latest remote version of the TRMT:'),
+            self.auto_scan_combo_branch,
             (self.auto_scan_label_remote, dict(stretch=1)),
             self.auto_scan_btn,
             self.auto_scan_download_btn,
@@ -244,6 +252,10 @@ class _AutoLayout:
         if Config().auto_source_folder:
             self.auto_src_le.setText(Config().auto_source_folder)
 
+    @abc.abstractmethod
+    def _branch_changed(self):
+        """"""
+
     def auto_reorder(self):
         if self.latest_trmt and self.auto_out_path:
             self.reorder_miz(self.latest_trmt, self.auto_out_path, self.skip_options_file)
@@ -269,6 +281,11 @@ class _AutoLayout:
         if len(t) > 3:
             return Path(t)
         return None
+
+    @property
+    @abc.abstractmethod
+    def selected_branch(self):
+        """"""
 
     @abc.abstractmethod
     def scan(self):
@@ -403,6 +420,15 @@ class TabReorder(iTab, _SingleLayout, _AutoLayout):
             ]
         )
 
+    @property
+    def selected_branch(self):
+        return self.auto_scan_combo_branch.currentText()
+
+    def _branch_changed(self):
+        Config().selected_branch = self.selected_branch
+        if hasattr(self, 'pool'):
+            self.scan()
+
     def _scan(self):
 
         self.auto_scan_label_remote.set_text_color('black')
@@ -421,7 +447,7 @@ class TabReorder(iTab, _SingleLayout, _AutoLayout):
                 self.auto_scan_label_local.setText(local_version)
 
             try:
-                remote_version, remote_branch = appveyor.get_latest_remote_version()
+                remote_version, remote_branch = appveyor.get_latest_remote_version(self.selected_branch)
                 self.auto_scan_label_remote.setText('{} ({})'.format(remote_version, remote_branch))
             except:
                 remote_version = None
