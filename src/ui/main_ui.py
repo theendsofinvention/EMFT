@@ -2,7 +2,7 @@
 from queue import Queue
 from PyQt5.QtCore import Qt
 from PyQt5.QtGui import QIcon, QKeySequence
-from PyQt5.QtWidgets import QMainWindow, QTabWidget, QVBoxLayout, QWidget, QShortcut
+from PyQt5.QtWidgets import QMainWindow, QTabWidget
 
 # noinspection PyProtectedMember
 from src import global_
