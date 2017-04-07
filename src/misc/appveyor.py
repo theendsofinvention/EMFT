@@ -28,11 +28,16 @@ def get_latest_remote_version(branch='All'):
     return latest, branch
 
 
-def latest_version_download_url():
+def latest_version_download_url(branch='All'):
     logger.debug('querying AV for latest version download url')
-    req = requests.get(
-        __url('projects', '132nd-Entropy', '132nd-virtual-wing-training-mission-tblisi'),
-    )
+    if branch == 'All':
+        req = requests.get(
+            __url('projects', '132nd-Entropy', '132nd-virtual-wing-training-mission-tblisi'),
+        )
+    else:
+        req = requests.get(
+            __url('projects', '132nd-Entropy', '132nd-virtual-wing-training-mission-tblisi', 'branch', branch),
+        )
     dl_url = r'https://ci.appveyor.com/api/buildjobs/{}/artifacts/TRMT_{}.miz'.format(
         req.json()['build']['jobs'][0]['jobId'], req.json()['build']['version'])
     logger.debug('latest version download url: {}'.format(dl_url))
