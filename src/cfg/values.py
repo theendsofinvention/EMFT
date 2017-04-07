@@ -71,3 +71,7 @@ class ConfigValues:
         if value not in ['DEBUG', 'INFO', 'WARNING', 'ERROR']:
             raise ValueError(value)
         return value
+
+    @MetaProperty('All', str)
+    def selected_branch(self, value: str):
+        return value
