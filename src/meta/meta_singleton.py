@@ -29,12 +29,12 @@ class _MetaSingleton(abc.ABCMeta):
 
 class MetaSingleton(Meta, metaclass=_MetaSingleton):
     @property
-    @abc.abstractproperty
+    @abc.abstractmethod
     def meta_header(self):
         """"""
 
     @property
-    @abc.abstractproperty
+    @abc.abstractmethod
     def meta_version(self):
         """"""
 

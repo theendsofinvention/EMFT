@@ -34,6 +34,8 @@ class GroupBox(QGroupBox):
         self.setContentsMargins(40, 0, 0, 0)
         if title:
             self.setTitle(title)
+        if layout:
+            self.setLayout(layout)
 
 
 class _WithChildren:
@@ -44,6 +46,8 @@ class _WithChildren:
                 params = child[1]
                 child = child[0]
             if isinstance(child, QBoxLayout):
+                self.addLayout(child, **params)
+            elif isinstance(child, QGridLayout):
                 self.addLayout(child, **params)
             elif isinstance(child, QSpacerItem):
                 self.addSpacerItem(child, **params)
@@ -171,13 +175,14 @@ class Shortcut(QShortcut):
         self.activated.connect(func)
 
 
-class LineEdit(QLineEdit):
-    def __init__(self, text, func: callable = None, read_only=False):
+class LineEdit(QLineEdit, Expandable):
+    def __init__(self, text, func: callable = None, read_only=False, clear_btn_enabled=False):
         QLineEdit.__init__(self, text)
         if func:
             # noinspection PyUnresolvedReferences
             self.textChanged.connect(func)
         self.setReadOnly(read_only)
+        self.setClearButtonEnabled(clear_btn_enabled)
 
 
 class Label(QLabel):
@@ -223,4 +228,3 @@ class VSpacer(QSpacerItem):
             QSpacerItem.__init__(self, 1, 1, QSizePolicy.Minimum, QSizePolicy.Expanding)
         else:
             QSpacerItem.__init__(self, 1, size)
-

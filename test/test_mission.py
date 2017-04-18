@@ -96,7 +96,7 @@ RADIOS_TESTS = [
 
 class TestMizBasics:
 
-    @pytest.fixture(scope='function', autouse=True)
+    @pytest.fixture(autouse=True)
     def clean_up(self, OUT_FILE):
         yield
         if os.path.exists(OUT_FILE):
@@ -193,7 +193,7 @@ class TestMizValues:
         with Miz(TEST_FILE, keep_temp_dir=True) as miz:
             yield miz
 
-    @pytest.fixture(scope='function', autouse=True)
+    @pytest.fixture(autouse=True)
     def clean_up(self, OUT_FILE):
 
         success = yield
@@ -737,6 +737,7 @@ class TestMizValues:
         with Miz(r'./test/test_files/radios.miz') as miz:
             unit = miz.mission.get_unit_by_id(6)
             for radio in unit.radio_presets:
+                # TODO resume
                 pass
 
     def test_mission_start_time(self, TEST_FILE):

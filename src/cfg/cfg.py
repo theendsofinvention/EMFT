@@ -34,7 +34,7 @@ class Config(Meta, ConfigValues, metaclass=Singleton):
 
     def __getitem__(self, key):
         """Mutes KeyError"""
-        return self.get(key, None)
+        return self.get(key)
 
     def __setitem__(self, key, value, _write=True):
         """Immediately writes any change to file"""

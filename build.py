@@ -46,6 +46,8 @@ class __LogPipe(threading.Thread):
 def run_piped_process(args, logger_, level=DEBUG, cwd=None, env=None, exe=None):
     """
     Runs a standard process and pipes its output to a Python logger
+    :param exe: executable
+    :param env: working dir
     :param args: process and arguments ias a list
     :param logger_: logger to send data to
     :param level: logging level, defaults to DEBUG
@@ -66,7 +68,7 @@ def patch_exe(path_to_exe: str or Path,
               version: str,
               app_name: str,
               wkdir: str or Path,
-              build: str):
+              build_: str):
     path_to_exe = Path(path_to_exe)
     wkdir = Path(wkdir)
 
@@ -92,8 +94,8 @@ def patch_exe(path_to_exe: str or Path,
         '/s', 'product', app_name,
         '/s', 'copyright', '2017 etcher',
         '/s', 'company', 'etcher',
-        '/s', 'build', str(build),
-        '/s', 'PrivateBuild', str(build),
+        '/s', 'build', str(build_),
+        '/s', 'PrivateBuild', str(build_),
         '/langid', '1033',
     ]
     run_piped_process(cmd, logger_=logger, cwd=wkdir)
@@ -112,7 +114,8 @@ def pre_build(env):
     )
 
 
-# certifi-2017.1.23 cffi-1.9.1 cryptography-1.7.2 idna-2.2 packaging-16.8 paramiko-2.1.1 pyasn1-0.1.9 pycparser-2.17 pyparsing-2.1.10 scp-0.10.2 setuptools-34.1.1
+# certifi-2017.1.23 cffi-1.9.1 cryptography-1.7.2 idna-2.2 packaging-16.8
+# paramiko-2.1.1 pyasn1-0.1.9 pycparser-2.17 pyparsing-2.1.10 scp-0.10.2 setuptools-34.1.1
 
 def build(env):
     logger.info('reading GitVersion output')
@@ -141,7 +144,7 @@ def build(env):
         version=version.get('SemVer'),
         app_name=global_.APP_SHORT_NAME,
         wkdir=Path('.'),
-        build=version.get('InformationalVersion'),
+        build_=version.get('InformationalVersion'),
     )
 
     logger.info('all done')
