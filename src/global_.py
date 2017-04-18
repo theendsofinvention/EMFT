@@ -24,5 +24,13 @@ APP_WEBSITE = r'https://github.com/132nd-etcher/EMFT'
 
 ENCODING = 'iso8859_15'
 
+DCS = {
+    'reg_key': {
+        'stable': 'DCS World',
+        'beta': 'DCS World OpenBeta',
+        'alpha': 'DCS World 2 OpenAlpha',
+    },
+}
+
 QT_APP = None
 MAIN_UI = None
