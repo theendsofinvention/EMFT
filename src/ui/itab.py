@@ -14,6 +14,6 @@ class iTab(QWidget):
         self.setContentsMargins(20, 20, 20, 20)
 
     @property
-    @abc.abstractproperty
+    @abc.abstractmethod
     def tab_title(self) -> str:
         """"""

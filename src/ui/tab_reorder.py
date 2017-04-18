@@ -199,7 +199,7 @@ class _AutoLayout:
         # self.scan_label.setMinimumWidth(self.auto_folder_path.width())
         self.auto_scan_combo_branch = Combo(self._branch_changed, ['All'] + github.get_available_branches())
         try:
-            self.auto_scan_combo_branch.set_index_from_text(Config().selected_branch)
+            self.auto_scan_combo_branch.set_index_from_text(Config().selected_TRMT_branch)
         except ValueError:
             pass
 
@@ -425,7 +425,7 @@ class TabReorder(iTab, _SingleLayout, _AutoLayout):
         return self.auto_scan_combo_branch.currentText()
 
     def _branch_changed(self):
-        Config().selected_branch = self.selected_branch
+        Config().selected_TRMT_branch = self.selected_branch
         if hasattr(self, 'pool'):
             self.scan()
 

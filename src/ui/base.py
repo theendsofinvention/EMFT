@@ -4,7 +4,7 @@ import abc
 from PyQt5.QtCore import Qt
 from PyQt5.QtGui import QKeySequence
 from PyQt5.QtWidgets import QGroupBox, QBoxLayout, QSpacerItem, QWidget, QHBoxLayout, QVBoxLayout, QPushButton, \
-    QRadioButton, QComboBox, QShortcut, QCheckBox, QLineEdit, QLabel, QPlainTextEdit
+    QRadioButton, QComboBox, QShortcut, QCheckBox, QLineEdit, QLabel, QPlainTextEdit, QSizePolicy
 
 
 class Widget(QWidget):
@@ -13,9 +13,11 @@ class Widget(QWidget):
 
 
 class GroupBox(QGroupBox):
-    def __init__(self):
+    def __init__(self, title=None):
         QGroupBox.__init__(self)
         self.setContentsMargins(40, 0, 0, 0)
+        if title:
+            self.setTitle(title)
 
 
 class _WithChildren:
@@ -115,11 +117,12 @@ class Shortcut(QShortcut):
 
 
 class LineEdit(QLineEdit):
-    def __init__(self, text, func: callable = None):
+    def __init__(self, text, func: callable = None, read_only=False):
         QLineEdit.__init__(self, text)
         if func:
             # noinspection PyUnresolvedReferences
             self.textChanged.connect(func)
+        self.setReadOnly(read_only)
 
 
 class Label(QLabel):
@@ -145,3 +148,21 @@ class PlainTextEdit(QPlainTextEdit):
     def __init__(self, *, default_text='', read_only=False):
         QPlainTextEdit.__init__(self, default_text)
         self.setReadOnly(read_only)
+
+
+class Spacer(QSpacerItem):
+
+    def __init__(self, w=1, h=1):
+        QSpacerItem.__init__(self, w, h, QSizePolicy.Expanding, QSizePolicy.Expanding)
+
+
+class HSpacer(QSpacerItem):
+
+    def __init__(self, w=1, h=1):
+        QSpacerItem.__init__(self, w, h, QSizePolicy.Expanding, QSizePolicy.Minimum)
+
+
+class VSpacer(QSpacerItem):
+
+    def __init__(self, w=1, h=1):
+        QSpacerItem.__init__(self, w, h, QSizePolicy.Minimum, QSizePolicy.Expanding)

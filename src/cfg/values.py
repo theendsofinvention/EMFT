@@ -1,14 +1,16 @@
 # coding=utf-8
 
 import path
+from utils.custom_logging import make_logger
 
 from src.meta.meta_property import MetaProperty
+
+logger = make_logger(__name__)
 
 
 class ConfigValues:
     @MetaProperty(None, str)
     def saved_games_path(self, value: str):
-        """Path to the Saved Games folder"""
         p = path.Path(value)
         if not p.exists():
             raise FileNotFoundError('path does not exist: {}'.format(p.abspath()))
@@ -72,6 +74,7 @@ class ConfigValues:
             raise ValueError(value)
         return value
 
+    # noinspection PyPep8Naming
     @MetaProperty('All', str)
-    def selected_branch(self, value: str):
+    def selected_TRMT_branch(self, value: str):
         return value
