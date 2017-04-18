@@ -1,17 +1,16 @@
 # coding=utf-8
 
 import logging
+
+from utils import create_new_paste
+
 from src import global_
-
-from PyQt5.QtWidgets import QPlainTextEdit
-
 from src.cfg import Config
 from src.sentry import SENTRY
-from src.ui.base import VLayout, Combo, PushButton, HLayout
-from src.ui.itab import iTab
 from src.ui.base import PlainTextEdit
+from src.ui.base import VLayout, Combo, PushButton, HLayout, LineEdit, Label, GridLayout
+from src.ui.itab import iTab
 from src.ui.main_ui_interface import I
-from utils import create_new_paste
 
 
 class TabLog(iTab, logging.Handler):
@@ -52,13 +51,16 @@ class TabLog(iTab, logging.Handler):
             ]
         )
 
+        self.filter_line_edit_msg = LineEdit('', self._filter_updated, clear_btn_enabled=True)
+        self.filter_line_edit_module = LineEdit('', self._filter_updated, clear_btn_enabled=True)
+
         self.log_text = PlainTextEdit(read_only=True)
 
         self._min_lvl = self.levels[Config().log_level]['level']
         self.combo.set_index_from_text(Config().log_level)
 
-        self.clear_btn = PushButton('Clear', self._clean)
-        self.send_btn = PushButton('Send', self._send)
+        self.clear_btn = PushButton('Clear log', self._clean)
+        self.send_btn = PushButton('Send log', self._send)
 
         self.setLayout(
             VLayout(
@@ -66,10 +68,29 @@ class TabLog(iTab, logging.Handler):
                     HLayout(
                         [
                             (self.combo, dict(stretch=1)),
+                            20,
                             (self.clear_btn, dict(stretch=0)),
                             (self.send_btn, dict(stretch=0)),
                         ]
                     ),
+                    GridLayout(
+                        [
+                            [Label('Filter message'), self.filter_line_edit_msg],
+                            [Label('Filter module'), self.filter_line_edit_module],
+                        ]
+                    ),
+                    # VLayout(
+                    #     [
+                    #         HLayout([
+                    #             (Label('Filter message'), dict(stretch=0)),
+                    #             (self.filter_line_edit_msg, dict(stretch=1)),
+                    #         ]),
+                    #         HLayout([
+                    #             (Label('Filter module'), dict(stretch=0)),
+                    #             (self.filter_line_edit_module, dict(stretch=1)),
+                    #         ]),
+                    #     ]
+                    # ),
                     self.log_text,
                 ]
             )
@@ -78,6 +99,18 @@ class TabLog(iTab, logging.Handler):
         logger = logging.getLogger('__main__')
         logger.addHandler(self)
         self._clean()
+
+    def _filter_updated(self):
+        self._clean()
+        for rec in self.records:
+            assert isinstance(rec, logging.LogRecord)
+            if self.filter_line_edit_msg.text():
+                if not self.filter_line_edit_msg.text() in rec.msg:
+                    continue
+            if self.filter_line_edit_module.text():
+                if not self.filter_line_edit_module.text() in rec.module:
+                    continue
+            self.write(self.format(rec))
 
     def emit(self, record: logging.LogRecord):
         self.records.append(record)
