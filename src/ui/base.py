@@ -4,7 +4,7 @@ import abc
 from PyQt5.QtCore import Qt
 from PyQt5.QtGui import QKeySequence
 from PyQt5.QtWidgets import QGroupBox, QBoxLayout, QSpacerItem, QWidget, QHBoxLayout, QVBoxLayout, QPushButton, \
-    QRadioButton, QComboBox, QShortcut, QCheckBox, QLineEdit, QLabel, QPlainTextEdit, QSizePolicy
+    QRadioButton, QComboBox, QShortcut, QCheckBox, QLineEdit, QLabel, QPlainTextEdit, QSizePolicy, QGridLayout
 
 
 class Widget(QWidget):
@@ -57,6 +57,45 @@ class _WithChildren:
     @abc.abstractmethod
     def addSpacing(self, spacer: int):
         """"""
+
+
+class GridLayout(QGridLayout):
+    align = {
+        'l': Qt.AlignLeft,
+        'c': Qt.AlignCenter,
+        'r': Qt.AlignRight,
+    }
+
+    def __init__(self, children: list, stretch: list = None, auto_right=True):
+        QGridLayout.__init__(self)
+        self.auto_right = auto_right
+        self.add_children(children)
+        if stretch:
+            for x in range(len(stretch)):
+                self.setColumnStretch(x, stretch[x])
+
+    # noinspection PyArgumentList
+    def add_children(self, children: list):
+        for r in range(len(children)):
+            child = children[r]
+            for c in range(len(child)):
+                if child[c] is None:
+                    continue
+                elif isinstance(child[c], QWidget):
+                    if c == 0 and self.auto_right:
+                        self.addWidget(child[c], r, c, Qt.AlignRight)
+                    else:
+                        self.addWidget(child[c], r, c)
+                elif isinstance(child[c], tuple):
+                    align = child[c][1].get('align', 'l')
+                    span = child[c][1].get('span', [1, 1])
+                    self.addWidget(child[c][0], r, c, *span, self.align[align])
+                elif isinstance(child[c], QBoxLayout):
+                    self.addLayout(child[c], r, c)
+                elif isinstance(child[c], int):
+                    self.addItem(VSpacer(child[c]))
+                else:
+                    raise ValueError('unmanaged child type: {}'.format(type(child[c])))
 
 
 class HLayout(QHBoxLayout, _WithChildren):
