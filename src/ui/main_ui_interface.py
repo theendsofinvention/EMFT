@@ -34,7 +34,12 @@ class I(ProgressAdapter):
 
     @staticmethod
     @MainUiMethod
-    def update_config_tab():
+    def update_config_tab(version_check_result=None):
+        """"""
+
+    @staticmethod
+    @MainUiMethod
+    def tab_reorder_update_view_after_remote_scan():
         """"""
 
     @staticmethod
