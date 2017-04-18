@@ -144,25 +144,28 @@ class Label(QLabel):
 
 
 class PlainTextEdit(QPlainTextEdit):
-
     def __init__(self, *, default_text='', read_only=False):
         QPlainTextEdit.__init__(self, default_text)
         self.setReadOnly(read_only)
 
 
 class Spacer(QSpacerItem):
-
     def __init__(self, w=1, h=1):
         QSpacerItem.__init__(self, w, h, QSizePolicy.Expanding, QSizePolicy.Expanding)
 
 
 class HSpacer(QSpacerItem):
-
-    def __init__(self, w=1, h=1):
-        QSpacerItem.__init__(self, w, h, QSizePolicy.Expanding, QSizePolicy.Minimum)
+    def __init__(self, size: int = None):
+        if size is None:
+            QSpacerItem.__init__(self, 1, 1, QSizePolicy.Expanding, QSizePolicy.Minimum)
+        else:
+            QSpacerItem.__init__(self, size, 1)
 
 
 class VSpacer(QSpacerItem):
+    def __init__(self, size: int = None):
+        if size is None:
+            QSpacerItem.__init__(self, 1, 1, QSizePolicy.Minimum, QSizePolicy.Expanding)
+        else:
+            QSpacerItem.__init__(self, 1, size)
 
-    def __init__(self, w=1, h=1):
-        QSpacerItem.__init__(self, w, h, QSizePolicy.Minimum, QSizePolicy.Expanding)
