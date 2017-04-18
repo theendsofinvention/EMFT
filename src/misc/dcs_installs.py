@@ -25,8 +25,10 @@ class InvalidInstallPath(ValueError):
     pass
 
 
-class InvalidVariantPath(ValueError):
-    pass
+class DCSSkin:
+    def __init__(self, name, ac):
+        self.name = name
+        self.ac = ac
 
 
 class DCSInstall:
@@ -35,6 +37,7 @@ class DCSInstall:
         self.__sg = saved_games_path if saved_games_path else None
         self.__version = str(version) if version else None
         self.__label = label
+        self.__skins = {}
 
     @staticmethod
     def __check_path(path: Path or None, exc):
@@ -60,6 +63,14 @@ class DCSInstall:
     @property
     def version(self):
         return self.__version
+
+    def discover_skins(self):
+
+        def scan_dir(p: Path):
+            logger.debug('scanning for skins in: {}'.format(p.abspath()))
+
+        scan_dir(Path(self.install_path).joinpath('bazar', 'liveries'))
+        scan_dir(Path(self.saved_games).joinpath('liveries'))
 
 
 class DCSInstalls(metaclass=Singleton):
@@ -138,10 +149,7 @@ class DCSInstalls(metaclass=Singleton):
 
     def get_install_path(self, k) -> Path or None:
         logger.debug('{}: reading config'.format(k))
-        install_path = getattr(Config(), self.installs[k]['config_attrib'])
-        logger.debug('{}: config value: {}'.format(k, install_path))
-        if install_path is None:
-            install_path = self.__discover_install_path(k)
+        install_path = self.__discover_install_path(k)
         if install_path is None:
             logger.debug('{}: no install path found'.format(k))
             return None
@@ -186,13 +194,13 @@ class DCSInstalls(metaclass=Singleton):
             self.installs[k]['sg'] = self.get_variant(k)
             self.installs[k]['version'] = exe.get_win32_file_info().file_version
 
+            self.__getitem__(k).discover_skins()
+
             logger.debug('{}: set "Saved Games" path to: {}'.format(k, self.installs[k]['sg']))
 
     def __get_props(self, channel):
-        return self.installs[channel]['install'], \
-               self.installs[channel]['sg'], \
-               self.installs[channel]['version'], \
-               channel
+        return self.installs[channel]['install'],\
+               self.installs[channel]['sg'], self.installs[channel]['version'], channel
 
     @property
     def stable(self) -> DCSInstall:
@@ -205,6 +213,10 @@ class DCSInstalls(metaclass=Singleton):
     @property
     def alpha(self) -> DCSInstall:
         return DCSInstall(*self.__get_props('alpha'))
+
+    @property
+    def skins(self):
+        return
 
     def __iter__(self) -> DCSInstall:
         yield self.stable
