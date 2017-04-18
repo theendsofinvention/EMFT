@@ -29,7 +29,7 @@ class Expandable:
 
 
 class GroupBox(QGroupBox):
-    def __init__(self, title=None):
+    def __init__(self, title=None, layout=None):
         QGroupBox.__init__(self)
         self.setContentsMargins(40, 0, 0, 0)
         if title:
