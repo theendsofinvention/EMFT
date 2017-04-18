@@ -12,6 +12,22 @@ class Widget(QWidget):
         QWidget.__init__(self, parent=parent, flags=Qt.Widget)
 
 
+class Expandable:
+    # noinspection PyPep8Naming
+    @abc.abstractmethod
+    def setSizePolicy(self, w, h):
+        pass
+
+    def h_expand(self):
+        self.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Minimum)
+
+    def v_expand(self):
+        self.setSizePolicy(QSizePolicy.Minimum, QSizePolicy.Expanding)
+
+    def expand(self):
+        self.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
+
+
 class GroupBox(QGroupBox):
     def __init__(self, title=None):
         QGroupBox.__init__(self)
