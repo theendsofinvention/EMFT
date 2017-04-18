@@ -4,7 +4,7 @@ import abc
 from PyQt5.QtCore import Qt
 from PyQt5.QtGui import QKeySequence
 from PyQt5.QtWidgets import QGroupBox, QBoxLayout, QSpacerItem, QWidget, QHBoxLayout, QVBoxLayout, QPushButton, \
-    QRadioButton, QComboBox, QShortcut, QCheckBox, QLineEdit, QLabel
+    QRadioButton, QComboBox, QShortcut, QCheckBox, QLineEdit, QLabel, QPlainTextEdit
 
 
 class Widget(QWidget):
@@ -138,3 +138,10 @@ class Label(QLabel):
     def set_bg_color(self, color):
         self.bg_color = color
         self.__update_style_sheet()
+
+
+class PlainTextEdit(QPlainTextEdit):
+
+    def __init__(self, *, default_text='', read_only=False):
+        QPlainTextEdit.__init__(self, default_text)
+        self.setReadOnly(read_only)

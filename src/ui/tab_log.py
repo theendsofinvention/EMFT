@@ -9,6 +9,7 @@ from src.cfg import Config
 from src.sentry import SENTRY
 from src.ui.base import VLayout, Combo, PushButton, HLayout
 from src.ui.itab import iTab
+from src.ui.base import PlainTextEdit
 from src.ui.main_ui_interface import I
 from utils import create_new_paste
 
@@ -51,8 +52,7 @@ class TabLog(iTab, logging.Handler):
             ]
         )
 
-        self.log_text = QPlainTextEdit()
-        self.log_text.setReadOnly(True)
+        self.log_text = PlainTextEdit(read_only=True)
 
         self._min_lvl = self.levels[Config().log_level]['level']
         self.combo.set_index_from_text(Config().log_level)
