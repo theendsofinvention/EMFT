@@ -33,10 +33,10 @@ class TabConfig(iTab):
             channel=Config().update_channel
         )
 
+        self.remote_version = Label('')
         self.update_channel_combo.set_index_from_text(Config().update_channel)
         self.update_scan_btn = PushButton('Check for new version', self._check_for_new_version)
         self.install_new_version = PushButton('Install latest version', self._check_for_new_version)
-        self.remote_version = Label('')
 
         updater_layout = GroupBox(
             'Auto-update',
