@@ -78,3 +78,10 @@ class ConfigValues:
     @MetaProperty('All', str)
     def selected_TRMT_branch(self, value: str):
         return value
+
+    # noinspection PyPep8Naming
+    @MetaProperty('stable', str)
+    def update_channel(self, value: str):
+        if value not in ['stable', 'rc', 'dev', 'beta', 'alpha']:
+            raise ValueError('unknown update channel: {}'.format(value))
+        return value
