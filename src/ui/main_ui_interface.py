@@ -34,6 +34,11 @@ class I(ProgressAdapter):
 
     @staticmethod
     @MainUiMethod
+    def update_config_tab():
+        """"""
+
+    @staticmethod
+    @MainUiMethod
     def hide():
         """"""
 

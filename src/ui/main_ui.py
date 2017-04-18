@@ -60,6 +60,9 @@ class MainUi(QMainWindow, MainUiThreading, MainUiProgress):
     def write_log(self, value: str, color: str):
         self.helpers['write_log'](value, color)
 
+    def update_config_tab(self):
+        self.helpers['update_config_tab']()
+
     def add_tab(self, tab: iTab, helpers: dict = None):
         self.tabs.addTab(tab, tab.tab_title)
         if helpers:
@@ -91,10 +94,12 @@ def start_ui():
     import sys
     from src.ui.tab_reorder import TabReorder
     from src.ui.tab_log import TabLog
+    from src.ui.tab_config import TabConfig
     logger.debug('starting QtApp object')
     global_.QT_APP = QApplication([])
     global_.MAIN_UI = MainUi()
     global_.MAIN_UI.add_tab(TabReorder())
+    global_.MAIN_UI.add_tab(TabConfig(), helpers={'update_config_tab': 'update_config_tab'})
     global_.MAIN_UI.add_tab(TabLog(), helpers={'write_log': 'write'})
     global_.MAIN_UI.show()
 
@@ -119,5 +124,10 @@ def start_ui():
 
     from utils import Progress
     Progress.register_adapter(I)
+
+    from src.misc.dcs_installs import DCSInstalls
+    DCSInstalls().discover_dcs_installations()
+
+    global_.MAIN_UI.update_config_tab()
 
     sys.exit(global_.QT_APP.exec())
