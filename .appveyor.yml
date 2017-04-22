@@ -1,7 +1,5 @@
-
 version: pending.{build}
 max_jobs: 1
-
 
 environment:
     GIT_DAEMON_PATH:   "C:\\Program Files\\Git\\mingw64\\libexec\\git-core"
