@@ -1,7 +1,5 @@
-
 version: pending.{build}
 max_jobs: 1
-
 
 environment:
     GIT_DAEMON_PATH:   "C:\\Program Files\\Git\\mingw64\\libexec\\git-core"
@@ -22,13 +20,13 @@ cache:
   - C:\Users\appveyor\AppData\Local\pip\cache
   - C:\ProgramData\chocolatey\bin -> appveyor.yml
   - C:\ProgramData\chocolatey\lib -> appveyor.yml
-  - '%APPDATA%\pip\Cache'
+#  - '%APPDATA%\pip\Cache'
 
 install:
   - "%PYTHON%/Scripts/pip.exe install --disable-pip-version-check --user --upgrade pip"
   - "%PYTHON%/Scripts/pip.exe install --upgrade coverage"
   - "%PYTHON%/Scripts/pip.exe install -r requirements.txt"
-  - "%PYTHON%/Scripts/pip.exe install -r own_requirements.txt --upgrade"
+  - "%PYTHON%/Scripts/pip.exe install -r own_requirements.txt"
   - choco install gitversion.portable -pre -y
   - choco install gitversion.portable -y
   - git clone --branch=master https://github.com/132nd-etcher/verpatch.git C:\projects\verpatch
@@ -78,7 +76,6 @@ deploy:
     auth_token:
       secure: T9LMiMzikVwlfnYhxlIpzhmfotDN75SUmEv1FSGLHZ/vMHMCMT3SEapSOH1iPdaD
     on:
-      branch: master
       appveyor_repo_tag: false
 
 skip_tags: true

@@ -11,8 +11,7 @@ try:
 except KeyError:
     TESTING = False
 
-UPDATER_CONFIG = dict(executable_name='EMFT',
-                      current_version=src.__version__.__version__,
+UPDATER_CONFIG = dict(current_version=src.__version__.__version__,
                       gh_user='132nd-etcher',
                       gh_repo='EMFT',
                       asset_filename='EMFT.exe')
