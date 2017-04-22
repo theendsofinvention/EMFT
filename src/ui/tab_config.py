@@ -132,6 +132,7 @@ class TabConfig(iTab):
         )
 
     def update_config_tab(self, latest_release: GithubRelease):
+        self.remote_version.set_text_color('black')
         for x in ['stable', 'beta', 'alpha']:
             getattr(self, '{}_install'.format(x)).setText(getattr(DCSInstalls(), x).install_path)
             getattr(self, '{}_variant'.format(x)).setText(getattr(DCSInstalls(), x).saved_games)
@@ -140,6 +141,8 @@ class TabConfig(iTab):
         if latest_release:
             self.latest_release = latest_release
             self.remote_version.setText(latest_release.version.version_str)
+            if Version(global_.APP_VERSION) < self.latest_release.version:
+                self.remote_version.set_text_color('green')
 
     def _on_change_sg(self, *_):
         Config().saved_games_path = str(Path(self.sg.text()).abspath())
