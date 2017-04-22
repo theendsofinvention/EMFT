@@ -2,9 +2,10 @@
 import abc
 
 from PyQt5.QtCore import Qt
-from PyQt5.QtGui import QKeySequence
+from PyQt5.QtGui import QKeySequence, QIcon
 from PyQt5.QtWidgets import QGroupBox, QBoxLayout, QSpacerItem, QWidget, QHBoxLayout, QVBoxLayout, QPushButton, \
-    QRadioButton, QComboBox, QShortcut, QCheckBox, QLineEdit, QLabel, QPlainTextEdit, QSizePolicy, QGridLayout
+    QRadioButton, QComboBox, QShortcut, QCheckBox, QLineEdit, QLabel, QPlainTextEdit, QSizePolicy, QGridLayout, \
+    QMessageBox
 
 
 class Widget(QWidget):
@@ -228,3 +229,37 @@ class VSpacer(QSpacerItem):
             QSpacerItem.__init__(self, 1, 1, QSizePolicy.Minimum, QSizePolicy.Expanding)
         else:
             QSpacerItem.__init__(self, 1, size)
+
+
+class WithMsgBoxAdapter(metaclass=abc.ABCMeta):
+    @abc.abstractmethod
+    def msg(self, text: str, follow_up: callable = None, title: str = None): pass
+
+    @abc.abstractmethod
+    def error(self, text: str, follow_up: callable = None, title: str = None): pass
+
+
+class WithMsgBox:
+
+    def __init__(self, title: str, ico: str):
+        self.title = title
+        self.ico = ico
+
+    def _run_box(self, text: str, follow_up: callable = None, title: str = None):
+        msgbox = QMessageBox()
+        msgbox.addButton(QPushButton('Ok'), QMessageBox.YesRole)
+        msgbox.setWindowIcon(QIcon(self.ico))
+        if title:
+            msgbox.setWindowTitle(title)
+        else:
+            msgbox.setWindowTitle(self.title)
+        msgbox.setText(text)
+        msgbox.exec()
+        if follow_up:
+            follow_up()
+
+    def msg(self, text: str, follow_up: callable = None, title: str = None):
+        self._run_box(text, follow_up, title)
+
+    def error(self, text: str, follow_up: callable = None, title: str = None):
+        self._run_box(text, follow_up, title)
