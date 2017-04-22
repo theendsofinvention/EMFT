@@ -127,13 +127,11 @@ def start_ui():
     from utils import Updater
     updater = Updater(
         **global_.UPDATER_CONFIG,
-        pre_update_func=pre_update_hook,
-        channel=Config().update_channel,
-        cancel_update_func=I.show,
-        post_check_func=I.update_config_tab,
-        auto_update=True
     )
-    updater.version_check()
+    updater.find_and_install_latest_release(
+        channel=Config().update_channel,
+        cancel_func=I.show(),
+    )
 
     from src.misc.dcs_installs import DCSInstalls
     DCSInstalls().discover_dcs_installations()

@@ -2,8 +2,7 @@
 
 import os
 
-from utils import Path
-from utils import Updater
+from utils import Path, Updater, Version, GithubRelease
 
 from src import global_
 from src.__version__ import __version__, __guid__
@@ -29,14 +28,14 @@ class TabConfig(iTab):
 
         self.updater = Updater(
             **global_.UPDATER_CONFIG,
-            auto_update=False,
-            channel=Config().update_channel
         )
+
+        self.latest_release = None
 
         self.remote_version = Label('')
         self.update_channel_combo.set_index_from_text(Config().update_channel)
         self.update_scan_btn = PushButton('Check for new version', self._check_for_new_version)
-        self.install_new_version = PushButton('Install latest version', self._check_for_new_version)
+        self.install_new_version_btn = PushButton('Install latest version', self._install_latest_version)
 
         updater_layout = GroupBox(
             'Auto-update',
@@ -54,6 +53,7 @@ class TabConfig(iTab):
                                     [
                                         self.update_channel_combo,
                                         self.update_scan_btn,
+                                        self.install_new_version_btn,
                                         HSpacer()
                                     ]
                                 ),
@@ -131,19 +131,15 @@ class TabConfig(iTab):
             )
         )
 
-    def update_config_tab(self, version_check_result):
+    def update_config_tab(self, latest_release: GithubRelease):
         for x in ['stable', 'beta', 'alpha']:
             getattr(self, '{}_install'.format(x)).setText(getattr(DCSInstalls(), x).install_path)
             getattr(self, '{}_variant'.format(x)).setText(getattr(DCSInstalls(), x).saved_games)
             getattr(self, '{}_version'.format(x)).setText(getattr(DCSInstalls(), x).version)
         self.update_channel_combo.set_index_from_text(Config().update_channel)
-        if version_check_result:
-            latest_remote, new_version_available = version_check_result
-            if new_version_available:
-                self.remote_version.set_text_color('green')
-            else:
-                self.remote_version.set_text_color('black')
-            self.remote_version.setText(latest_remote)
+        if latest_release:
+            self.latest_release = latest_release
+            self.remote_version.setText(latest_release.version.version_str)
 
     def _on_change_sg(self, *_):
         Config().saved_games_path = str(Path(self.sg.text()).abspath())
@@ -154,11 +150,16 @@ class TabConfig(iTab):
         self._check_for_new_version()
 
     def _check_for_new_version(self):
-        self.updater.channel = Config().update_channel
-        self.updater.get_latest_remote(I.update_config_tab)
+        self.updater.get_latest_release(
+            channel=Config().update_channel,
+            branch=Version(global_.APP_VERSION),
+            success_callback=I.update_config_tab,
+        )
 
     def _install_latest_version(self):
-        self.updater.install_latest_remote()
+        if self.latest_release:
+            self.updater.download_and_install_release(self.latest_release, 'emft.exe')
+        # self.updater.install_latest_remote()
 
     def _sg_browse(self):
         p = BrowseDialog.get_directory(self, 'Saved Games directory', Path(self.sg.text()).dirname())
