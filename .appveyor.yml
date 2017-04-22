@@ -22,7 +22,7 @@ cache:
   - C:\Users\appveyor\AppData\Local\pip\cache
   - C:\ProgramData\chocolatey\bin -> appveyor.yml
   - C:\ProgramData\chocolatey\lib -> appveyor.yml
-  - '%APPDATA%\pip\Cache'
+#  - '%APPDATA%\pip\Cache'
 
 install:
   - "%PYTHON%/Scripts/pip.exe install --disable-pip-version-check --user --upgrade pip"
