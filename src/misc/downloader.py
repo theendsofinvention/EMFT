@@ -5,10 +5,11 @@ from utils import Progress, Downloader, make_logger
 logger = make_logger(__name__)
 
 
-def download(url, local_file, progress_title):
+def download(url, local_file, progress_title: str, progress_text: str = ''):
     logger.info('downloading {} -> {}'.format(url, local_file))
 
     Progress.start(progress_title)
+    Progress.set_label(progress_text)
 
     def hook(data):
         Progress.set_value(float(data['percent_complete']))

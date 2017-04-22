@@ -317,7 +317,11 @@ class _AutoLayout:
     def _download(self):
         dl_url, local_file_name = appveyor.latest_version_download_url(self.selected_branch)
         local_file = Path(self.auto_src_path).joinpath(local_file_name).abspath()
-        downloader.download(dl_url, local_file, 'Downloading {}'.format(local_file))
+        downloader.download(
+            dl_url, local_file,
+            'Downloading {}'.format(dl_url.split('/').pop()),
+            local_file
+        )
 
     def download(self):
         self.pool.queue_task(self._download)
