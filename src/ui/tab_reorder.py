@@ -425,6 +425,12 @@ class TabReorder(iTab, _SingleLayout, _AutoLayout):
     def skip_options_file(self) -> bool:
         return self.check_skip_options.isChecked()
 
+    @staticmethod
+    def _on_reorder_error(miz_file):
+        I.error('Could not unzip the following file:\n\n{}\n\n'
+                'Please check the log, and eventually send it to me along with the MIZ file '
+                'if you think this is a bug.'.format(miz_file))
+
     def reorder_miz(self, miz_file, output_dir, skip_options_file):
         self.pool.queue_task(
             Miz.reorder,
@@ -432,7 +438,9 @@ class TabReorder(iTab, _SingleLayout, _AutoLayout):
                 miz_file,
                 output_dir,
                 skip_options_file,
-            ]
+            ],
+            _err_callback=self._on_reorder_error,
+            _err_args=miz_file,
         )
 
     @property
