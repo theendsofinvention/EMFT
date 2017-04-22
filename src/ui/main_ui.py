@@ -9,7 +9,7 @@ from utils import make_logger
 # noinspection PyProtectedMember
 from src import global_
 from src.cfg import Config
-from .base import Shortcut, VLayout, Widget
+from .base import Shortcut, VLayout, Widget, WithMsgBox
 from .itab import iTab
 from .main_ui_interface import I
 from .main_ui_progress import MainUiProgress
@@ -18,7 +18,7 @@ from .main_ui_threading import MainUiThreading
 logger = make_logger(__name__)
 
 
-class MainUi(QMainWindow, MainUiThreading, MainUiProgress):
+class MainUi(QMainWindow, MainUiThreading, MainUiProgress, WithMsgBox):
     threading_queue = Queue()
 
     def __init__(self):
@@ -32,6 +32,8 @@ class MainUi(QMainWindow, MainUiThreading, MainUiProgress):
             self,
             flags=flags
         )
+
+        WithMsgBox.__init__(self, global_.APP_SHORT_NAME, ':/ico/app.ico')
 
         self.resize(1024, 768)
 

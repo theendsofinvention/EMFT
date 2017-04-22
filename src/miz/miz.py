@@ -195,9 +195,10 @@ class Miz:
 
         logger.debug('unzipping miz to temp dir')
 
-        with ZipFile(self.miz_path.abspath()) as zip_file:
+        try:
 
-            try:
+            with ZipFile(self.miz_path.abspath()) as zip_file:
+
                 logger.debug('reading infolist')
 
                 self.zip_content = [f.filename for f in zip_file.infolist()]
@@ -213,12 +214,12 @@ class Miz:
                         logger.error('failed to extract archive member: {}'.format(item))
                         raise
 
-            except BadZipFile:
-                raise BadZipFile(self.miz_path.abspath())
+        except BadZipFile:
+            raise BadZipFile(self.miz_path.abspath())
 
-            except:
-                logger.exception('error while unzipping miz file: {}'.format(self.miz_path.abspath()))
-                raise
+        except:
+            logger.exception('error while unzipping miz file: {}'.format(self.miz_path.abspath()))
+            raise
 
         logger.debug('checking miz content')
 
