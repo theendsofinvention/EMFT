@@ -233,10 +233,12 @@ class VSpacer(QSpacerItem):
 
 class WithMsgBoxAdapter(metaclass=abc.ABCMeta):
     @abc.abstractmethod
-    def msg(self, text: str, follow_up: callable = None, title: str = None): pass
+    def msg(self, text: str, follow_up: callable = None, title: str = None):
+        pass
 
     @abc.abstractmethod
-    def error(self, text: str, follow_up: callable = None, title: str = None): pass
+    def error(self, text: str, follow_up: callable = None, title: str = None):
+        pass
 
 
 class WithMsgBox:

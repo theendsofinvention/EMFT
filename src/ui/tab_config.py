@@ -49,13 +49,14 @@ class TabConfig(iTab):
                     GridLayout(
                         [
                             [
-                                Label('Active update channel'), HLayout(
+                                Label('Active update channel'),
+                                HLayout(
                                     [
                                         self.update_channel_combo,
                                         self.update_scan_btn,
                                         HSpacer()
                                     ]
-                            ),
+                                ),
                             ],
                             [10],
                             [
