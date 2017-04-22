@@ -14,9 +14,10 @@ from utils.threadpool import ThreadPool
 from src.cfg.cfg import Config
 from src.misc import appveyor, downloader, github
 from src.miz.miz import Miz
-from src.ui.base import GroupBox, HLayout, VLayout, PushButton, Radio, Checkbox, Label, Combo
+from src.ui.base import GroupBox, HLayout, VLayout, PushButton, Radio, Checkbox, Label, Combo, GridLayout
 from src.ui.dialog_browse import BrowseDialog
 from src.ui.itab import iTab
+from src.ui.main_ui_interface import I
 
 try:
     import winreg
@@ -79,34 +80,42 @@ class _SingleLayout:
         self.single_miz_output_folder_browse = PushButton('Browse', self.browse_for_single_miz_output_folder)
         self.single_miz_output_folder_open = PushButton('Open', self.open_single_miz_output_folder)
 
-        single_miz_path_layout = HLayout([
-            QLabel('Source MIZ: '),
-            (self.single_miz, dict(stretch=1)),
-            (self.single_miz_browse, dict(stretch=0)),
-            (self.single_miz_open, dict(stretch=0)),
-        ])
-
-        single_miz_output_layout = HLayout([
-            QLabel('Output folder: '),
-            (self.single_miz_output_folder, dict(stretch=1)),
-            (self.single_miz_output_folder_browse, dict(stretch=0)),
-            (self.single_miz_output_folder_open, dict(stretch=0)),
-
-        ])
+        # single_miz_path_layout = HLayout([
+        #     QLabel('Source MIZ: '),
+        #     (self.single_miz, dict(stretch=1)),
+        #     (self.single_miz_browse, dict(stretch=0)),
+        #     (self.single_miz_open, dict(stretch=0)),
+        # ])
+        #
+        # single_miz_output_layout = HLayout([
+        #     QLabel('Output folder: '),
+        #     (self.single_miz_output_folder, dict(stretch=1)),
+        #     (self.single_miz_output_folder_browse, dict(stretch=0)),
+        #     (self.single_miz_output_folder_open, dict(stretch=0)),
+        #
+        # ])
 
         self.single_miz_reorder_btn = PushButton('Reorder MIZ file', self.single_reorder)
         self.single_miz_reorder_btn.setMinimumHeight(40)
         self.single_miz_reorder_btn.setMinimumWidth(400)
 
-        single_miz_btn_layout = HLayout([
-            self.single_miz_reorder_btn
-        ])
+        # single_miz_btn_layout = HLayout([
+        #     self.single_miz_reorder_btn
+        # ])
 
         self.single_layout = VLayout([
-            single_miz_path_layout,
-            single_miz_output_layout,
-            QSpacerItem(1, 10, QSizePolicy.Expanding, QSizePolicy.Expanding),
-            single_miz_btn_layout,
+            GridLayout(
+                [
+                    [(QLabel('Source MIZ'), dict(align='r')), self.single_miz, self.single_miz_browse,
+                     self.single_miz_open],
+                    [(QLabel('Output folder'), dict(align='r')), self.single_miz_output_folder,
+                     self.single_miz_output_folder_browse,
+                     self.single_miz_output_folder_open],
+                ],
+            ),
+            # QSpacerItem(1, 10, QSizePolicy.Expanding, QSizePolicy.Expanding),
+            # single_miz_btn_layout,
+            self.single_miz_reorder_btn,
         ])
 
         self.single_group.setLayout(self.single_layout)
@@ -171,7 +180,6 @@ class _SingleLayout:
 
 
 class _AutoLayout:
-
     def __init__(self):
 
         self.auto_group = GroupBox()
@@ -186,20 +194,13 @@ class _AutoLayout:
         self.auto_src_browse_btn = PushButton('Browse', self.auto_src_browse)
         self.auto_src_open_btn = PushButton('Open', self.auto_src_open)
 
-        auto_folder_layout = HLayout([
-            QLabel('Source folder:'),
-            self.auto_src_le,
-            self.auto_src_browse_btn,
-            self.auto_src_open_btn,
-        ])
-
         # scan_layout.setContentsMargins(source_folder_label.width(), 0, 0, 0)
         self.auto_scan_label_local = QLabel('')
         self.auto_scan_label_remote = Label('')
         # self.scan_label.setMinimumWidth(self.auto_folder_path.width())
         self.auto_scan_combo_branch = Combo(self._branch_changed, ['All'] + github.get_available_branches())
         try:
-            self.auto_scan_combo_branch.set_index_from_text(Config().selected_branch)
+            self.auto_scan_combo_branch.set_index_from_text(Config().selected_TRMT_branch)
         except ValueError:
             pass
 
@@ -211,21 +212,12 @@ class _AutoLayout:
         self.auto_out_browse_btn = PushButton('Browse', self.auto_out_browse)
         self.auto_out_open_btn = PushButton('Open', self.auto_out_open)
 
-        output_layout = HLayout([
-            QLabel('Output folder: '),
-            (self.auto_out_le, dict(stretch=1)),
-            (self.auto_out_browse_btn, dict(stretch=0)),
-            (self.auto_out_open_btn, dict(stretch=0)),
-        ])
-
         scan_layout = HLayout([
             QLabel('Latest local version of the TRMT:'),
             (self.auto_scan_label_local, dict(stretch=1)),
             QLabel('Latest remote version of the TRMT:'),
             self.auto_scan_combo_branch,
             (self.auto_scan_label_remote, dict(stretch=1)),
-            self.auto_scan_btn,
-            self.auto_scan_download_btn,
         ])
 
         self.auto_reorder_btn = PushButton('Reorder MIZ file', self.auto_reorder)
@@ -239,9 +231,30 @@ class _AutoLayout:
             20,
             auto_help,
             40,
-            auto_folder_layout,
-            output_layout,
-            scan_layout,
+            GridLayout(
+                [
+                    [
+                        (QLabel('Source folder'), dict(align='r')),
+                        self.auto_src_le,
+                        self.auto_src_browse_btn,
+                        self.auto_src_open_btn,
+                    ],
+                    [
+                        (QLabel('Output folder'), dict(align='r')),
+                        self.auto_out_le,
+                        self.auto_out_browse_btn,
+                        self.auto_out_open_btn,
+                    ],
+                    [
+                        None,
+                        scan_layout,
+                        self.auto_scan_btn,
+                        self.auto_scan_download_btn
+                    ],
+                ]
+            ),
+            # output_layout,
+            # scan_layout,
             auto_btn_layout
         ])
 
@@ -353,6 +366,8 @@ class TabReorder(iTab, _SingleLayout, _AutoLayout):
         _SingleLayout.__init__(self)
         _AutoLayout.__init__(self)
 
+        self.remote_version, self.remote_branch, self.local_version = None, None, None
+
         self._pool = ThreadPool(_basename='REORDER', _num_threads=1, _daemon=True)
 
         help_text = QLabel('By design, LUA tables are unordered, which makes tracking changes extremely difficult.\n\n'
@@ -410,6 +425,12 @@ class TabReorder(iTab, _SingleLayout, _AutoLayout):
     def skip_options_file(self) -> bool:
         return self.check_skip_options.isChecked()
 
+    @staticmethod
+    def _on_reorder_error(miz_file):
+        I.error('Could not unzip the following file:\n\n{}\n\n'
+                'Please check the log, and eventually send it to me along with the MIZ file '
+                'if you think this is a bug.'.format(miz_file))
+
     def reorder_miz(self, miz_file, output_dir, skip_options_file):
         self.pool.queue_task(
             Miz.reorder,
@@ -417,7 +438,9 @@ class TabReorder(iTab, _SingleLayout, _AutoLayout):
                 miz_file,
                 output_dir,
                 skip_options_file,
-            ]
+            ],
+            _err_callback=self._on_reorder_error,
+            _err_args=miz_file,
         )
 
     @property
@@ -425,40 +448,54 @@ class TabReorder(iTab, _SingleLayout, _AutoLayout):
         return self.auto_scan_combo_branch.currentText()
 
     def _branch_changed(self):
-        Config().selected_branch = self.selected_branch
+        Config().selected_TRMT_branch = self.selected_branch
         if hasattr(self, 'pool'):
             self.scan()
 
     def _scan(self):
 
-        self.auto_scan_label_remote.set_text_color('black')
-        self.auto_scan_label_remote.setText('Probing...')
-
         if self.auto_src_path:
             try:
+                logger.debug('looking for latest local TRMT version')
                 self._latest_trmt = natsorted(
                     [Path(f).abspath() for f in Path(self.auto_src_path).listdir('TRMT_*.miz')]).pop()
             except IndexError:
                 self._latest_trmt = None
-                local_version = None
-                self.auto_scan_label_local.setText('No TRMT local MIZ file found.')
+                self.local_version = None
+                logger.debug('no local TRMT found')
             else:
-                local_version = Path(self._latest_trmt).namebase.replace('TRMT_', '')
-                self.auto_scan_label_local.setText(local_version)
+                self.local_version = Path(self._latest_trmt).namebase.replace('TRMT_', '')
+                logger.debug('latest local TRMT found: {}'.format(self.local_version))
 
+            # noinspection PyBroadException
             try:
-                remote_version, remote_branch = appveyor.get_latest_remote_version(self.selected_branch)
-                self.auto_scan_label_remote.setText('{} ({})'.format(remote_version, remote_branch))
+                logger.debug('looking for latest remote TRMT version')
+                self.remote_version, self.remote_branch = appveyor.get_latest_remote_version(self.selected_branch)
             except:
-                remote_version = None
+                logger.debug('no remote TRMT found')
+                self.remote_version = None
 
-            if remote_version:
-                if local_version:
-                    if LooseVersion(local_version) < LooseVersion(remote_version):
-                        self.auto_scan_label_remote.set_text_color('green')
-                else:
+    def tab_reorder_update_view_after_remote_scan(self):
+        if self.local_version:
+            self.auto_scan_label_local.setText(self.local_version)
+        else:
+            self.auto_scan_label_local.setText('No TRMT local MIZ file found.')
+
+        if self.remote_version:
+            self.auto_scan_label_remote.setText('{} ({})'.format(self.remote_version, self.remote_branch))
+            logger.debug('latest remote TRMT found: {}'.format(self.remote_version))
+            if self.local_version:
+                if LooseVersion(self.local_version) < LooseVersion(self.remote_version):
                     self.auto_scan_label_remote.set_text_color('green')
+                    logger.debug('remote TRMT is newer than local')
+                else:
+                    logger.debug('no new TRMT version found')
+            else:
+                self.auto_scan_label_remote.set_text_color('green')
 
     def scan(self):
-
+        self.auto_scan_label_remote.set_text_color('black')
+        self.auto_scan_label_remote.setText('Probing...')
+        self.remote_version, self.remote_branch, self.local_version = None, None, None
         self.pool.queue_task(task=self._scan)
+        self.pool.queue_task(task=I.tab_reorder_update_view_after_remote_scan)

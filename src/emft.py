@@ -47,12 +47,12 @@ def check_cert():
 
 
 @click.command()
-@click.option('-m', '--mizfile', nargs=1, type=str, default=None, help='Source MIZ file.')
-@click.option('-o', '--output', nargs=1, default='./output', help='Directory to store the results in.')
-@click.option('-l', '--latest', nargs=1, default=None,
-              help='Folder that contains the TRMT files; the latest will be picked automatically.')
+# @click.option('-m', '--mizfile', nargs=1, type=str, default=None, help='Source MIZ file.')
+# @click.option('-o', '--output', nargs=1, default='./output', help='Directory to store the results in.')
+# @click.option('-l', '--latest', nargs=1, default=None,
+#               help='Folder that contains the TRMT files; the latest will be picked automatically.')
 @click.option('-v', '--verbose', is_flag=True, help='Outputs debug messages')
-def main(mizfile, output, latest, verbose):
+def main(verbose):
 
     # from src.miz.miz import Miz
     #

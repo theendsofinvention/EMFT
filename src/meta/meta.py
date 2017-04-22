@@ -30,12 +30,12 @@ add_constructor(_yaml_mapping, odict_construct)
 class Meta(AbstractMeta):
 
     @property
-    @abc.abstractproperty
+    @abc.abstractmethod
     def meta_header(self):
         """"""
 
     @property
-    @abc.abstractproperty
+    @abc.abstractmethod
     def meta_version(self):
         """"""
 
@@ -92,6 +92,7 @@ class Meta(AbstractMeta):
 
         self._path = value
 
+    # noinspection PyArgumentList
     def _init_views(self):
         self._values = self._data.values()
         self._keys = self._data.keys()
@@ -121,6 +122,7 @@ class Meta(AbstractMeta):
             yield k
 
     def __contains__(self, x):
+        # noinspection PyArgumentList
         return self._data.__contains__(x)
 
     def __delitem__(self, key, _write=False):
@@ -139,6 +141,7 @@ class Meta(AbstractMeta):
         return self._data.get(key, None)
 
     def __str__(self):
+        # noinspection PyArgumentList
         return self.data.__str__()
 
     def __repr__(self):

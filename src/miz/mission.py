@@ -126,10 +126,10 @@ class BaseMissionObject(Logged):
         ids = set()
         for group in chain(self.blue_coa.groups, self.red_coa.groups):
             assert isinstance(group, Group)
-            id = group.group_id
-            if id in ids:
+            id_ = group.group_id
+            if id_ in ids:
                 raise IndexError(group.group_name)
-            ids.add(id)
+            ids.add(id_)
         return max(ids) + 1
 
     @property
@@ -137,10 +137,10 @@ class BaseMissionObject(Logged):
         ids = set()
         for unit in chain(self.blue_coa.units, self.red_coa.units):
             assert isinstance(unit, BaseUnit)
-            id = unit.unit_id
-            if id in ids:
+            id_ = unit.unit_id
+            if id_ in ids:
                 raise IndexError(unit.unit_name)
-            ids.add(id)
+            ids.add(id_)
         return max(ids) + 1
 
     @property
@@ -231,6 +231,7 @@ class Mission(BaseMissionObject):
         return 'Mission({})'.format(self.d)
 
 
+# noinspection PyProtectedMember
 class Coalition(BaseMissionObject):
     def __init__(self, mission_dict, ln10, coa_color):
         super().__init__(mission_dict, ln10)
@@ -263,7 +264,7 @@ class Coalition(BaseMissionObject):
 
     @property
     def bullseye_position(self):
-        return (self.bullseye_x, self.bullseye_y)
+        return self.bullseye_x, self.bullseye_y
 
     @property
     def _section_nav_points(self):
@@ -504,6 +505,7 @@ class GroundControl(BaseMissionObject):
         return self._section_ground_control_roles['instructor']
 
 
+# noinspection PyProtectedMember
 class Weather(BaseMissionObject):
     validator_precipitations = Validator(_type=int, _min=0, _max=4, exc=ValueError, logger=logger)
     validator_cloud_density = Validator(_type=int, _min=0, _max=10, exc=ValueError, logger=logger)
@@ -779,6 +781,7 @@ class Weather(BaseMissionObject):
         self._section_wind_at8000['speed'] = value
 
 
+# noinspection PyProtectedMember
 class Country(Coalition):
     def __init__(self, mission_dict, l10n, coa_color, country_index):
         super().__init__(mission_dict, l10n, coa_color)
@@ -871,6 +874,7 @@ class Country(Coalition):
                 yield unit
 
 
+# noinspection PyProtectedMember
 class Group(Country):
 
     attribs = ('group_category', 'group_index', 'group_hidden', 'group_start_time', '_group_name_key')
@@ -1033,6 +1037,7 @@ class Group(Country):
         return first_unit.skill == 'Client'
 
 
+# noinspection PyProtectedMember
 class BaseUnit(Group):
     validator_skill = Validator(_type=str,
                                 _in_list=['Average', 'Good', 'High', 'Excellent', 'Random', 'Client', 'Player'],
@@ -1124,9 +1129,8 @@ class BaseUnit(Group):
         return self.unit_pos_x, self.unit_pos_y
 
     @unit_position.setter
-    def unit_position(self, x, y):
-        self.unit_pos_x = x
-        self.unit_pos_y = y
+    def unit_position(self, value):
+        self.unit_pos_x, self.unit_pos_y = value
 
     @property
     def heading(self):

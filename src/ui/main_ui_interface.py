@@ -2,6 +2,7 @@
 
 
 from utils import ProgressAdapter
+from .base import WithMsgBoxAdapter
 
 from src import global_
 
@@ -16,7 +17,17 @@ class MainUiMethod:
         global_.MAIN_UI.do('main_ui', self.func.__name__, *args, **kwargs)
 
 
-class I(ProgressAdapter):
+class I(ProgressAdapter, WithMsgBoxAdapter):
+    @staticmethod
+    @MainUiMethod
+    def error(self, text: str, follow_up: callable = None, title: str = None):
+        """"""
+
+    @staticmethod
+    @MainUiMethod
+    def msg(self, text: str, follow_up: callable = None, title: str = None):
+        """"""
+
     @staticmethod
     @MainUiMethod
     def show_log_tab():
@@ -30,6 +41,16 @@ class I(ProgressAdapter):
     @staticmethod
     @MainUiMethod
     def write_log(value: str, color: str):
+        """"""
+
+    @staticmethod
+    @MainUiMethod
+    def update_config_tab(version_check_result=None):
+        """"""
+
+    @staticmethod
+    @MainUiMethod
+    def tab_reorder_update_view_after_remote_scan():
         """"""
 
     @staticmethod

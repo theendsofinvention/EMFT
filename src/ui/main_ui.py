@@ -1,23 +1,24 @@
 # coding=utf-8
 from queue import Queue
+
 from PyQt5.QtCore import Qt
 from PyQt5.QtGui import QIcon, QKeySequence
 from PyQt5.QtWidgets import QMainWindow, QTabWidget
+from utils import make_logger
 
 # noinspection PyProtectedMember
 from src import global_
-from .base import Shortcut, VLayout, Widget
+from src.cfg import Config
+from .base import Shortcut, VLayout, Widget, WithMsgBox
 from .itab import iTab
+from .main_ui_interface import I
 from .main_ui_progress import MainUiProgress
 from .main_ui_threading import MainUiThreading
-from .main_ui_interface import I
-from utils import make_logger
 
 logger = make_logger(__name__)
 
 
-class MainUi(QMainWindow, MainUiThreading, MainUiProgress):
-
+class MainUi(QMainWindow, MainUiThreading, MainUiProgress, WithMsgBox):
     threading_queue = Queue()
 
     def __init__(self):
@@ -29,9 +30,10 @@ class MainUi(QMainWindow, MainUiThreading, MainUiProgress):
 
         QMainWindow.__init__(
             self,
-            parent=None,
             flags=flags
         )
+
+        WithMsgBox.__init__(self, global_.APP_SHORT_NAME, ':/ico/app.ico')
 
         self.resize(1024, 768)
 
@@ -59,6 +61,12 @@ class MainUi(QMainWindow, MainUiThreading, MainUiProgress):
 
     def write_log(self, value: str, color: str):
         self.helpers['write_log'](value, color)
+
+    def tab_reorder_update_view_after_remote_scan(self):
+        self.helpers['tab_reorder_update_view_after_remote_scan']()
+
+    def update_config_tab(self, version_check_result=None):
+        self.helpers['update_config_tab'](version_check_result)
 
     def add_tab(self, tab: iTab, helpers: dict = None):
         self.tabs.addTab(tab, tab.tab_title)
@@ -91,10 +99,17 @@ def start_ui():
     import sys
     from src.ui.tab_reorder import TabReorder
     from src.ui.tab_log import TabLog
+    from src.ui.tab_config import TabConfig
     logger.debug('starting QtApp object')
     global_.QT_APP = QApplication([])
     global_.MAIN_UI = MainUi()
-    global_.MAIN_UI.add_tab(TabReorder())
+    global_.MAIN_UI.add_tab(
+        TabReorder(),
+        helpers={
+            'tab_reorder_update_view_after_remote_scan': 'tab_reorder_update_view_after_remote_scan'
+        }
+    )
+    global_.MAIN_UI.add_tab(TabConfig(), helpers={'update_config_tab': 'update_config_tab'})
     global_.MAIN_UI.add_tab(TabLog(), helpers={'write_log': 'write'})
     global_.MAIN_UI.show()
 
@@ -106,18 +121,23 @@ def start_ui():
             I.hide()
             return True
 
-    from utils import Updater
-    updater = Updater(
-        executable_name='EMFT',
-        current_version=global_.APP_VERSION,
-        gh_user='132nd-etcher',
-        gh_repo='EMFT',
-        asset_filename='EMFT.exe',
-        pre_update_func=pre_update_hook,
-        cancel_update_func=I.show)
-    updater.version_check('alpha')
-
     from utils import Progress
     Progress.register_adapter(I)
+
+    from utils import Updater
+    updater = Updater(
+        **global_.UPDATER_CONFIG,
+        pre_update_func=pre_update_hook,
+        channel=Config().update_channel,
+        cancel_update_func=I.show,
+        post_check_func=I.update_config_tab,
+        auto_update=True
+    )
+    updater.version_check()
+
+    from src.misc.dcs_installs import DCSInstalls
+    DCSInstalls().discover_dcs_installations()
+
+    global_.MAIN_UI.update_config_tab()
 
     sys.exit(global_.QT_APP.exec())

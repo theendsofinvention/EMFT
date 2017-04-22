@@ -11,6 +11,14 @@ try:
 except KeyError:
     TESTING = False
 
+UPDATER_CONFIG = dict(executable_name='EMFT',
+                      current_version=src.__version__.__version__,
+                      gh_user='132nd-etcher',
+                      gh_repo='EMFT',
+                      asset_filename='EMFT.exe')
+
+UPDATER_LATEST = None
+
 PATH_LOG_FILE = 'emft.debug'
 PATH_CONFIG_FILE = 'emft.config'
 
@@ -23,6 +31,14 @@ APP_RELEASE_NAME = 'Refreshingly Unconcerned With the Vulgar Exigencies of Verac
 APP_WEBSITE = r'https://github.com/132nd-etcher/EMFT'
 
 ENCODING = 'iso8859_15'
+
+DCS = {
+    'reg_key': {
+        'stable': 'DCS World',
+        'beta': 'DCS World OpenBeta',
+        'alpha': 'DCS World 2 OpenAlpha',
+    },
+}
 
 QT_APP = None
 MAIN_UI = None

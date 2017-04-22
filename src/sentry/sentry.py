@@ -23,8 +23,8 @@ class Sentry(raven.Client, metaclass=Singleton):
         self.registered_contexts = {}
         raven.Client.__init__(
             self,
-            'https://da606739b60743859ffc04963d6ea1a3:59825849c3884a52a0244e7f1c30260b@sentry.io/135324?ca_certs={}'.format(
-                certifi.where()),
+            'https://da606739b60743859ffc04963d6ea1a3:'
+            '59825849c3884a52a0244e7f1c30260b@sentry.io/135324?ca_certs={}'.format(certifi.where()),
             release=__version__
         )
         logger.info('Sentry is ready')

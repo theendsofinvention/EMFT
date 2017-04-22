@@ -2,8 +2,8 @@
 
 import abc
 
-from PyQt5.QtCore import Qt, QThread, QObject, pyqtSignal
-from PyQt5.QtWidgets import QMainWindow, QTabWidget, QVBoxLayout, QWidget, QPushButton, QFrame
+from PyQt5.QtCore import Qt
+from PyQt5.QtWidgets import QWidget
 
 
 # noinspection PyPep8Naming
@@ -14,6 +14,6 @@ class iTab(QWidget):
         self.setContentsMargins(20, 20, 20, 20)
 
     @property
-    @abc.abstractproperty
+    @abc.abstractmethod
     def tab_title(self) -> str:
         """"""

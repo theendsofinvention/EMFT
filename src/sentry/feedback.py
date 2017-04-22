@@ -1,6 +1,5 @@
 # coding=utf-8
 
-from src.cfg.cfg import Config
 from src.sentry.sentry import SENTRY
 
 
