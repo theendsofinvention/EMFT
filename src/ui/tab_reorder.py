@@ -444,7 +444,7 @@ class TabReorder(iTab, _SingleLayout, _AutoLayout):
                 skip_options_file,
             ],
             _err_callback=self._on_reorder_error,
-            _err_args=miz_file,
+            _err_args=[miz_file],
         )
 
     @property
