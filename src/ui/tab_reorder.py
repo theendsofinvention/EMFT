@@ -330,7 +330,7 @@ class _AutoLayout:
         local_file = Path(self.auto_src_path).joinpath(local_file_name).abspath()
 
         if local_file.exists():
-            
+
             I.confirm(text='Local file already exists; do you want to overwrite?', follow_up=proceed_with_download)
         else:
             proceed_with_download()

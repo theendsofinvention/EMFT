@@ -246,7 +246,6 @@ class WithMsgBoxAdapter():
 
 
 class WithMsgBox(WithMsgBoxAdapter):
-
     def __init__(self, title: str, ico: str):
         self.title = title
         self.ico = ico
@@ -306,4 +305,3 @@ class WithMsgBox(WithMsgBoxAdapter):
             title = 'Please confirm'
 
         self._run_box(text=text, follow_up=follow_up, title=title, follow_up_on_no=follow_up_on_no, is_question=True)
-
