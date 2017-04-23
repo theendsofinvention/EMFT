@@ -315,13 +315,25 @@ class _AutoLayout:
         webbrowser.open_new_tab(r'https://ci.appveyor.com/api-token')
 
     def _download(self):
-        dl_url, local_file_name = appveyor.latest_version_download_url(self.selected_branch)
+
+        def proceed_with_download():
+
+            downloader.download(
+                url=dl_url,
+                local_file=local_file,
+                progress_title='Downloading {}'.format(dl_url.split('/').pop()),
+                progress_text=local_file,
+                file_size=file_size
+            )
+
+        dl_url, file_size, local_file_name = appveyor.latest_version_download_url(self.selected_branch)
         local_file = Path(self.auto_src_path).joinpath(local_file_name).abspath()
-        downloader.download(
-            dl_url, local_file,
-            'Downloading {}'.format(dl_url.split('/').pop()),
-            local_file
-        )
+
+        if local_file.exists():
+            
+            I.confirm(text='Local file already exists; do you want to overwrite?', follow_up=proceed_with_download)
+        else:
+            proceed_with_download()
 
     def download(self):
         self.pool.queue_task(self._download)
@@ -444,7 +456,7 @@ class TabReorder(iTab, _SingleLayout, _AutoLayout):
                 skip_options_file,
             ],
             _err_callback=self._on_reorder_error,
-            _err_args=miz_file,
+            _err_args=[miz_file],
         )
 
     @property

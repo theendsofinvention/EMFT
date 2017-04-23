@@ -5,7 +5,7 @@ from utils import Progress, Downloader, make_logger
 logger = make_logger(__name__)
 
 
-def download(url, local_file, progress_title: str, progress_text: str = ''):
+def download(url, local_file, progress_title: str, progress_text: str = '', file_size: int = None):
     logger.info('downloading {} -> {}'.format(url, local_file))
 
     Progress.start(progress_title)
@@ -17,6 +17,8 @@ def download(url, local_file, progress_title: str, progress_text: str = ''):
     dl = Downloader(
         url=url,
         filename=local_file,
-        progress_hooks=[hook])
+        progress_hooks=[hook],
+        content_length=file_size,
+    )
 
-    dl.download()
+    return dl.download()

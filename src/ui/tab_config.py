@@ -35,7 +35,7 @@ class TabConfig(iTab):
         self.remote_version = Label('')
         self.update_channel_combo.set_index_from_text(Config().update_channel)
         self.update_scan_btn = PushButton('Check for new version', self._check_for_new_version)
-        self.install_new_version_btn = PushButton('Install latest version', self._install_latest_version)
+        self.install_new_version_btn = PushButton('Install this version', self._install_latest_version)
 
         updater_layout = GroupBox(
             'Auto-update',
@@ -53,7 +53,6 @@ class TabConfig(iTab):
                                     [
                                         self.update_channel_combo,
                                         self.update_scan_btn,
-                                        self.install_new_version_btn,
                                         HSpacer()
                                     ]
                                 ),
@@ -61,15 +60,15 @@ class TabConfig(iTab):
                             [10],
                             [
                                 Label('Current version'),
-                                (Label(__version__), dict(span=[1, -1])),
+                                Label(__version__),
                             ],
                             [
                                 Label('Remote version'),
-                                (self.remote_version, dict(span=[1, -1])),
+                                HLayout([self.remote_version, self.install_new_version_btn, HSpacer()]),
                             ],
                             [
                                 Label('GUID'),
-                                (Label(__guid__), dict(span=[1, -1])),
+                                Label(__guid__),
                             ],
                         ],
                         [0, 1]
@@ -131,7 +130,10 @@ class TabConfig(iTab):
             )
         )
 
+        self.install_new_version_btn.setEnabled(False)
+
     def update_config_tab(self, latest_release: GithubRelease):
+        self.remote_version.set_text_color('black')
         for x in ['stable', 'beta', 'alpha']:
             getattr(self, '{}_install'.format(x)).setText(getattr(DCSInstalls(), x).install_path)
             getattr(self, '{}_variant'.format(x)).setText(getattr(DCSInstalls(), x).saved_games)
@@ -140,6 +142,9 @@ class TabConfig(iTab):
         if latest_release:
             self.latest_release = latest_release
             self.remote_version.setText(latest_release.version.version_str)
+            self.install_new_version_btn.setEnabled(True)
+            if Version(global_.APP_VERSION) < self.latest_release.version:
+                self.remote_version.set_text_color('green')
 
     def _on_change_sg(self, *_):
         Config().saved_games_path = str(Path(self.sg.text()).abspath())

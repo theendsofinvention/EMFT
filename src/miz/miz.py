@@ -69,7 +69,7 @@ class Miz:
         if exc_type:
             logger.error('there were error with this mission, keeping temp dir at "{}" and re-raising'.format(
                 self.tmpdir.abspath()))
-            logger.error(exc_type, exc_val)
+            logger.error('{}\n{}'.format(exc_type, exc_val))
             return False
         else:
             logger.debug('closing Mission object context')
@@ -109,28 +109,40 @@ class Miz:
 
     @staticmethod
     def reorder(miz_file_path, target_dir, skip_options_file):
-        m = Miz(miz_file_path)
+        with Miz(miz_file_path) as m:
 
-        def compare_and_copy_diff(_diff):
-            assert isinstance(_diff, dircmp)
-            for file in _diff.left_only + _diff.diff_files:
-                logger.debug('copying: {}'.format('file'))
-                Path(_diff.left).joinpath(file).copy2(_diff.right)
-            for sub in _diff.subdirs.values():
-                compare_and_copy_diff(sub)
+            def mirror_dir(src, dst):
+                logger.debug('{} -> {}'.format(src, dst))
+                diff_ = dircmp(src, dst, ignore)
+                diff_list = diff_.left_only + diff_.diff_files
+                logger.debug('differences: {}'.format(diff_list))
+                for x in diff_list:
+                    source = Path(diff_.left).joinpath(x)
+                    target = Path(diff_.right).joinpath(x)
+                    logger.debug('looking at: {}'.format(x))
+                    if source.isdir():
+                        logger.debug('isdir: {}'.format(x))
+                        if not target.exists():
+                            logger.debug('creating: {}'.format(x))
+                            target.mkdir()
+                        mirror_dir(source, target)
+                    else:
+                        logger.debug('copying: {}'.format(x))
+                        source.copy2(diff_.right)
+                for sub in diff_.subdirs.values():
+                    assert isinstance(sub, dircmp)
+                    mirror_dir(sub.left, sub.right)
 
-        m.unzip(overwrite=True)
-        m._decode()
-        m._encode()
+            m.unzip(overwrite=True)
+            m._decode()
+            m._encode()
 
-        if skip_options_file:
-            ignore = ['options']
-        else:
-            ignore = []
+            if skip_options_file:
+                ignore = ['options']
+            else:
+                ignore = []
 
-        diff = dircmp(m.tmpdir, target_dir, ignore=ignore)
-
-        compare_and_copy_diff(diff)
+            mirror_dir(m.tmpdir, target_dir)
 
     def _decode(self):
 
