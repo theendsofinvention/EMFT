@@ -60,23 +60,15 @@ class TabConfig(iTab):
                             [10],
                             [
                                 Label('Current version'),
-                                # (Label(__version__), dict(span=[1, -1])),
                                 Label(__version__),
-                                # HSpacer(),
-                                # HSpacer(),
                             ],
                             [
                                 Label('Remote version'),
-                                # (self.remote_version, dict(span=[1, -1])),
                                 HLayout([self.remote_version, self.install_new_version_btn, HSpacer()]),
-                                # HSpacer(),
                             ],
                             [
                                 Label('GUID'),
-                                # (Label(__guid__), dict(span=[1, -1])),
                                 Label(__guid__),
-                                # HSpacer(),
-                                # HSpacer(),
                             ],
                         ],
                         [0, 1]
