@@ -69,7 +69,7 @@ class Miz:
         if exc_type:
             logger.error('there were error with this mission, keeping temp dir at "{}" and re-raising'.format(
                 self.tmpdir.abspath()))
-            logger.error(exc_type, exc_val)
+            logger.error('{}\n{}'.format(exc_type, exc_val))
             return False
         else:
             logger.debug('closing Mission object context')
