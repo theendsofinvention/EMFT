@@ -121,6 +121,9 @@ def start_ui():
             I.hide()
             return True
 
+    def cancel_update_hook():
+        I.show()
+
     from utils import Progress
     Progress.register_adapter(I)
 
@@ -130,7 +133,8 @@ def start_ui():
     )
     updater.find_and_install_latest_release(
         channel=Config().update_channel,
-        cancel_func=I.show(),
+        cancel_update_hook=cancel_update_hook,
+        pre_update_hook=pre_update_hook,
     )
 
     from src.misc.dcs_installs import DCSInstalls
