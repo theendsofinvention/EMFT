@@ -80,6 +80,7 @@ deploy:
     auth_token:
       secure: T9LMiMzikVwlfnYhxlIpzhmfotDN75SUmEv1FSGLHZ/vMHMCMT3SEapSOH1iPdaD
     on:
+      branch: master
       appveyor_repo_tag: false
 
 skip_tags: true
