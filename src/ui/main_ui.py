@@ -131,6 +131,7 @@ def start_ui(test=False):
 
     updater.find_and_install_latest_release(
         current_version=global_.APP_VERSION,
+        channel=Config().update_channel,
         cancel_update_hook=cancel_update_hook,
         pre_update_hook=pre_update_hook,
     )

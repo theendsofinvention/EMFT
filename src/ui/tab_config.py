@@ -2,7 +2,7 @@
 
 import os
 
-from utils import Path, Version, GithubRelease, make_logger
+from utils import Path, Version, AVRelease, make_logger
 
 from src import global_
 from src.__version__ import __version__, __guid__
@@ -132,7 +132,7 @@ class TabConfig(iTab):
 
         self.install_new_version_btn.setVisible(False)
 
-    def update_config_tab(self, latest_release: GithubRelease):
+    def update_config_tab(self, latest_release: AVRelease):
         self.remote_version.set_text_color('black')
         for x in ['stable', 'beta', 'alpha']:
             getattr(self, '{}_install'.format(x)).setText(getattr(DCSInstalls(), x).install_path)
@@ -140,11 +140,13 @@ class TabConfig(iTab):
             getattr(self, '{}_version'.format(x)).setText(getattr(DCSInstalls(), x).version)
         self.update_channel_combo.set_index_from_text(Config().update_channel)
         if latest_release:
+            app_version = Version(global_.APP_VERSION)
             self.latest_release = latest_release
             self.remote_version.setText(latest_release.version.version_str)
-            self.install_new_version_btn.setVisible(True)
-            if Version(global_.APP_VERSION) < self.latest_release.version:
+            if app_version < self.latest_release.version:
                 self.remote_version.set_text_color('green')
+            if app_version != self.latest_release.version:
+                self.install_new_version_btn.setVisible(True)
 
     def _on_change_sg(self, *_):
         Config().saved_games_path = str(Path(self.sg.text()).abspath())
@@ -155,6 +157,7 @@ class TabConfig(iTab):
         self._check_for_new_version()
 
     def _check_for_new_version(self):
+        self.install_new_version_btn.setVisible(False)
         updater.get_latest_release(
             channel=Config().update_channel,
             branch=Version(global_.APP_VERSION),
