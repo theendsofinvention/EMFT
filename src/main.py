@@ -34,3 +34,4 @@ if __name__ == '__main__':
         src.emft.main()
     except:
         logger.exception('caught exception in main loop')
+        raise
