@@ -127,12 +127,10 @@ def start_ui():
     from utils import Progress
     Progress.register_adapter(I)
 
-    from utils import Updater
-    updater = Updater(
-        **global_.UPDATER_CONFIG,
-    )
+    from src.updater import updater
+
     updater.find_and_install_latest_release(
-        channel=Config().update_channel,
+        current_version=global_.APP_VERSION,
         cancel_update_hook=cancel_update_hook,
         pre_update_hook=pre_update_hook,
     )
