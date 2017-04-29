@@ -36,5 +36,6 @@ ruamel.yaml==0.11.10
 semver==2.7.5
 sip==4.19
 six==1.10.0
+tendo==0.2.8
 urllib3==1.20
 wincertstore==0.2
