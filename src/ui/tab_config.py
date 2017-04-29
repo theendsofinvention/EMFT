@@ -157,7 +157,8 @@ class TabConfig(iTab):
         self._check_for_new_version()
 
     def _check_for_new_version(self):
-        self.install_new_version_btn.setVisible(False)
+        if hasattr(self, 'install_new_version_btn'):
+            self.install_new_version_btn.setVisible(False)
         updater.get_latest_release(
             channel=Config().update_channel,
             branch=Version(global_.APP_VERSION),
