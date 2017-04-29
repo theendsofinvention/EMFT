@@ -157,16 +157,19 @@ class Radio(QRadioButton):
 class Combo(QComboBox):
     def __init__(self, on_change: callable, choices: list = None, parent=None):
         QComboBox.__init__(self, parent=parent)
+        self.on_change = on_change
         if choices:
             self.addItems(choices)
         # noinspection PyUnresolvedReferences
         self.currentTextChanged.connect(on_change)
 
     def set_index_from_text(self, text):
+        self.currentTextChanged.disconnect()
         idx = self.findText(text, Qt.MatchExactly)
         if idx < 0:
             raise ValueError(text)
         self.setCurrentIndex(idx)
+        self.currentTextChanged.connect(self.on_change)
 
 
 class Shortcut(QShortcut):
