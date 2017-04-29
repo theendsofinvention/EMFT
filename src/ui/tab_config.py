@@ -66,10 +66,10 @@ class TabConfig(iTab):
                                 Label('Remote version'),
                                 HLayout([self.remote_version, self.install_new_version_btn, HSpacer()]),
                             ],
-                            [
-                                Label('GUID'),
-                                Label(__guid__),
-                            ],
+                            # [
+                            #     Label('GUID'),
+                            #     Label(__guid__),
+                            # ],
                         ],
                         [0, 1]
                     )
