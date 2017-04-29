@@ -2,10 +2,6 @@
 
 if __name__ == '__main__':
 
-    import tendo.singleton
-
-    me = tendo.singleton.SingleInstance()
-
     """Setup logging"""
     from utils.custom_logging import make_logger
     # noinspection PyProtectedMember
