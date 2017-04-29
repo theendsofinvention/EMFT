@@ -30,4 +30,7 @@ if __name__ == '__main__':
     core_sig.signal(core_sig.SIGINT, nice_exit)
 
     import src.emft
-    src.emft.main()
+    try:
+        src.emft.main()
+    except:
+        logger.exception('caught exception in main loop')
