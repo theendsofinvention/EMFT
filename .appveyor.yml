@@ -1,5 +1,12 @@
 version: pending.{build}
 max_jobs: 1
+skip_tags: true
+skip_branch_with_pr: false
+skip_commits:
+  files:
+    - docs/*
+    - '**/*.html'
+  message: /.*\[nobuild\].*/
 
 environment:
     GIT_DAEMON_PATH:   "C:\\Program Files\\Git\\mingw64\\libexec\\git-core"
@@ -8,6 +15,14 @@ environment:
     PYTHON: "C:\\Python35"
     PYTHON_VERSION: "3.5.2"
     GIT_PATH: "%GIT_DAEMON_PATH%"
+    CODACY_PROJECT_TOKEN:
+      secure: bmEooEVFoq7es4UnGWre1B59iF3PYcHts+eFirP+RxJp6IBRm2210jU2zpIpOKaD
+    SCRUTINIZER_TOKEN:
+      secure: owuBnEnDzxG0BV/zs6D21ezEUTNSgw5YVYWK4JVytbwPW4fAJMYLsrr5HhDGFdcZF0s45GPly1epCSKRT+xOAdf0ni4+bXmclf5nVxipodY=
+    GH_TOKEN:
+      secure: H9M/aPctMSk1+0AWe/l5D0U3oXto404/4UYiPMCECpjy0llgb8cBKTRyr20UDWdX
+    GH_MAIL:
+      secure: hyFFOoK6WbxtLxy2jOGlOPbRJ33Al8E1B0QeT+qUqJ8=
 
 matrix:
     fast_finish: true
@@ -15,12 +30,15 @@ matrix:
 init:
   - cmd: echo %PYTHON% %PYTHON_VERSION% %PYTHON_ARCH%
   - cmd: appveyor UpdateBuild -Version "%APPVEYOR_REPO_BRANCH%.%APPVEYOR_REPO_COMMIT%.%APPVEYOR_BUILD_NUMBER%"
+  - git config --global credential.helper store
+  - ps: Add-Content "$env:USERPROFILE\.git-credentials" "https://$($env:GH_TOKEN):x-oauth-basic@github.com`n"
+  - "git config --global user.email %GH_MAIL%"
+  - "git config --global user.name 132nd-etcher"
 
 cache:
   - C:\Users\appveyor\AppData\Local\pip\cache
   - C:\ProgramData\chocolatey\bin -> appveyor.yml
   - C:\ProgramData\chocolatey\lib -> appveyor.yml
-#  - '%APPDATA%\pip\Cache'
 
 install:
   - "%PYTHON%/Scripts/pip.exe install --disable-pip-version-check --user --upgrade pip"
@@ -32,27 +50,37 @@ install:
   - git clone --branch=master https://github.com/132nd-etcher/verpatch.git C:\projects\verpatch
   - curl -O http://esrg.sourceforge.net/utils_win_up/md5sum/crc32.exe
 
-
 before_build:
   - ps: C:\ProgramData\chocolatey\bin\gitversion /l console /output buildserver /updateassemblyinfo /b (get-item env:APPVEYOR_REPO_BRANCH).Value
   - cmd: appveyor UpdateBuild -Version %GitVersion_InformationalVersion%.%APPVEYOR_BUILD_NUMBER%
   - "%PYTHON%/python -m pytest --cov=src --cov-config .coveragerc --cov-report xml -c test/.pytest"
-#  - "%PYTHON%/Scripts/pip.exe install git+https://github.com/132nd-etcher/ocular.py.git"
-#  - "%PYTHON%/Scripts/ocular.exe --access-token %SCRUTINIZER%"
-#  - "%PYTHON%/Scripts/pip.exe install codacy-coverage"
-#  - "%PYTHON%/Scripts/python-codacy-coverage.exe -r coverage.xml"
+  - set PATH="c:\projects\verpatch";%PATH%
 #  - "%PYTHON%/Scripts/pip.exe install coveralls"
 #  - "%PYTHON%/Scripts/coveralls.exe"
 #  - "%PYTHON%/Scripts/pip.exe install codecov"
 #  - "%PYTHON%/Scripts/codecov.exe"
 
 build_script:
-  - set PATH="c:\projects\verpatch";%PATH%
   - "%PYTHON%/python.exe -m PyInstaller src/main.py --noconfirm --onefile --clean --icon src/ui/app.ico --workpath ./build --paths %PYTHON%/Lib/site-packages/PyQt5/Qt/bin --name EMFT --distpath ./dist --windowed --log-level=WARN"
+
+after_build:
   - cmd: verpatch.exe %APPVEYOR_BUILD_FOLDER%\dist\emft.exe /high %GitVersion_SemVer% /va /pv %GitVersion_SemVer% /s product EMFT /s copyright "2017 etcher" /s build %GitVersion_Sha% /langid 1033 /s PrivateBuild %APPVEYOR_BUILD_NUMBER%
+  - cmd: move dist\emft.exe emft.exe
+
+test_script:
+  - cmd: emft.exe --test
+
+after_test:
+  - cmd: git tag %GitVersion_SemVer%
+  - cmd: git push origin %GitVersion_SemVer%
+  - "%PYTHON%/Scripts/pip.exe install git+https://github.com/132nd-etcher/ocular.py.git"
+  - "%PYTHON%/Scripts/ocular.exe --access-token %SCRUTINIZER_TOKEN%"
+  - "%PYTHON%/Scripts/pip.exe install codacy-coverage"
+  - "%PYTHON%/Scripts/python-codacy-coverage.exe -r coverage.xml"
+
 
 artifacts:
-  - path: ./dist/*.exe
+  - path: emft.exe
     name: emft
 
 branches:
@@ -76,15 +104,6 @@ deploy:
     auth_token:
       secure: T9LMiMzikVwlfnYhxlIpzhmfotDN75SUmEv1FSGLHZ/vMHMCMT3SEapSOH1iPdaD
     on:
+      branch: master
       appveyor_repo_tag: false
-
-skip_tags: true
-
-skip_branch_with_pr: true
-
-skip_commits:
-  files:
-    - docs/*
-    - '**/*.html'
-  message: /.*\[nobuild\].*/
 

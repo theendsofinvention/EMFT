@@ -47,12 +47,13 @@ def check_cert():
 
 
 @click.command()
+@click.option('-t', '--test', is_flag=True, help='Test and exit')
 # @click.option('-m', '--mizfile', nargs=1, type=str, default=None, help='Source MIZ file.')
 # @click.option('-o', '--output', nargs=1, default='./output', help='Directory to store the results in.')
 # @click.option('-l', '--latest', nargs=1, default=None,
 #               help='Folder that contains the TRMT files; the latest will be picked automatically.')
 @click.option('-v', '--verbose', is_flag=True, help='Outputs debug messages')
-def main(verbose):
+def main(test, verbose):
 
     # from src.miz.miz import Miz
     #
@@ -76,4 +77,4 @@ def main(verbose):
     check_cert()
 
     from src.ui.main_ui import start_ui
-    start_ui()
+    start_ui(test)

@@ -94,7 +94,7 @@ class MainUi(QMainWindow, MainUiThreading, MainUiProgress, WithMsgBox):
         self.exit()
 
 
-def start_ui():
+def start_ui(test=False):
     from PyQt5.QtWidgets import QApplication
     import sys
     from src.ui.tab_reorder import TabReorder
@@ -121,21 +121,38 @@ def start_ui():
             I.hide()
             return True
 
+    def cancel_update_hook():
+        I.show()
+
     from utils import Progress
     Progress.register_adapter(I)
 
-    from utils import Updater
-    updater = Updater(
-        **global_.UPDATER_CONFIG,
-    )
+    from src.updater import updater
+
     updater.find_and_install_latest_release(
+        current_version=global_.APP_VERSION,
+        executable_path='emft.exe',
         channel=Config().update_channel,
-        cancel_func=I.show(),
+        cancel_update_hook=cancel_update_hook,
+        pre_update_hook=pre_update_hook,
     )
 
     from src.misc.dcs_installs import DCSInstalls
     DCSInstalls().discover_dcs_installations()
 
     global_.MAIN_UI.update_config_tab()
+
+    if test:
+
+        logger.critical('RUNNING IN TEST MODE')
+        import time
+        from utils import ThreadPool, nice_exit
+
+        def test_hook():
+            time.sleep(10)
+            nice_exit(0)
+
+        pool = ThreadPool(1, 'test')
+        pool.queue_task(test_hook)
 
     sys.exit(global_.QT_APP.exec())

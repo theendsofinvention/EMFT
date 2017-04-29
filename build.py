@@ -159,8 +159,8 @@ def build_requirements(env):
     requirements = requirements.replace('\r\n', '\n')
     requirements = requirements.replace(r'PyInstaller==3.3.dev0+gb78bfe5',
                                         r'git+https://github.com/132nd-etcher/pyinstaller.git#egg=PyInstaller')
-    requirements = re.sub(r'SLTP==\d+.\d+.\d+\n', r'', requirements)
-    requirements = re.sub(r'utils==\d+.\d+.\d+\n', r'', requirements)
+    requirements = re.sub(r'SLTP==\d+.\d+.\d+.*\n', r'', requirements)
+    requirements = re.sub(r'utils==\d+.\d+.\d+.*\n', r'', requirements)
     Path('requirements.txt').write_text(requirements)
     own_requirements = [
         'git+https://github.com/132nd-etcher/sltp.git#egg=sltp',
