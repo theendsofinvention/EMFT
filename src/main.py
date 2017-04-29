@@ -32,6 +32,9 @@ if __name__ == '__main__':
     import src.emft
     try:
         src.emft.main()
+    except SystemExit as e:
+        logger.info('caught SystemExit, bye bye !')
+        nice_exit(e.code)
     except:
         logger.exception('caught exception in main loop')
         raise
