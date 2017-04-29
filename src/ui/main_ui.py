@@ -94,7 +94,7 @@ class MainUi(QMainWindow, MainUiThreading, MainUiProgress, WithMsgBox):
         self.exit()
 
 
-def start_ui():
+def start_ui(test=False):
     from PyQt5.QtWidgets import QApplication
     import sys
     from src.ui.tab_reorder import TabReorder
@@ -139,5 +139,18 @@ def start_ui():
     DCSInstalls().discover_dcs_installations()
 
     global_.MAIN_UI.update_config_tab()
+
+    if test:
+
+        logger.critical('RUNNING IN TEST MODE')
+        import time
+        from utils import ThreadPool, nice_exit
+
+        def test_hook():
+            time.sleep(10)
+            nice_exit(0)
+
+        pool = ThreadPool(1, 'test')
+        pool.queue_task(test_hook)
 
     sys.exit(global_.QT_APP.exec())
