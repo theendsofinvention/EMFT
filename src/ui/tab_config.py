@@ -135,9 +135,13 @@ class TabConfig(iTab):
     def update_config_tab(self, latest_release: AVRelease):
         self.remote_version.set_text_color('black')
         for x in ['stable', 'beta', 'alpha']:
-            getattr(self, '{}_install'.format(x)).setText(getattr(dcs_installs, x).install_path or 'not found')
-            getattr(self, '{}_variant'.format(x)).setText(getattr(dcs_installs, x).saved_games)
-            getattr(self, '{}_version'.format(x)).setText(getattr(dcs_installs, x).version)
+            dcs_install = getattr(dcs_installs, x)
+            if dcs_install:
+                getattr(self, '{}_install'.format(x)).setText(dcs_install.install_path)
+                getattr(self, '{}_variant'.format(x)).setText(dcs_install.saved_games)
+                getattr(self, '{}_version'.format(x)).setText(dcs_install.version)
+            else:
+                getattr(self, '{}_install'.format(x)).setText('not found')
         self.update_channel_combo.set_index_from_text(Config().update_channel)
         if latest_release:
             app_version = Version(global_.APP_VERSION)

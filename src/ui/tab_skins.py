@@ -52,7 +52,10 @@ class TabSkins(iTab):
         )
 
         if Config().skins_active_dcs_installation:
-            self.combo_active_dcs_installation.set_index_from_text(Config().skins_active_dcs_installation)
+            try:
+                self.combo_active_dcs_installation.set_index_from_text(Config().skins_active_dcs_installation)
+            except ValueError:
+                pass
 
         data = []
 
@@ -172,19 +175,18 @@ class TabSkins(iTab):
 
     @property
     def _active_dcs_install(self) -> DCSInstall:
-        return getattr(dcs_installs, self.combo_active_dcs_installation.currentText())
+        if self.combo_active_dcs_installation.currentText():
+            return getattr(dcs_installs, self.combo_active_dcs_installation.currentText())
 
     def _display_list_of_skins_for_currently_selected_install(self):
         def skin_to_data_line(skin: DCSSkin):
             return [skin.skin_nice_name, skin.ac, skin.root_folder]
 
-        # install = getattr(dcs_installs, self.combo_active_dcs_installation.currentText())
-
-        # install.discover_skins()
-        self.model.reset_data(
-            [skin_to_data_line(skin) for skin in self._active_dcs_install.skins.values()]
-        )
-        self.table.resizeColumnsToContents()
+        if self._active_dcs_install:
+            self.model.reset_data(
+                [skin_to_data_line(skin) for skin in self._active_dcs_install.skins.values()]
+            )
+            self.table.resizeColumnsToContents()
 
     def _on_active_dcs_installation_change(self):
         Config().skins_active_dcs_installation = self.combo_active_dcs_installation.currentText()
