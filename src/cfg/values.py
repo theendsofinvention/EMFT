@@ -68,6 +68,10 @@ class ConfigValues:
     def auto_mode(self, value: bool):
         return value
 
+    @MetaProperty(True, bool)
+    def allow_mv_autoexec_changes(self, value: bool):
+        return value
+
     @MetaProperty('INFO', str)
     def log_level(self, value: str):
         if value not in ['DEBUG', 'INFO', 'WARNING', 'ERROR']:
@@ -77,6 +81,11 @@ class ConfigValues:
     # noinspection PyPep8Naming
     @MetaProperty('All', str)
     def selected_TRMT_branch(self, value: str):
+        return value
+
+    # noinspection PyPep8Naming
+    @MetaProperty(None, str)
+    def skins_active_dcs_installation(self, value: str):
         return value
 
     # noinspection PyPep8Naming
