@@ -26,7 +26,7 @@ class TabLog(iTab, logging.Handler):
             'NOTSET': dict(level=0, color='#808080'),
             'DEBUG': dict(level=10, color='#808080'),
             'INFO': dict(level=20, color='#000000'),
-            'WARNING': dict(level=30, color='#FFFF00'),
+            'WARNING': dict(level=30, color='#FF5500'),
             'ERROR': dict(level=40, color='#FF0000'),
             'CRITICAL': dict(level=50, color='#FF0000'),
         }
