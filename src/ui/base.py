@@ -96,6 +96,13 @@ class GridLayout(QGridLayout):
     }
 
     def __init__(self, children: list, stretch: list = None, auto_right=True):
+        """
+        
+        
+        :param children: 
+        :param stretch: 
+        :param auto_right: 
+        """
         QGridLayout.__init__(self)
         self.auto_right = auto_right
         self.add_children(children)
@@ -105,9 +112,9 @@ class GridLayout(QGridLayout):
 
     # noinspection PyArgumentList
     def add_children(self, children: list):
-        for r in range(len(children)):
+        for r in range(len(children)):  # "r" is the row
             child = children[r]
-            for c in range(len(child)):
+            for c in range(len(child)):  # "c" is the column
                 if child[c] is None:
                     continue
                 elif isinstance(child[c], QWidget):
@@ -129,6 +136,15 @@ class GridLayout(QGridLayout):
 
 class HLayout(QHBoxLayout, _WithChildren):
     def __init__(self, children: list):
+        """
+        Creates a horizontal layout.
+        
+        Children can be either a single item, or a tuple including a configuration dictionary.        
+        Parameters that can be included in the configuration dictionary are:
+            Stretch: "weight" of the item in the layout
+        
+        :param children: list of children 
+        """
         super(HLayout, self).__init__()
         self.setContentsMargins(*DEFAULT_MARGINS)
         self.add_children(children)
@@ -136,6 +152,15 @@ class HLayout(QHBoxLayout, _WithChildren):
 
 class VLayout(QVBoxLayout, _WithChildren):
     def __init__(self, children: list):
+        """
+        Creates a vertical layout.
+        
+        Children can be either a single item, or a tuple including a configuration dictionary.        
+        Parameters that can be included in the configuration dictionary are:
+            Stretch: "weight" of the item in the layout
+        
+        :param children: list of children 
+        """
         super(VLayout, self).__init__()
         self.setContentsMargins(*DEFAULT_MARGINS)
         self.add_children(children)
@@ -173,11 +198,13 @@ class Combo(QComboBox):
         self.currentTextChanged.connect(on_change)
 
     def set_index_from_text(self, text):
+        # noinspection PyUnresolvedReferences
         self.currentTextChanged.disconnect()
         idx = self.findText(text, Qt.MatchExactly)
         if idx < 0:
             raise ValueError(text)
         self.setCurrentIndex(idx)
+        # noinspection PyUnresolvedReferences
         self.currentTextChanged.connect(self.on_change)
 
 
@@ -331,7 +358,6 @@ class WithMsgBox(WithMsgBoxAdapter):
 
 
 class TableView(QTableView):
-
     def __init__(self, parent=None):
         super(TableView, self).__init__(parent=parent)
         self.setSelectionBehavior(QAbstractItemView.SelectRows)
@@ -347,25 +373,24 @@ class TableView(QTableView):
 
 
 class TableProxy(QSortFilterProxyModel):
-
     def __init__(self, parent=None):
         super(TableProxy, self).__init__(parent)
         self.setDynamicSortFilter(False)
 
     def default_sort(self):
         self.sort(0, Qt.AscendingOrder)
-        
+
     def sort(self, p_int, order=None):
         print('sorting proxy')
         super(TableProxy, self).sort(p_int, order)
 
-class TableModel(QAbstractTableModel):
 
+class TableModel(QAbstractTableModel):
     def __init__(self, data: list, header_data: list, parent=None):
         super(TableModel, self).__init__(parent=parent)
         self._data = data[:]
         self._header_data = header_data[:]
-        
+
     # def sort(self, p_int, order=None):
     #     print('sorting model')
     #     super(TableModel, self).sort(p_int, order)
