@@ -7,7 +7,10 @@ except ImportError:
 
     winreg = MagicMock()
 
-from utils import make_logger, Path, Singleton
+import os
+import re
+
+from utils import make_logger, Path
 
 from src import global_
 from src.cfg.cfg import Config
@@ -26,12 +29,21 @@ class InvalidInstallPath(ValueError):
 
 
 class DCSSkin:
-    def __init__(self, name, ac):
+    def __init__(self, name, ac, root_folder, skin_nice_name=None):
         self.name = name
         self.ac = ac
+        self.root_folder = root_folder
+        self.skin_nice_name = skin_nice_name or name
+
+    def __repr__(self):
+        return 'DCSSkin("{}", "{}", "{}", "{}")'.format(
+            self.name, self.ac, self.root_folder, self.skin_nice_name
+        )
 
 
 class DCSInstall:
+    re_skin_name = re.compile(r'name = "(?P<skin_nice_name>.*)"')
+
     def __init__(self, install_path, saved_games_path, version, label):
         self.__install = install_path if install_path else None
         self.__sg = saved_games_path if saved_games_path else None
@@ -64,16 +76,47 @@ class DCSInstall:
     def version(self):
         return self.__version
 
+    @property
+    def skins(self):
+        return self.__skins
+
     def discover_skins(self):
 
+        self.__skins = {}
+
         def scan_dir(p: Path):
+            if not p.exists():
+                logger.debug('skipping absent folder: {}'.format(p.abspath()))
+                return
             logger.debug('scanning for skins in: {}'.format(p.abspath()))
+            for ac_folder in os.scandir(p.abspath()):
+                # logger.debug('scanning for skins in: {}'.format(ac_folder.path))
+                ac_name = ac_folder.name
+                if ac_folder.is_dir():
+                    for skin_folder in os.scandir(ac_folder.path):
+                        # logger.debug('scanning for skins in: {}'.format(skin_folder.path))
+                        skin_name = skin_folder.name
+                        skin_nice_name = None
+
+                        try:
+                            with open(Path(skin_folder.path).join('description.lua')) as f:
+                                lines = f.readlines()
+                                for line in lines:
+                                    m = self.re_skin_name.match(line)
+                                    if m:
+                                        skin_nice_name = m.group('skin_nice_name')
+                        except FileNotFoundError:
+                            pass
+
+                        self.__skins['{}_{}'.format(ac_name, skin_name)] = DCSSkin(
+                            skin_name, ac_name, str(skin_folder.path), skin_nice_name
+                        )
 
         scan_dir(Path(self.install_path).joinpath('bazar', 'liveries'))
         scan_dir(Path(self.saved_games).joinpath('liveries'))
 
 
-class DCSInstalls(metaclass=Singleton):
+class DCSInstalls:
     def __init__(self):
         self.installs = {
             'stable': {
@@ -199,7 +242,7 @@ class DCSInstalls(metaclass=Singleton):
             logger.debug('{}: set "Saved Games" path to: {}'.format(k, self.installs[k]['sg']))
 
     def __get_props(self, channel):
-        return self.installs[channel]['install'],\
+        return self.installs[channel]['install'], \
                self.installs[channel]['sg'], self.installs[channel]['version'], channel
 
     @property
@@ -215,8 +258,10 @@ class DCSInstalls(metaclass=Singleton):
         return DCSInstall(*self.__get_props('alpha'))
 
     @property
-    def skins(self):
-        return
+    def present_dcs_installations(self):
+        for x in self.__iter__():
+            if x.install_path:
+                yield x
 
     def __iter__(self) -> DCSInstall:
         yield self.stable

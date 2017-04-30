@@ -100,6 +100,7 @@ def start_ui(test=False):
     from src.ui.tab_reorder import TabReorder
     from src.ui.tab_log import TabLog
     from src.ui.tab_config import TabConfig
+    from src.ui.tab_skins import TabSkins
     logger.debug('starting QtApp object')
     global_.QT_APP = QApplication([])
     global_.MAIN_UI = MainUi()
@@ -109,6 +110,15 @@ def start_ui(test=False):
             'tab_reorder_update_view_after_remote_scan': 'tab_reorder_update_view_after_remote_scan'
         }
     )
+
+    from src.misc import dcs_installs
+    dcs_installs.discover_dcs_installations()
+
+    global_.MAIN_UI.add_tab(
+        TabSkins(),
+        helpers={}
+    )
+
     global_.MAIN_UI.add_tab(TabConfig(), helpers={'update_config_tab': 'update_config_tab'})
     global_.MAIN_UI.add_tab(TabLog(), helpers={'write_log': 'write'})
     global_.MAIN_UI.show()
@@ -136,9 +146,6 @@ def start_ui(test=False):
         cancel_update_hook=cancel_update_hook,
         pre_update_hook=pre_update_hook,
     )
-
-    from src.misc.dcs_installs import DCSInstalls
-    DCSInstalls().discover_dcs_installations()
 
     global_.MAIN_UI.update_config_tab()
 
