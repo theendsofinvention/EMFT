@@ -9,7 +9,7 @@ from requests import get as request_get
 # from ui.ui_globals import main_window
 re_rem1 = re_compile('''[0-9]{6}/ ''')
 re_rem2 = re_compile('''R[0-9]{2}([RL])?/[^ ]*''')
-valid_airports_by_ICAO = {
+valid_airports_by_icao_code = {
     'UGKO': 'Kutaisi',
     'UGSB': 'Batumi',
     'UGSS': 'Sukhumi',
@@ -23,7 +23,7 @@ valid_airports_by_ICAO = {
     'URKM': 'Maykop',
 }
 
-valid_airport_by_name = dict(zip(valid_airports_by_ICAO.values(), valid_airports_by_ICAO.keys()))
+valid_airport_by_name = dict(zip(valid_airports_by_icao_code.values(), valid_airports_by_icao_code.keys()))
 
 
 class WeatherError:
@@ -40,7 +40,7 @@ class WeatherError:
 
 def get_metar_of(station):
     station = station.upper()
-    if station not in valid_airports_by_ICAO.keys():
+    if station not in valid_airports_by_icao_code.keys():
         raise WeatherError.UnknownAirportError(station)
     url = "http://weather.noaa.gov/pub/data/observations/metar/stations/{}.TXT".format(station.upper())
     try:
@@ -72,20 +72,20 @@ class Weather():
         decoder = Decoder(taf)
         print(decoder.decode_taf())
         return
-        # print(html)
-        re_taf_line = re_compile(
-            r'.*LATEST TAF REPORT FOR {}\s+(?P<taf>.*)\s+LATEST TAF REPORT FOR {}.*'.format(location, location),
-            re_MULTILINE)
-        m = re_taf_line.match(html)
-        if m:
-            taf = m.group('taf')
-            print(taf)
-            return
-            metar_string = m.group('metar')
-            metar_string = re.sub(re_rem1, '', metar_string)
-            metar_string = re.sub(re_rem2, '', metar_string)
-            self.__parse_metar_string(metar_string)
-            # TODO: add check for failure
+        # # print(html)
+        # re_taf_line = re_compile(
+        #     r'.*LATEST TAF REPORT FOR {}\s+(?P<taf>.*)\s+LATEST TAF REPORT FOR {}.*'.format(location, location),
+        #     re_MULTILINE)
+        # m = re_taf_line.match(html)
+        # if m:
+        #     taf = m.group('taf')
+        #     print(taf)
+        #     return
+        #     metar_string = m.group('metar')
+        #     metar_string = re.sub(re_rem1, '', metar_string)
+        #     metar_string = re.sub(re_rem2, '', metar_string)
+        #     self.__parse_metar_string(metar_string)
+        #     # TODO: add check for failure
 
     def __parse_metar_string(self, metar_string):
         self.metar = Metar(metar_string)

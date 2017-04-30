@@ -13,7 +13,7 @@ from src.global_ import ENCODING
 from src.miz.mission import Mission, Country, Group, BaseUnit, FlyingUnit, EPOCH_DELTA, Coalition
 from src.miz.miz import Miz as Miz
 
-SKIP_LONG_TESTS = os.environ.get('EMFT_SKIP_LONG_TESTS', None) == '1'
+SKIP_LONG_TESTS = os.environ.get('EMFT_SKIP_LONG_TESTS') == '1'
 
 RADIOS_TESTS = [
     (

@@ -84,7 +84,8 @@ class MainUiThreading:
             else:
                 method()
         except TypeError:
-            logger.exception('method "{}" of object "{}" failed ([{}], {{{}}})'.format(method, func, args, kwargs))
+            logger.exception(
+                'method "{method}" of object "{func}" failed ([{args}], {{{kwargs}}})'.format(**locals()))
 
     @classmethod
     def do(cls, obj_name, func, *args, **kwargs):
