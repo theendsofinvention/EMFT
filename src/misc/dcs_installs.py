@@ -225,3 +225,6 @@ class DCSInstalls(metaclass=Singleton):
 
     def __getitem__(self, item) -> DCSInstall:
         return getattr(self, item)
+
+
+dcs_installs = DCSInstalls()
