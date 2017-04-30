@@ -13,6 +13,14 @@ class Widget(QWidget):
         QWidget.__init__(self, parent=parent, flags=Qt.Widget)
 
 
+LEFT_MARGIN = 10
+RIGHT_MARGIN = 10
+TOP_MARGIN = 10
+BOTTOM_MARGIN = 10
+
+DEFAULT_MARGINS = (LEFT_MARGIN, RIGHT_MARGIN, TOP_MARGIN, BOTTOM_MARGIN)
+
+
 class Expandable:
     # noinspection PyPep8Naming
     @abc.abstractmethod
@@ -32,11 +40,11 @@ class Expandable:
 class GroupBox(QGroupBox):
     def __init__(self, title=None, layout=None):
         QGroupBox.__init__(self)
-        self.setContentsMargins(40, 0, 0, 0)
         if title:
             self.setTitle(title)
         if layout:
             self.setLayout(layout)
+        self.setContentsMargins(*DEFAULT_MARGINS)
 
 
 class _WithChildren:
@@ -122,13 +130,14 @@ class GridLayout(QGridLayout):
 class HLayout(QHBoxLayout, _WithChildren):
     def __init__(self, children: list):
         super(HLayout, self).__init__()
-        self.setContentsMargins(0, 0, 0, 0)
+        self.setContentsMargins(*DEFAULT_MARGINS)
         self.add_children(children)
 
 
 class VLayout(QVBoxLayout, _WithChildren):
     def __init__(self, children: list):
         super(VLayout, self).__init__()
+        self.setContentsMargins(*DEFAULT_MARGINS)
         self.add_children(children)
 
 
