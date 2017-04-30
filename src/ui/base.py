@@ -2,10 +2,11 @@
 import abc
 
 from PyQt5.QtCore import Qt, QAbstractTableModel, QModelIndex, QVariant, QSortFilterProxyModel
-from PyQt5.QtGui import QKeySequence, QIcon
+from PyQt5.QtGui import QKeySequence, QIcon, QContextMenuEvent
 from PyQt5.QtWidgets import QGroupBox, QBoxLayout, QSpacerItem, QWidget, QHBoxLayout, QVBoxLayout, QPushButton, \
     QRadioButton, QComboBox, QShortcut, QCheckBox, QLineEdit, QLabel, QPlainTextEdit, QSizePolicy, QGridLayout, \
-    QMessageBox, QTableView, QAbstractItemView
+    QMessageBox, QTableView, QAbstractItemView, QMenu, QMenuBar
+from utils import make_logger
 
 
 class Widget(QWidget):
@@ -19,6 +20,8 @@ TOP_MARGIN = 10
 BOTTOM_MARGIN = 10
 
 DEFAULT_MARGINS = (LEFT_MARGIN, RIGHT_MARGIN, TOP_MARGIN, BOTTOM_MARGIN)
+
+logger = make_logger(__name__)
 
 
 class Expandable:
@@ -346,15 +349,52 @@ class WithMsgBox(WithMsgBoxAdapter):
         self._run_box(text=text, follow_up=follow_up, title=title, follow_up_on_no=follow_up_on_no, is_question=True)
 
 
-# class TableHeader(QHeaderView):
-#
-#     def __init__(self, data, orientation=Qt.Horizontal, parent=None):
-#         super(TableHeader, self).__init__(orientation, parent)
-#         self._data = data
-#         self.setSortIndicatorShown(True)
-#
-#     def count(self):
-#         return len(self._data)
+class Menu(QMenu):
+    def __init__(self, title: str = '', parent=None):
+        super(Menu, self).__init__(title, parent)
+        self.actions = {}
+
+    def add_action(self, text: str, func: callable):
+        action = self.addAction(text)
+        self.actions[action] = func
+
+
+class MenuBar(QMenuBar):
+    def __init__(self, parent=None):
+        super(MenuBar, self).__init__(parent)
+        raise NotImplementedError('plop')
+
+
+class _TableViewWithRowContextMenu:
+    # noinspection PyPep8Naming
+    @abc.abstractmethod
+    def selectionModel(self):
+        """"""
+
+    def __init__(self, menu=None):
+        self._menu = menu
+
+    # noinspection PyPep8Naming
+    def contextMenuEvent(self, event):  # TODO
+        logger.debug('in')
+        if self._menu:
+            logger.debug('menu')
+            if self.selectionModel().selection().indexes():
+                selected_rows = set()
+                logger.debug('indexes')
+                for i in self.selectionModel().selection().indexes():
+                    selected_rows.add(i.row())
+
+                if selected_rows:
+
+                    assert isinstance(self._menu, Menu)
+                    assert isinstance(event, QContextMenuEvent)
+
+                    action = self._menu.exec(event.globalPos())
+                    if action:
+                        func = self._menu.actions[action]
+                        for row in selected_rows:
+                            func(row)
 
 
 class TableView(QTableView):
@@ -363,13 +403,15 @@ class TableView(QTableView):
         self.setSelectionBehavior(QAbstractItemView.SelectRows)
         self.horizontalHeader().setStretchLastSection(True)
         self.setSortingEnabled(True)
-        # self._headers = TableHeader(headers_data)
-        # self.setHorizontalHeader(self._headers)
         self.setSortingEnabled(True)
         self.verticalHeader().hide()
 
-    def contextMenuEvent(self, event):  # TODO
-        print(event)
+
+class TableViewWithSingleRowMenu(TableView, _TableViewWithRowContextMenu):
+
+    def __init__(self, menu, parent=None):
+        TableView.__init__(self, parent)
+        _TableViewWithRowContextMenu.__init__(self, menu)
 
 
 class TableProxy(QSortFilterProxyModel):
