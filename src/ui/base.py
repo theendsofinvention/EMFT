@@ -1,11 +1,11 @@
 # coding=utf-8
 import abc
 
-from PyQt5.QtCore import Qt
+from PyQt5.QtCore import Qt, QAbstractTableModel, QModelIndex, QVariant, QSortFilterProxyModel
 from PyQt5.QtGui import QKeySequence, QIcon
 from PyQt5.QtWidgets import QGroupBox, QBoxLayout, QSpacerItem, QWidget, QHBoxLayout, QVBoxLayout, QPushButton, \
     QRadioButton, QComboBox, QShortcut, QCheckBox, QLineEdit, QLabel, QPlainTextEdit, QSizePolicy, QGridLayout, \
-    QMessageBox
+    QMessageBox, QTableView, QAbstractItemView
 
 
 class Widget(QWidget):
@@ -317,3 +317,82 @@ class WithMsgBox(WithMsgBoxAdapter):
             title = 'Please confirm'
 
         self._run_box(text=text, follow_up=follow_up, title=title, follow_up_on_no=follow_up_on_no, is_question=True)
+
+
+# class TableHeader(QHeaderView):
+#
+#     def __init__(self, data, orientation=Qt.Horizontal, parent=None):
+#         super(TableHeader, self).__init__(orientation, parent)
+#         self._data = data
+#         self.setSortIndicatorShown(True)
+#
+#     def count(self):
+#         return len(self._data)
+
+
+class TableView(QTableView):
+
+    def __init__(self, parent=None):
+        super(TableView, self).__init__(parent=parent)
+        self.setSelectionBehavior(QAbstractItemView.SelectRows)
+        self.horizontalHeader().setStretchLastSection(True)
+        self.setSortingEnabled(True)
+        # self._headers = TableHeader(headers_data)
+        # self.setHorizontalHeader(self._headers)
+        self.setSortingEnabled(True)
+        self.verticalHeader().hide()
+
+    def contextMenuEvent(self, event):  # TODO
+        print(event)
+
+
+class TableProxy(QSortFilterProxyModel):
+
+    def __init__(self, parent=None):
+        super(TableProxy, self).__init__(parent)
+        self.setDynamicSortFilter(False)
+
+    def default_sort(self):
+        self.sort(0, Qt.AscendingOrder)
+        
+    def sort(self, p_int, order=None):
+        print('sorting proxy')
+        super(TableProxy, self).sort(p_int, order)
+
+class TableModel(QAbstractTableModel):
+
+    def __init__(self, data: list, header_data: list, parent=None):
+        super(TableModel, self).__init__(parent=parent)
+        self._data = data[:]
+        self._header_data = header_data[:]
+        
+    # def sort(self, p_int, order=None):
+    #     print('sorting model')
+    #     super(TableModel, self).sort(p_int, order)
+
+    def reset_data(self, new_data):
+        self.beginResetModel()
+        self._data = new_data[:]
+        self.endResetModel()
+        self.sort(0, Qt.AscendingOrder)
+
+    def rowCount(self, parent=None, *args, **kwargs):
+        return len(self._data)
+
+    def columnCount(self, parent=None, *args, **kwargs):
+        return len(self._header_data)
+
+    def data(self, index: QModelIndex, role=Qt.DisplayRole):
+        if role == Qt.DisplayRole:
+            if index.isValid():
+                item = self._data[index.row()]
+                if hasattr(item, '__len__'):
+                    return item[index.column()]
+                return item
+        return QVariant()
+
+    def headerData(self, col, orientation=Qt.Horizontal, role=Qt.DisplayRole):
+        if role == Qt.DisplayRole:
+            if orientation == Qt.Horizontal:
+                return self._header_data[col]
+        return QVariant()
