@@ -216,11 +216,11 @@ class Shortcut(QShortcut):
 
 
 class LineEdit(QLineEdit, Expandable):
-    def __init__(self, text, func: callable = None, read_only=False, clear_btn_enabled=False):
+    def __init__(self, text, on_text_changed: callable = None, read_only=False, clear_btn_enabled=False):
         QLineEdit.__init__(self, text)
-        if func:
+        if on_text_changed:
             # noinspection PyUnresolvedReferences
-            self.textChanged.connect(func)
+            self.textChanged.connect(on_text_changed)
         self.setReadOnly(read_only)
         self.setClearButtonEnabled(clear_btn_enabled)
 
