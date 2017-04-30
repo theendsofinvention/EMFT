@@ -736,6 +736,7 @@ class TestMizValues:
     def test_radios_generator(self):  # FIXME
         with Miz(r'./test/test_files/radios.miz') as miz:
             unit = miz.mission.get_unit_by_id(6)
+            # noinspection PyUnusedLocal
             for radio in unit.radio_presets:
                 # TODO resume
                 pass

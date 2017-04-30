@@ -115,6 +115,7 @@ class Meta(AbstractMeta):
         self._init_views()
 
     def __len__(self):
+        # noinspection PyTypeChecker
         return len(self.data)
 
     def __iter__(self):
@@ -235,6 +236,7 @@ class Meta(AbstractMeta):
                 self.write()
 
     def write(self):
+        # noinspection PyTypeChecker
         if len(self._data) == 0:
             raise ValueError('no data to write')
 

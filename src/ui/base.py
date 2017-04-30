@@ -99,13 +99,6 @@ class GridLayout(QGridLayout):
     }
 
     def __init__(self, children: list, stretch: list = None, auto_right=True):
-        """
-        
-        
-        :param children: 
-        :param stretch: 
-        :param auto_right: 
-        """
         QGridLayout.__init__(self)
         self.auto_right = auto_right
         self.add_children(children)
@@ -141,12 +134,10 @@ class HLayout(QHBoxLayout, _WithChildren):
     def __init__(self, children: list):
         """
         Creates a horizontal layout.
-        
-        Children can be either a single item, or a tuple including a configuration dictionary.        
+        Children can be either a single item, or a tuple including a configuration dictionary.
         Parameters that can be included in the configuration dictionary are:
             Stretch: "weight" of the item in the layout
-        
-        :param children: list of children 
+        :param children: list of children
         """
         super(HLayout, self).__init__()
         self.setContentsMargins(*DEFAULT_MARGINS)
@@ -157,12 +148,11 @@ class VLayout(QVBoxLayout, _WithChildren):
     def __init__(self, children: list):
         """
         Creates a vertical layout.
-        
-        Children can be either a single item, or a tuple including a configuration dictionary.        
+        Children can be either a single item, or a tuple including a configuration dictionary.
         Parameters that can be included in the configuration dictionary are:
             Stretch: "weight" of the item in the layout
-        
-        :param children: list of children 
+
+        :param children: list of children
         """
         super(VLayout, self).__init__()
         self.setContentsMargins(*DEFAULT_MARGINS)
@@ -273,7 +263,7 @@ class VSpacer(QSpacerItem):
             QSpacerItem.__init__(self, 1, size)
 
 
-class WithMsgBoxAdapter():
+class WithMsgBoxAdapter:
     @abc.abstractmethod
     def msg(self, text: str, follow_up: callable = None, title: str = None):
         pass
@@ -408,7 +398,6 @@ class TableView(QTableView):
 
 
 class TableViewWithSingleRowMenu(TableView, _TableViewWithRowContextMenu):
-
     def __init__(self, menu, parent=None):
         TableView.__init__(self, parent)
         _TableViewWithRowContextMenu.__init__(self, menu)

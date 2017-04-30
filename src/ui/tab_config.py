@@ -5,7 +5,7 @@ import os
 from utils import Path, Version, AVRelease, make_logger
 
 from src import global_
-from src.__version__ import __version__, __guid__
+from src.__version__ import __version__
 from src.cfg import Config
 from src.misc import dcs_installs
 from src.ui.base import VLayout, PushButton, GroupBox, LineEdit, Label, VSpacer, GridLayout, Combo, HLayout, HSpacer

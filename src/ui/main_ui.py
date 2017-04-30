@@ -135,6 +135,7 @@ def start_ui(test=False):
         I.show()
 
     from utils import Progress
+    # noinspection PyTypeChecker
     Progress.register_adapter(I)
 
     from src.updater import updater
@@ -157,7 +158,7 @@ def start_ui(test=False):
 
         def test_hook():
             time.sleep(10)
-            nice_exit(0)
+            nice_exit()
 
         pool = ThreadPool(1, 'test')
         pool.queue_task(test_hook)

@@ -69,6 +69,7 @@ class _MetaProperty:
         if not isinstance(instance, AbstractMeta):
             raise TypeError('_MetaProperty can only be used with Meta() instances')
 
+        # noinspection PyTypeChecker
         if not isinstance(value, self.type):
             # Checks for type of "value"
             raise TypeError('expected a {}, got: {} (value: {})'.format(str(self.type), type(value), value))

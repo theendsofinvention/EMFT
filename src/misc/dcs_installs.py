@@ -308,7 +308,7 @@ class DCSInstalls:
 
     @property
     def present_dcs_installations(self):
-        for x in self.__iter__():
+        for x in self:
             if x.install_path:
                 yield x
 
