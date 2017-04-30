@@ -138,4 +138,4 @@ class TabLog(iTab, logging.Handler):
         for rec in self.records:
             assert isinstance(rec, logging.LogRecord)
             if rec.levelno >= self._min_lvl:
-                self.write(self.format(rec))
+                self.write(self.format(rec), color=self.levels[rec.levelname]['color'])
