@@ -79,18 +79,6 @@ class TabLog(iTab, logging.Handler):
                             [Label('Filter module'), self.filter_line_edit_module],
                         ]
                     ),
-                    # VLayout(
-                    #     [
-                    #         HLayout([
-                    #             (Label('Filter message'), dict(stretch=0)),
-                    #             (self.filter_line_edit_msg, dict(stretch=1)),
-                    #         ]),
-                    #         HLayout([
-                    #             (Label('Filter module'), dict(stretch=0)),
-                    #             (self.filter_line_edit_module, dict(stretch=1)),
-                    #         ]),
-                    #     ]
-                    # ),
                     self.log_text,
                 ]
             )
