@@ -376,13 +376,27 @@ class TableProxy(QSortFilterProxyModel):
     def __init__(self, parent=None):
         super(TableProxy, self).__init__(parent)
         self.setDynamicSortFilter(False)
+        self._filter = None
 
     def default_sort(self):
         self.sort(0, Qt.AscendingOrder)
 
     def sort(self, p_int, order=None):
-        print('sorting proxy')
         super(TableProxy, self).sort(p_int, order)
+
+    def filterAcceptsRow(self, row: int, index: QModelIndex):
+        if self._filter:
+            model = self.sourceModel()
+            for column, filter_ in enumerate(self._filter):
+                if filter_:
+                    item_text = model.data(model.index(row, column), role=Qt.DisplayRole)
+                    if filter_ not in item_text:
+                        return False
+        return True
+
+    def filter(self, *args):
+        self._filter = args
+        self.invalidateFilter()
 
 
 class TableModel(QAbstractTableModel):
