@@ -50,7 +50,7 @@ init:
   - "pip --version"
 
   - cmd: echo %PYTHON% %PYTHON_VERSION% %PYTHON_ARCH%
-  - cmd: echo "running on: APPVEYOR_BUILD_WORKER_IMAGE"
+  - cmd: echo "running on %APPVEYOR_BUILD_WORKER_IMAGE%"
   - cmd: appveyor UpdateBuild -Version "%APPVEYOR_REPO_BRANCH%.%APPVEYOR_REPO_COMMIT%.%APPVEYOR_BUILD_NUMBER%"
   - git config --global credential.helper store
   - ps: Add-Content "$env:USERPROFILE\.git-credentials" "https://$($env:GH_TOKEN):x-oauth-basic@github.com`n"
