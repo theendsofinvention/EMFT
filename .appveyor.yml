@@ -50,16 +50,15 @@ init:
   - "pip --version"
 
   - cmd: echo %PYTHON% %PYTHON_VERSION% %PYTHON_ARCH%
-  - cmd: echo "running on %APPVEYOR_BUILD_WORKER_IMAGE%"
+  - cmd: echo %APPVEYOR_BUILD_WORKER_IMAGE%
   - cmd: appveyor UpdateBuild -Version "%APPVEYOR_REPO_BRANCH%.%APPVEYOR_REPO_COMMIT%.%APPVEYOR_BUILD_NUMBER%"
   - git config --global credential.helper store
   - ps: Add-Content "$env:USERPROFILE\.git-credentials" "https://$($env:GH_TOKEN):x-oauth-basic@github.com`n"
   - "git config --global user.email %GH_MAIL%"
   - "git config --global user.name %APPVEYOR_ACCOUNT_NAME%"
-  - cmd: echo 'Commit info:'
-  - cmd: echo '%APPVEYOR_REPO_COMMIT_AUTHOR% - %APPVEYOR_REPO_COMMIT_TIMESTAMP%'
-  - cmd: echo 'Msg %APPVEYOR_REPO_COMMIT_MESSAGE%:'
-  - cmd: echo 'Extended msg %APPVEYOR_REPO_COMMIT_MESSAGE_EXTENDED%'
+  - cmd: echo %APPVEYOR_REPO_COMMIT_TIMESTAMP%
+  - cmd: echo %APPVEYOR_REPO_COMMIT_MESSAGE%
+  - cmd: echo %APPVEYOR_REPO_COMMIT_MESSAGE_EXTENDED%
 
 cache:
   - C:\Users\appveyor\AppData\Local\pip\cache
