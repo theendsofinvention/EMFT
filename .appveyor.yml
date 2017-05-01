@@ -92,7 +92,8 @@ test_script:
   - cmd: emft.exe --test
 
 after_test:
-  - cmd: git tag %GitVersion_SemVer% && git push origin %GitVersion_SemVer% && exit 0
+  - 'git tag %GitVersion_SemVer% & exit 0'
+  - 'git push origin %GitVersion_SemVer% & exit 0'
   - "%PYTHON%/Scripts/pip.exe install git+https://github.com/132nd-etcher/ocular.py.git"
   - "%PYTHON%/Scripts/ocular.exe --access-token %SCRUTINIZER_TOKEN%"
   - "%PYTHON%/Scripts/pip.exe install codacy-coverage"
