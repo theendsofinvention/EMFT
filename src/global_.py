@@ -11,11 +11,6 @@ try:
 except KeyError:
     TESTING = False
 
-UPDATER_CONFIG = dict(current_version=src.__version__.__version__,
-                      gh_user='132nd-etcher',
-                      gh_repo='EMFT',
-                      asset_filename='EMFT.exe')
-
 UPDATER_LATEST = None
 
 PATH_LOG_FILE = 'emft.debug'
