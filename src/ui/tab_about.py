@@ -1,11 +1,8 @@
 # coding=utf-8
-import os
-import re
 
 from utils import make_logger
 
-from src.ui.base import VLayout, Combo, HLayout, Label, HSpacer, TableModel, TableViewWithSingleRowMenu, \
-    TableProxy, LineEdit, GroupBox, GridLayout, Menu, Checkbox
+from src.ui.base import VLayout, Label, HSpacer, GridLayout, VSpacer
 from src.ui.itab import iTab
 
 logger = make_logger(__name__)
@@ -25,10 +22,15 @@ class TabAbout(iTab):
         repo_label.setOpenExternalLinks(True)
 
         self.setLayout(
-            GridLayout(
+            VLayout(
                 [
-                    [Label('Github repository: '), repo_label, HSpacer()]
-                ],
-                [0, 0, 1]
+                    GridLayout(
+                        [
+                            [Label('Github repository: '), repo_label, HSpacer()]
+                        ],
+                        [0, 0, 1]
+                    ),
+                    VSpacer(),
+                ]
             )
         )
