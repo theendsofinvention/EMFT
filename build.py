@@ -169,11 +169,25 @@ def build_requirements(env):
     Path('own_requirements.txt').write_text('\n'.join(own_requirements))
 
 
+def generate_changelog(env):
+    logger.debug('building changelog')
+    changelog = subprocess.Popen(
+        [os.path.join(env, 'scripts/gitchangelog.exe'), '0.4.1..HEAD'],
+        stdout=subprocess.PIPE
+    ).stdout.read().decode('utf8')
+    with open('CHANGELOG.rst', mode='w') as f:
+        f.write(changelog)
+
+
 @click.command()
 @click.argument('env', type=click.Path(exists=True, file_okay=False, dir_okay=True, readable=True))
 @click.option('-p', '--pre', is_flag=True, help='Pre build only')
 @click.option('-r', '--req', is_flag=True, help='Req build only')
-def main(env, pre, req):
+@click.option('-c', '--cha', is_flag=True, help='Changelog build only')
+def main(env, pre, req, cha):
+    if cha:
+        generate_changelog(env)
+        return
     if req:
         build_requirements(env)
         return
