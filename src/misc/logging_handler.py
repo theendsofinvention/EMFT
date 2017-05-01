@@ -110,7 +110,7 @@ class PersistentLoggingFollower(logging.Formatter):
             .filter_by_module(module_filter)\
             .filter_by_thread(thread_filter)
         for rec in records:
-            self.handle_record(rec)
+            yield rec
 
 
 class PersistentLoggingHandler(logging.Handler):

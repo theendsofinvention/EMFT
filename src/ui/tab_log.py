@@ -1,6 +1,7 @@
 # coding=utf-8
 
 import logging
+import typing
 
 from utils import create_new_paste
 
@@ -51,9 +52,9 @@ class TabLog(iTab, PersistentLoggingFollower):
             ]
         )
 
-        self.filter_line_edit_msg = LineEdit('', self._filter_updated, clear_btn_enabled=True)
-        self.filter_line_edit_module = LineEdit('', self._filter_updated, clear_btn_enabled=True)
-        self.filter_line_edit_thread = LineEdit('', self._filter_updated, clear_btn_enabled=True)
+        self.filter_line_edit_msg = LineEdit('', self._redraw, clear_btn_enabled=True)
+        self.filter_line_edit_module = LineEdit('', self._redraw, clear_btn_enabled=True)
+        self.filter_line_edit_thread = LineEdit('', self._redraw, clear_btn_enabled=True)
 
         self.log_text = PlainTextEdit(read_only=True)
         self.combo.set_index_from_text(Config().log_level)
@@ -83,23 +84,25 @@ class TabLog(iTab, PersistentLoggingFollower):
                 ]
             )
         )
-
-        # logger = logging.getLogger('__main__')
-        # logger.addHandler(self)
-        self._filter_updated()
+        self._redraw()
 
     @property
     def min_lvl(self):
         return self.combo.currentText()
 
-    def _filter_updated(self):
-        self._clean()
-        self.filter_records(
+    @property
+    def records(self) -> typing.Generator[logging.LogRecord, None, None]:
+        return self.filter_records(
             minimum_level=self.min_lvl,
             msg_filter=self.filter_line_edit_msg.text(),
             module_filter=self.filter_line_edit_module.text(),
-            thread_filter=self.filter_line_edit_thread.text(),
+            thread_filter=self.filter_line_edit_thread.text()
         )
+
+    def _redraw(self):
+        self._clean()
+        for record in self.records:
+            self.handle_record(record)
 
     def handle_record(self, record: logging.LogRecord):
         if record.levelno >= self._sanitize_level(self.min_lvl):
@@ -113,7 +116,7 @@ class TabLog(iTab, PersistentLoggingFollower):
 
     def combo_changed(self, new_value):
         Config().log_level = new_value
-        self._set_log_level(new_value)
+        self._redraw()
 
     def _send(self):
         content = []
@@ -130,9 +133,3 @@ class TabLog(iTab, PersistentLoggingFollower):
     def _clean(self):
         self.log_text.clear()
         self.log_text.appendHtml('<b>Running EMFT v{}</b>'.format(global_.APP_VERSION))
-
-    def _set_log_level(self, log_level):
-        self._clean()
-        self.filter_records(
-            minimum_level=log_level
-        )
