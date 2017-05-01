@@ -22,8 +22,8 @@ class TabSkins(iTab):
     def tab_title(self) -> str:
         return 'Skins'
 
-    def __init__(self):
-        super(TabSkins, self).__init__()
+    def __init__(self, parent=None):
+        super(TabSkins, self).__init__(parent)
 
         self.no_install_label = Label('No DSC installation found on this system')
         self.no_install_label.set_text_color('red')
