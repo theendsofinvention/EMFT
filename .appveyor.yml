@@ -24,6 +24,11 @@ environment:
       secure: H9M/aPctMSk1+0AWe/l5D0U3oXto404/4UYiPMCECpjy0llgb8cBKTRyr20UDWdX
     GH_MAIL:
       secure: hyFFOoK6WbxtLxy2jOGlOPbRJ33Al8E1B0QeT+qUqJ8=
+    GITTER_WH:
+      secure: +89HquiQeI4sKs1t8EZ0hEuFjD/KMPWL09tJTmKjFOuHomh3O0jWMTzif2fv3EkuH2/WNf4IrtxFa9Lyxt8mtA==
+    CODECOV_TOKEN:
+      secure: vmheTXBO6T+ryELK1KR2ykiu5wj4ltDRhUo576dG6CGGBCxjpi+BUoa55Amtdoy8
+
 
 matrix:
     fast_finish: true
@@ -88,16 +93,15 @@ test_script:
   - cmd: emft.exe --test
 
 after_test:
-  - cmd: git tag %GitVersion_SemVer%
-  - cmd: git push origin %GitVersion_SemVer%
+  - cmd: git tag %GitVersion_SemVer% && git push origin %GitVersion_SemVer% && exit 0
   - "%PYTHON%/Scripts/pip.exe install git+https://github.com/132nd-etcher/ocular.py.git"
   - "%PYTHON%/Scripts/ocular.exe --access-token %SCRUTINIZER_TOKEN%"
   - "%PYTHON%/Scripts/pip.exe install codacy-coverage"
   - "%PYTHON%/Scripts/python-codacy-coverage.exe -r coverage.xml"
 #  - "%PYTHON%/Scripts/pip.exe install coveralls"
 #  - "%PYTHON%/Scripts/coveralls.exe"
-#  - "%PYTHON%/Scripts/pip.exe install codecov"
-#  - "%PYTHON%/Scripts/codecov.exe"
+  - "%PYTHON%/Scripts/pip.exe install codecov"
+  - "%PYTHON%/Scripts/codecov.exe"
 
 
 artifacts:
@@ -127,4 +131,12 @@ deploy:
     on:
       branch: master
       appveyor_repo_tag: false
+
+notifications:
+
+  - provider: Webhook
+    url: %GITTER_WH%
+    method: GET
+    on_build_failure: true
+    on_build_status_changed: true
 
