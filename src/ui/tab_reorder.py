@@ -14,7 +14,8 @@ from utils.threadpool import ThreadPool
 from src.cfg.cfg import Config
 from src.misc import appveyor, downloader, github
 from src.miz.miz import Miz
-from src.ui.base import GroupBox, HLayout, VLayout, PushButton, Radio, Checkbox, Label, Combo, GridLayout, VSpacer
+from src.ui.base import GroupBox, HLayout, VLayout, PushButton, Radio, Checkbox, Label, Combo, GridLayout, VSpacer, \
+    box_question
 from src.ui.dialog_browse import BrowseDialog
 from src.ui.itab import iTab
 from src.ui.main_ui_interface import I
@@ -181,7 +182,7 @@ class _AutoLayout:
             pass
 
         self.auto_scan_btn = PushButton('Refresh', self.scan)
-        self.auto_scan_download_btn = PushButton('Download', self.download)
+        self.auto_scan_download_btn = PushButton('Download', self.auto_download)
 
         self.auto_out_le = QLineEdit()
         self.auto_out_le.setEnabled(False)
@@ -285,30 +286,9 @@ class _AutoLayout:
         # noinspection SpellCheckingInspection
         webbrowser.open_new_tab(r'https://ci.appveyor.com/api-token')
 
-    def _download(self):
-
-        def proceed_with_download():
-
-            downloader.download(
-                url=dl_url,
-                local_file=local_file,
-                progress_title='Downloading {}'.format(dl_url.split('/').pop()),
-                progress_text=local_file,
-                file_size=file_size
-            )
-
-        dl_url, file_size, local_file_name = appveyor.latest_version_download_url(self.selected_branch)
-        local_file = Path(self.auto_src_path).joinpath(local_file_name).abspath()
-
-        if local_file.exists():
-
-            I.confirm(text='Local file already exists; do you want to overwrite?', follow_up=proceed_with_download)
-        else:
-            proceed_with_download()
-
-    def download(self):
-        self.pool.queue_task(self._download)
-        self.scan()
+    @abc.abstractmethod
+    def auto_download(self):
+        """"""
 
     @property
     def auto_src_path(self) -> Path or None:
@@ -355,7 +335,7 @@ class TabReorder(iTab, _SingleLayout, _AutoLayout):
 
         self.remote_version, self.remote_branch, self.local_version = None, None, None
 
-        self._pool = ThreadPool(_basename='REORDER', _num_threads=1, _daemon=True)
+        self._pool = ThreadPool(_basename='reorder', _num_threads=1, _daemon=True)
 
         help_text = QLabel('By design, LUA tables are unordered, which makes tracking changes extremely difficult.\n\n'
                            'This lets you reorder them alphabetically before you push them in a SCM.\n\n'
@@ -420,6 +400,7 @@ class TabReorder(iTab, _SingleLayout, _AutoLayout):
 
     @staticmethod
     def _on_reorder_error(miz_file):
+        # noinspection PyCallByClass
         I.error('Could not unzip the following file:\n\n{}\n\n'
                 'Please check the log, and eventually send it to me along with the MIZ file '
                 'if you think this is a bug.'.format(miz_file))
@@ -492,3 +473,32 @@ class TabReorder(iTab, _SingleLayout, _AutoLayout):
         self.remote_version, self.remote_branch, self.local_version = None, None, None
         self.pool.queue_task(task=self._scan)
         self.pool.queue_task(task=I.tab_reorder_update_view_after_remote_scan)
+
+    def _auto_download(self, local_file, dl_url, file_size):
+
+        downloader.download(
+            url=dl_url,
+            local_file=local_file,
+            progress_title='Downloading {}'.format(dl_url.split('/').pop()),
+            progress_text=local_file,
+            file_size=file_size
+        )
+
+        self.scan()
+
+    def auto_download(self):
+        dl_url, file_size, local_file_name = appveyor.latest_version_download_url(self.selected_branch)
+        local_file = Path(self.auto_src_path).joinpath(local_file_name).abspath()
+
+        if local_file.exists():
+            if not box_question(self, 'Local file already exists; do you want to overwrite?'):
+                return
+
+        self.pool.queue_task(
+            self._auto_download,
+            kwargs=dict(
+                local_file=local_file,
+                dl_url=dl_url,
+                file_size=file_size,
+            ),
+        )
