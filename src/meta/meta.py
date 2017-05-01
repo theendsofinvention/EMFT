@@ -211,7 +211,7 @@ class Meta(AbstractMeta):
                     except KeyError:
                         pass
 
-                    meta_updated = self.data['meta_version'] < self.meta_version
+                    meta_updated = False
 
                     while self.data['meta_version'] < self.meta_version:
                         current_version = self.data['meta_version']
@@ -223,6 +223,7 @@ class Meta(AbstractMeta):
 
                         else:
                             logger.debug('successfully upgraded meta to version "{}"'.format(next_version))
+                            meta_updated = True
 
                         self.data['meta_version'] = next_version
 
@@ -231,7 +232,6 @@ class Meta(AbstractMeta):
 
         finally:
             self.free = True
-
             if meta_updated:
                 self.write()
 
