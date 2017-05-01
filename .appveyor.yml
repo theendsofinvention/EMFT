@@ -58,8 +58,8 @@ init:
   - "git config --global user.name %APPVEYOR_ACCOUNT_NAME%"
   - cmd: echo 'Commit info:'
   - cmd: echo '%APPVEYOR_REPO_COMMIT_AUTHOR% - %APPVEYOR_REPO_COMMIT_TIMESTAMP%'
-  - cmd: echo 'Msg: %APPVEYOR_REPO_COMMIT_MESSAGE%:'
-  - cmd: echo 'Extended msg: %APPVEYOR_REPO_COMMIT_MESSAGE_EXTENDED%'
+  - cmd: echo 'Msg %APPVEYOR_REPO_COMMIT_MESSAGE%:'
+  - cmd: echo 'Extended msg %APPVEYOR_REPO_COMMIT_MESSAGE_EXTENDED%'
 
 cache:
   - C:\Users\appveyor\AppData\Local\pip\cache
