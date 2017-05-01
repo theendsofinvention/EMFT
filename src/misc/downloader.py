@@ -12,10 +12,11 @@ logger = make_logger(__name__)
 def download(url, local_file, progress_title: str, progress_text: str = '', file_size: int = None):
     logger.info('downloading {} -> {}'.format(url, local_file))
 
+    # noinspection PyArgumentEqualDefault
     I.progress_start(progress_title, length=100, label=progress_text)
 
     def hook(data):
-        I.progress_set_value(float(data['percent_complete']))
+        I.progress_set_value(int(float(data['percent_complete'])))
 
     time.sleep(1)
     dl = Downloader(

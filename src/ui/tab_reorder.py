@@ -335,7 +335,7 @@ class TabReorder(iTab, _SingleLayout, _AutoLayout):
 
         self.remote_version, self.remote_branch, self.local_version = None, None, None
 
-        self._pool = ThreadPool(_basename='REORDER', _num_threads=1, _daemon=True)
+        self._pool = ThreadPool(_basename='reorder', _num_threads=1, _daemon=True)
 
         help_text = QLabel('By design, LUA tables are unordered, which makes tracking changes extremely difficult.\n\n'
                            'This lets you reorder them alphabetically before you push them in a SCM.\n\n'

@@ -2,7 +2,7 @@
 import os
 import re
 
-from utils import make_logger, Path
+from utils import make_logger
 
 from src.cfg import Config
 from src.misc import dcs_installs, DCSInstall, DCSSkin
@@ -157,7 +157,8 @@ class TabSkins(iTab):
     #             continue
     #         lines.append(line)
     #
-    #     # model_path = 'LoadModel("Bazar/World/Shapes/{}.edm")'.format(self._active_dcs_install.get_object_model(ac_name))
+    #     # model_path = 'LoadModel("Bazar/World/Shapes/{}.edm")'.format(
+    #           self._active_dcs_install.get_object_model(ac_name))
     #
     #     lines.insert(0, 'LoadLivery("{ac_name}","{skin_name}")'.format(**locals()))
     #     lines.insert(0, 'LoadModel("Bazar/World/Shapes/{ac_name}.edm")'.format(**locals()))
