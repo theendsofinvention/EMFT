@@ -2,9 +2,9 @@
 
 
 from utils import ProgressAdapter
-from .base import WithMsgBoxAdapter
 
 from src import global_
+from .base import WithMsgBoxAdapter
 
 
 class MainUiMethod:
@@ -18,17 +18,14 @@ class MainUiMethod:
 
 
 class I(ProgressAdapter, WithMsgBoxAdapter):
-    @staticmethod
     @MainUiMethod
     def confirm(self, text: str, follow_up: callable, title: str = None, follow_up_on_no: callable = None):
         """"""
 
-    @staticmethod
     @MainUiMethod
     def error(self, text: str, follow_up: callable = None, title: str = None):
         """"""
 
-    @staticmethod
     @MainUiMethod
     def msg(self, text: str, follow_up: callable = None, title: str = None):
         """"""

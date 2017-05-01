@@ -94,6 +94,7 @@ RADIOS_TESTS = [
 ]
 
 
+# noinspection PyPep8Naming
 class TestMizBasics:
 
     @pytest.fixture(autouse=True)
@@ -187,6 +188,7 @@ class TestMizBasics:
         #                 assert isinstance(miz, Miz)
 
 
+# noinspection PyPep8Naming
 class TestMizValues:
     @pytest.fixture(scope='class')
     def miz(self, TEST_FILE):
