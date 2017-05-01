@@ -98,9 +98,6 @@ def start_ui(test=False):
     from PyQt5.QtWidgets import QApplication
     import sys
     from src.ui.tab_reorder import TabReorder
-    from src.ui.tab_log import TabLog
-    from src.ui.tab_config import TabConfig
-    from src.ui.tab_skins import TabSkins
     logger.debug('starting QtApp object')
     global_.QT_APP = QApplication([])
     global_.MAIN_UI = MainUi()
@@ -114,11 +111,13 @@ def start_ui(test=False):
     from src.misc import dcs_installs
     dcs_installs.discover_dcs_installations()
 
+    from src.ui.tab_skins import TabSkins
     global_.MAIN_UI.add_tab(
         TabSkins(),
         helpers={}
     )
 
+    from src.ui.tab_config import TabConfig
     global_.MAIN_UI.add_tab(
         TabConfig(),
         helpers={
@@ -126,16 +125,21 @@ def start_ui(test=False):
         }
     )
 
+    from src.ui.tab_log import TabLog
     tab_log = TabLog()
-
     from src.misc.logging_handler import persistent_logging_handler
     persistent_logging_handler.add_follower(tab_log)
-
     global_.MAIN_UI.add_tab(
         tab_log,
         helpers={
             'write_log': 'write'
         }
+    )
+
+    from src.ui.tab_about import TabAbout
+    global_.MAIN_UI.add_tab(
+        TabAbout(),
+        helpers={}
     )
 
     global_.MAIN_UI.show()
