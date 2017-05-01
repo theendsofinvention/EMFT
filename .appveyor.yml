@@ -12,6 +12,7 @@ environment:
     GIT_DAEMON_PATH:   "C:\\Program Files\\Git\\mingw64\\libexec\\git-core"
     CYGWIN_GIT_PATH:   "C:\\cygwin\\bin;%GIT_DAEMON_PATH%"
     CYGWIN64_GIT_PATH: "C:\\cygwin64\\bin;%GIT_DAEMON_PATH%"
+    APPVEYOR_ARTIFACT_UPLOAD_TIMEOUT: 60
     PYTHON: "C:\\Python35"
     PYTHON_VERSION: "3.5.2"
     GIT_PATH: "%GIT_DAEMON_PATH%"
