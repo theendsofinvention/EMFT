@@ -1305,6 +1305,7 @@ class FlyingUnit(BaseUnit):
             valid_positive_int.validate(channel, 'set_frequency')
             valid_float.validate(frequency, 'set_frequency')
             if 1 <= channel <= self.channels_qty:
+                # noinspection PyTypeChecker
                 if self.min <= frequency <= self.max:
                     self._section_channels[channel] = float(frequency)
                 else:

@@ -1,6 +1,10 @@
 # coding=utf-8
 
-from utils import Progress, Downloader, make_logger
+import time
+
+from utils import Downloader, make_logger
+
+from src.ui.main_ui_interface import I
 
 logger = make_logger(__name__)
 
@@ -8,12 +12,13 @@ logger = make_logger(__name__)
 def download(url, local_file, progress_title: str, progress_text: str = '', file_size: int = None):
     logger.info('downloading {} -> {}'.format(url, local_file))
 
-    Progress.start(progress_title)
-    Progress.set_label(progress_text)
+    # noinspection PyArgumentEqualDefault
+    I.progress_start(progress_title, length=100, label=progress_text)
 
     def hook(data):
-        Progress.set_value(float(data['percent_complete']))
+        I.progress_set_value(int(float(data['percent_complete'])))
 
+    time.sleep(1)
     dl = Downloader(
         url=url,
         filename=local_file,

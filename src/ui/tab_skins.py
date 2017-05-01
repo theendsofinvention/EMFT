@@ -2,7 +2,7 @@
 import os
 import re
 
-from utils import make_logger, Path
+from utils import make_logger
 
 from src.cfg import Config
 from src.misc import dcs_installs, DCSInstall, DCSSkin
@@ -22,8 +22,8 @@ class TabSkins(iTab):
     def tab_title(self) -> str:
         return 'Skins'
 
-    def __init__(self):
-        super(TabSkins, self).__init__()
+    def __init__(self, parent=None):
+        super(TabSkins, self).__init__(parent)
 
         self.no_install_label = Label('No DSC installation found on this system')
         self.no_install_label.set_text_color('red')
@@ -115,60 +115,61 @@ class TabSkins(iTab):
     def _context_open_folder(self, row):
         os.startfile(self.proxy.data(self.proxy.index(row, 2)))
 
-    def _show_skin_in_model_viewer(self, row):
-        skin_name = self.proxy.data(self.proxy.index(row, 0))
-        ac_name = self.proxy.data(self.proxy.index(row, 1))
-        mv_autoexec_cfg = Path(self._active_dcs_install.install_path).joinpath(
-            'Config', 'ModelViewer', 'autoexec.lua'
-        )
-        mv_exe = Path(self._active_dcs_install.install_path).joinpath(
-            'bin', 'ModelViewer.exe'
-        )
-
-        for f in mv_autoexec_cfg, mv_exe:
-            if not f.exists():
-                logger.error('file not found: {}'.format(f.abspath()))
-                return
-
-        mount_lines = set()
-        if self._active_dcs_install.autoexec_cfg:
-            for vfs_path in self._active_dcs_install.autoexec_cfg.mounted_vfs_paths:
-                mount_lines.add('mount_vfs_texture_path("{}")\n'.format(vfs_path))
-
-        backup_path = mv_autoexec_cfg.dirname().joinpath('autoexec.lua_EMFT_BACKUP')
-        if not backup_path.exists():
-            logger.info('backing up "{}" -> "{}"'.format(mv_autoexec_cfg.abspath(), backup_path.abspath()))
-            mv_autoexec_cfg.copy2(backup_path.abspath())
-
-        orig_lines = mv_autoexec_cfg.lines()
-
-        lines = []
-
-        for line in orig_lines:
-            if Config().allow_mv_autoexec_changes:
-                if RE_MOUNT_LINE.match(line):
-                    # print('skipping', line)
-                    continue
-            if RE_LOAD_MODEL_LINE.match(line):
-                # print('skipping', line)
-                continue
-            if RE_LOAD_LIVERY_LINE.match(line):
-                # print('skipping', line)
-                continue
-            lines.append(line)
-
-        # model_path = 'LoadModel("Bazar/World/Shapes/{}.edm")'.format(self._active_dcs_install.get_object_model(ac_name))
-
-        lines.insert(0, 'LoadLivery("{ac_name}","{skin_name}")'.format(**locals()))
-        lines.insert(0, 'LoadModel("Bazar/World/Shapes/{ac_name}.edm")'.format(**locals()))
-
-        if Config().allow_mv_autoexec_changes:
-            for line in mount_lines:
-                lines.insert(0, line)
-
-        mv_autoexec_cfg.write_lines(lines)
-
-        os.startfile(mv_exe.abspath())
+    # def _show_skin_in_model_viewer(self, row):
+    #     skin_name = self.proxy.data(self.proxy.index(row, 0))
+    #     ac_name = self.proxy.data(self.proxy.index(row, 1))
+    #     mv_autoexec_cfg = Path(self._active_dcs_install.install_path).joinpath(
+    #         'Config', 'ModelViewer', 'autoexec.lua'
+    #     )
+    #     mv_exe = Path(self._active_dcs_install.install_path).joinpath(
+    #         'bin', 'ModelViewer.exe'
+    #     )
+    #
+    #     for f in mv_autoexec_cfg, mv_exe:
+    #         if not f.exists():
+    #             logger.error('file not found: {}'.format(f.abspath()))
+    #             return
+    #
+    #     mount_lines = set()
+    #     if self._active_dcs_install.autoexec_cfg:
+    #         for vfs_path in self._active_dcs_install.autoexec_cfg.mounted_vfs_paths:
+    #             mount_lines.add('mount_vfs_texture_path("{}")\n'.format(vfs_path))
+    #
+    #     backup_path = mv_autoexec_cfg.dirname().joinpath('autoexec.lua_EMFT_BACKUP')
+    #     if not backup_path.exists():
+    #         logger.info('backing up "{}" -> "{}"'.format(mv_autoexec_cfg.abspath(), backup_path.abspath()))
+    #         mv_autoexec_cfg.copy2(backup_path.abspath())
+    #
+    #     orig_lines = mv_autoexec_cfg.lines()
+    #
+    #     lines = []
+    #
+    #     for line in orig_lines:
+    #         if Config().allow_mv_autoexec_changes:
+    #             if RE_MOUNT_LINE.match(line):
+    #                 # print('skipping', line)
+    #                 continue
+    #         if RE_LOAD_MODEL_LINE.match(line):
+    #             # print('skipping', line)
+    #             continue
+    #         if RE_LOAD_LIVERY_LINE.match(line):
+    #             # print('skipping', line)
+    #             continue
+    #         lines.append(line)
+    #
+    #     # model_path = 'LoadModel("Bazar/World/Shapes/{}.edm")'.format(
+    #           self._active_dcs_install.get_object_model(ac_name))
+    #
+    #     lines.insert(0, 'LoadLivery("{ac_name}","{skin_name}")'.format(**locals()))
+    #     lines.insert(0, 'LoadModel("Bazar/World/Shapes/{ac_name}.edm")'.format(**locals()))
+    #
+    #     if Config().allow_mv_autoexec_changes:
+    #         for line in mount_lines:
+    #             lines.insert(0, line)
+    #
+    #     mv_autoexec_cfg.write_lines(lines)
+    #
+    #     os.startfile(mv_exe.abspath())
 
     def _test_menu(self, row):
         print(self.proxy.data(self.proxy.index(row, 0)))
