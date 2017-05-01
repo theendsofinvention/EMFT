@@ -1,6 +1,7 @@
 # coding=utf-8
 
 import os
+import webbrowser
 
 from utils import Path, Version, AVRelease, make_logger
 
@@ -8,12 +9,11 @@ from src import global_
 from src.__version__ import __version__
 from src.cfg import Config
 from src.misc.dcs_installs import dcs_installs
-from src.ui.base import VLayout, PushButton, GroupBox, LineEdit, Label, VSpacer, GridLayout, Combo, HLayout, HSpacer
+from src.ui.base import VLayout, PushButton, GroupBox, LineEdit, Label, VSpacer, GridLayout, Combo, HSpacer, HLayout
 from src.ui.dialog_browse import BrowseDialog
 from src.ui.itab import iTab
 from src.ui.main_ui_interface import I
 from src.updater import updater
-
 
 logger = make_logger(__name__)
 
@@ -33,6 +33,7 @@ class TabConfig(iTab):
         self.remote_version = Label('')
         self.update_channel_combo.set_index_from_text(Config().update_channel)
         self.update_scan_btn = PushButton('Check for new version', self._check_for_new_version)
+        self.show_changelog_btn = PushButton('Show changelog', self._show_changelog)
         self.install_new_version_btn = PushButton('Install this version', self._install_latest_version)
 
         updater_layout = GroupBox(
@@ -42,34 +43,51 @@ class TabConfig(iTab):
                     Label('During the initial testing phase of this application, auto-update cannot be turned off.\n'
                           'You can, however, elect to participate in early testing, or stick to the most stable'
                           ' versions only.'),
-                    10,
+                    20,
                     GridLayout(
                         [
                             [
                                 Label('Active update channel'),
-                                HLayout(
-                                    [
-                                        self.update_channel_combo,
-                                        self.update_scan_btn,
-                                        HSpacer()
-                                    ]
-                                ),
-                            ],
-                            [10],
-                            [
+                                self.update_channel_combo,
+                                self.update_scan_btn,
+                                HSpacer(),
                                 Label('Current version'),
                                 Label(__version__),
-                                HSpacer(),
+                                self.show_changelog_btn,
                                 HSpacer(),
                             ],
                             [
+                                HSpacer(),
+                                (Label('stable:'), {'align': 'r'}),
+                                Label('tested releases'),
+                                HSpacer(),
                                 Label('Remote version'),
                                 self.remote_version,
                                 self.install_new_version_btn,
                                 HSpacer(),
                             ],
+                            [
+                                HSpacer(),
+                                (Label('rc:'), {'align': 'r'}),
+                                Label('releases candidates'),
+                                HSpacer(),
+                                HSpacer(),
+                                HSpacer(),
+                                HSpacer(),
+                                HSpacer(),
+                            ],
+                            [
+                                HSpacer(),
+                                (Label('dev:'), {'align': 'r'}),
+                                Label('experimental versions'),
+                                HSpacer(),
+                                HSpacer(),
+                                HSpacer(),
+                                HSpacer(),
+                                HSpacer(),
+                            ],
                         ],
-                        [0, 0, 0, 10000]
+                        [0, 0, 0, 25, 0, 0, 0, 50]
                     )
                 ]
             )
@@ -92,8 +110,8 @@ class TabConfig(iTab):
         )
 
         dcs_installations = []
-        for x in ['stable', 'beta', 'alpha']:
-            setattr(self, '{}_group'.format(x), GroupBox('DCS {} installation'.format(x)))
+        for x, y in [('stable', 'Stable'), ('beta', 'Open beta'), ('alpha', 'Open alpha')]:
+            setattr(self, '{}_group'.format(x), GroupBox(y))
             setattr(self, '{}_install'.format(x), Label(''))
             setattr(self, '{}_variant'.format(x), Label(''))
             setattr(self, '{}_version'.format(x), Label(''))
@@ -108,11 +126,15 @@ class TabConfig(iTab):
                 )
             )
             dcs_installations.append(getattr(self, '{}_group'.format(x)))
+            dcs_installations.append(HSpacer())
 
-        dcs_installations = VLayout(
-            [
-                *dcs_installations
-            ]
+        dcs_installations = GroupBox(
+            'DCS Installations',
+            HLayout(
+                [
+                    *dcs_installations[:-1]
+                ]
+            )
         )
 
         self.setLayout(
@@ -123,12 +145,15 @@ class TabConfig(iTab):
                     sg_path_layout,
                     VSpacer(),
                     dcs_installations,
-                    VSpacer(),
+                    # VSpacer(),
                 ]
             )
         )
 
         self.install_new_version_btn.setVisible(False)
+
+    def _show_changelog(self):
+        webbrowser.open_new_tab(r'''https://github.com/132nd-etcher/EMFT/blob/develop/CHANGELOG.rst''')
 
     def update_config_tab(self, latest_release: AVRelease):
         self.remote_version.set_text_color('black')
@@ -173,7 +198,7 @@ class TabConfig(iTab):
             updater.download_and_install_release(self.latest_release, 'emft.exe')
         else:
             logger.error('no release to install')
-        # self.updater.install_latest_remote()
+            # self.updater.install_latest_remote()
 
     def _sg_browse(self):
         p = BrowseDialog.get_directory(self, 'Saved Games directory', Path(self.sg.text()).dirname())
