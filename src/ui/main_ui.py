@@ -106,21 +106,11 @@ def start_ui(test=False):
     global_.MAIN_UI = MainUi()
 
     global_.MAIN_UI.add_tab(
-        TabLog(),
-        helpers=
-        {
-            'write_log': 'write'
-        }
-    )
-
-    global_.MAIN_UI.add_tab(
         TabReorder(),
-        helpers=
-        {
+        helpers={
             'tab_reorder_update_view_after_remote_scan': 'tab_reorder_update_view_after_remote_scan'
         }
     )
-
     from src.misc import dcs_installs
     dcs_installs.discover_dcs_installations()
 
@@ -131,9 +121,20 @@ def start_ui(test=False):
 
     global_.MAIN_UI.add_tab(
         TabConfig(),
-        helpers=
-        {
+        helpers={
             'update_config_tab': 'update_config_tab'
+        }
+    )
+
+    tab_log = TabLog()
+
+    from src.misc.logging_handler import persistent_logging_handler
+    persistent_logging_handler.add_follower(tab_log)
+
+    global_.MAIN_UI.add_tab(
+        tab_log,
+        helpers={
+            'write_log': 'write'
         }
     )
 
@@ -167,7 +168,6 @@ def start_ui(test=False):
     global_.MAIN_UI.update_config_tab()
 
     if test:
-
         logger.critical('RUNNING IN TEST MODE')
         import time
         from utils import ThreadPool, nice_exit

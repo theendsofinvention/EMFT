@@ -6,7 +6,8 @@ if __name__ == '__main__':
     from utils.custom_logging import make_logger
     # noinspection PyProtectedMember
     from src.global_ import PATH_LOG_FILE
-    logger = make_logger(__name__, log_file_path=PATH_LOG_FILE)
+    from src.misc.logging_handler import persistent_logging_handler
+    logger = make_logger(__name__, log_file_path=PATH_LOG_FILE, custom_handler=persistent_logging_handler)
 
     """Say hello !"""
     from src.__version__ import __version__
