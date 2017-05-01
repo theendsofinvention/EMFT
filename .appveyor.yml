@@ -26,9 +26,6 @@ environment:
       secure: hyFFOoK6WbxtLxy2jOGlOPbRJ33Al8E1B0QeT+qUqJ8=
     GITTER_WH:
       secure: +89HquiQeI4sKs1t8EZ0hEuFjD/KMPWL09tJTmKjFOuHomh3O0jWMTzif2fv3EkuH2/WNf4IrtxFa9Lyxt8mtA==
-    CODECOV_TOKEN:
-      secure: vmheTXBO6T+ryELK1KR2ykiu5wj4ltDRhUo576dG6CGGBCxjpi+BUoa55Amtdoy8
-
 
 matrix:
     fast_finish: true
@@ -100,8 +97,8 @@ after_test:
   - "%PYTHON%/Scripts/python-codacy-coverage.exe -r coverage.xml"
 #  - "%PYTHON%/Scripts/pip.exe install coveralls"
 #  - "%PYTHON%/Scripts/coveralls.exe"
-  - "%PYTHON%/Scripts/pip.exe install codecov"
-  - "%PYTHON%/Scripts/codecov.exe"
+#  - "%PYTHON%/Scripts/pip.exe install codecov"
+#  - "%PYTHON%/Scripts/codecov.exe"
 
 
 artifacts:
