@@ -367,7 +367,7 @@ class _TableViewWithRowContextMenu:
         self._menu = menu
 
     # noinspection PyPep8Naming
-    def contextMenuEvent(self, event):  # TODO
+    def contextMenuEvent(self, event):
         logger.debug('in')
         if self._menu:
             logger.debug('menu')
@@ -468,3 +468,15 @@ class TableModel(QAbstractTableModel):
             if orientation == Qt.Horizontal:
                 return self._header_data[col]
         return QVariant()
+
+
+def box_info(parent, title: str, text: str):
+    # noinspection PyArgumentList
+    QMessageBox.information(parent, title, text)
+
+
+def box_question(parent, text: str, title: str = 'Please confirm'):
+    # noinspection PyArgumentList
+    reply = QMessageBox.question(parent, title, text)
+
+    return reply == QMessageBox.Yes
