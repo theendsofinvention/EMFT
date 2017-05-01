@@ -104,10 +104,19 @@ def start_ui(test=False):
     logger.debug('starting QtApp object')
     global_.QT_APP = QApplication([])
     global_.MAIN_UI = MainUi()
-    global_.MAIN_UI.add_tab(TabLog(), helpers={'write_log': 'write'})
+
+    global_.MAIN_UI.add_tab(
+        TabLog(),
+        helpers=
+        {
+            'write_log': 'write'
+        }
+    )
+
     global_.MAIN_UI.add_tab(
         TabReorder(),
-        helpers={
+        helpers=
+        {
             'tab_reorder_update_view_after_remote_scan': 'tab_reorder_update_view_after_remote_scan'
         }
     )
@@ -120,7 +129,14 @@ def start_ui(test=False):
         helpers={}
     )
 
-    global_.MAIN_UI.add_tab(TabConfig(), helpers={'update_config_tab': 'update_config_tab'})
+    global_.MAIN_UI.add_tab(
+        TabConfig(),
+        helpers=
+        {
+            'update_config_tab': 'update_config_tab'
+        }
+    )
+
     global_.MAIN_UI.show()
 
     def pre_update_hook():
