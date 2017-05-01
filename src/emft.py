@@ -5,7 +5,6 @@ from json import loads
 
 import click
 from natsort.natsort import natsorted
-
 from utils.custom_logging import make_logger, DEBUG, INFO
 from utils.custom_path import Path
 
@@ -39,7 +38,7 @@ def check_cert():
     from utils.custom_path import Path
     cacert = Path(certifi.where())
     # noinspection SpellCheckingInspection
-    if not cacert.crc32() == 'D069EE01':
+    if not cacert.crc32() == '8EBF6C38':
         raise ImportError('cacert.pem file is corrupted: {}'.format(cacert.crc32()))
     logger.debug('setting up local cacert file to: {}'.format(str(cacert)))
     os.environ['REQUESTS_CA_BUNDLE'] = str(cacert)
@@ -54,22 +53,6 @@ def check_cert():
 #               help='Folder that contains the TRMT files; the latest will be picked automatically.')
 @click.option('-v', '--verbose', is_flag=True, help='Outputs debug messages')
 def main(test, verbose):
-
-    # from src.miz.miz import Miz
-    #
-    # with Miz(r'C:\Users\bob\Saved Games\DCS\Missions\132nd\TRMT_2.4.0.86.miz') as miz:
-    #     mission = miz.mission
-    #     miz._encode_mission()
-    #     os.remove(r'C:\Users\bob\Saved Games\DCS\Missions\132nd\TRMT_2.4.0.86_EMFT\mission')
-    #     os.rename(miz.mission_file_path, r'C:\Users\bob\Saved Games\DCS\Missions\132nd\TRMT_2.4.0.86_EMFT\mission')
-    #     # miz.zip()
-    #
-    #
-    # # for client in mission.get_clients_groups():
-    # #     print(client.group_name)
-    #
-    # exit(0)
-
     if verbose:
         from utils.custom_logging import CH
         CH.setLevel(DEBUG)

@@ -1,40 +1,45 @@
 # coding=utf-8
 
 import os
+import webbrowser
 
 from utils import Path, Version, AVRelease, make_logger
 
 from src import global_
 from src.__version__ import __version__
 from src.cfg import Config
-from src.misc import dcs_installs
-from src.ui.base import VLayout, PushButton, GroupBox, LineEdit, Label, VSpacer, GridLayout, Combo, HLayout, HSpacer
-from src.ui.dialog_browse import BrowseDialog
-from src.ui.itab import iTab
+from src.misc.fs import dcs_installs, saved_games
+from src.ui.base import VLayout, PushButton, GroupBox, LineEdit, Label, VSpacer, GridLayout, Combo, HSpacer, HLayout, \
+    BrowseDialog
+from src.ui.main_ui_tab_widget import MainUiTabChild
 from src.ui.main_ui_interface import I
 from src.updater import updater
-
+from .tab_config_adapter import TAB_NAME, TabConfigAdapter
 
 logger = make_logger(__name__)
 
 
-class TabConfig(iTab):
+class TabChildConfig(MainUiTabChild, TabConfigAdapter):
+
+    def tab_clicked(self):
+        self._check_for_new_version()
+        self._sg_scan()
+
     @property
     def tab_title(self) -> str:
-        return 'Config'
+        return TAB_NAME
 
     def __init__(self, parent=None):
-        iTab.__init__(self, parent=parent)
+        MainUiTabChild.__init__(self, parent=parent)
         self.sg = LineEdit(Config().saved_games_path or '', self._on_change_sg, read_only=True)
-        self.update_channel_combo = Combo(self._on_change_update_channel, [
-            'stable', 'rc', 'dev', 'beta', 'alpha'
-        ])
+        self.update_channel_combo = Combo(self._on_change_update_channel, ['stable', 'rc', 'dev'])
 
         self.latest_release = None
 
         self.remote_version = Label('')
         self.update_channel_combo.set_index_from_text(Config().update_channel)
         self.update_scan_btn = PushButton('Check for new version', self._check_for_new_version)
+        self.show_changelog_btn = PushButton('Show changelog', self._show_changelog)
         self.install_new_version_btn = PushButton('Install this version', self._install_latest_version)
 
         updater_layout = GroupBox(
@@ -44,34 +49,51 @@ class TabConfig(iTab):
                     Label('During the initial testing phase of this application, auto-update cannot be turned off.\n'
                           'You can, however, elect to participate in early testing, or stick to the most stable'
                           ' versions only.'),
-                    10,
+                    20,
                     GridLayout(
                         [
                             [
                                 Label('Active update channel'),
-                                HLayout(
-                                    [
-                                        self.update_channel_combo,
-                                        self.update_scan_btn,
-                                        HSpacer()
-                                    ]
-                                ),
-                            ],
-                            [10],
-                            [
+                                self.update_channel_combo,
+                                self.update_scan_btn,
+                                HSpacer(),
                                 Label('Current version'),
                                 Label(__version__),
+                                self.show_changelog_btn,
+                                HSpacer(),
                             ],
                             [
+                                HSpacer(),
+                                (Label('stable:'), {'align': 'r'}),
+                                Label('tested releases'),
+                                HSpacer(),
                                 Label('Remote version'),
-                                HLayout([self.remote_version, self.install_new_version_btn, HSpacer()]),
+                                self.remote_version,
+                                self.install_new_version_btn,
+                                HSpacer(),
                             ],
-                            # [
-                            #     Label('GUID'),
-                            #     Label(__guid__),
-                            # ],
+                            [
+                                HSpacer(),
+                                (Label('rc:'), {'align': 'r'}),
+                                Label('releases candidates'),
+                                HSpacer(),
+                                HSpacer(),
+                                HSpacer(),
+                                HSpacer(),
+                                HSpacer(),
+                            ],
+                            [
+                                HSpacer(),
+                                (Label('dev:'), {'align': 'r'}),
+                                Label('experimental versions'),
+                                HSpacer(),
+                                HSpacer(),
+                                HSpacer(),
+                                HSpacer(),
+                                HSpacer(),
+                            ],
                         ],
-                        [0, 1]
+                        [0, 0, 0, 25, 0, 0, 0, 50]
                     )
                 ]
             )
@@ -94,8 +116,8 @@ class TabConfig(iTab):
         )
 
         dcs_installations = []
-        for x in ['stable', 'beta', 'alpha']:
-            setattr(self, '{}_group'.format(x), GroupBox('DCS {} installation'.format(x)))
+        for x, y in [('stable', 'Stable'), ('beta', 'Open beta'), ('alpha', 'Open alpha'), ('custom', 'Custom')]:
+            setattr(self, '{}_group'.format(x), GroupBox(y))
             setattr(self, '{}_install'.format(x), Label(''))
             setattr(self, '{}_variant'.format(x), Label(''))
             setattr(self, '{}_version'.format(x), Label(''))
@@ -110,13 +132,36 @@ class TabConfig(iTab):
                 )
             )
             dcs_installations.append(getattr(self, '{}_group'.format(x)))
+            # dcs_installations.append(HSpacer())
 
-        dcs_installations = VLayout(
-            [
-                *dcs_installations
-            ]
+        self.custom_dcs_install_install_set = PushButton('Set', self._custom_dcs_install_set)
+        self.custom_dcs_install_install_remove = PushButton('Remove', self._custom_dcs_install_remove)
+
+        dcs_installations = GroupBox(
+            'DCS Installations',
+            GridLayout([
+                [HLayout([dcs_installations[0]]), HLayout([dcs_installations[1]])],
+                [HLayout([dcs_installations[2]]), HLayout([dcs_installations[3]])],
+                [
+                    HSpacer(),
+                    HLayout(
+                        [
+                            Label('Custom DCS installation:'),
+                            self.custom_dcs_install_install_set,
+                            self.custom_dcs_install_install_remove,
+                            HSpacer()
+                        ]
+                    )
+                ]
+                # HLayout([*dcs_installations[0:2]]),
+                # HLayout([*dcs_installations[2:]]),
+            ]),
+            # HLayout(
+            #     [
+            #         *dcs_installations[:-1]
+            #     ]
+            # )
         )
-
         self.setLayout(
             VLayout(
                 [
@@ -132,9 +177,30 @@ class TabConfig(iTab):
 
         self.install_new_version_btn.setVisible(False)
 
-    def update_config_tab(self, latest_release: AVRelease):
+    def _custom_dcs_install_set(self):
+        logger.debug('setting custom DCS install')
+        install_dir = BrowseDialog.get_directory(self, 'DCS installation directory')
+        if not install_dir:
+            logger.debug('user cancelled')
+            return
+        variant = BrowseDialog.get_directory(self, 'Variant directory (DCS subdir in Saved Games)',
+                                             init_dir=saved_games.saved_games_path)
+        if not variant:
+            logger.debug('user cancelled')
+            return
+        dcs_installs.add_custom(install_dir, variant)
+
+    @staticmethod
+    def _custom_dcs_install_remove():
+        dcs_installs.remove_custom()
+
+    @staticmethod
+    def _show_changelog():
+        webbrowser.open_new_tab(global_.LINK_CHANGELOG)
+
+    def config_tab_update_dcs_installs(self):
         self.remote_version.set_text_color('black')
-        for x in ['stable', 'beta', 'alpha']:
+        for x in ['stable', 'beta', 'alpha', 'custom']:
             dcs_install = getattr(dcs_installs, x)
             if dcs_install:
                 getattr(self, '{}_install'.format(x)).setText(dcs_install.install_path)
@@ -142,7 +208,12 @@ class TabConfig(iTab):
                 getattr(self, '{}_version'.format(x)).setText(dcs_install.version)
             else:
                 getattr(self, '{}_install'.format(x)).setText('not found')
+                getattr(self, '{}_variant'.format(x)).setText('')
+                getattr(self, '{}_version'.format(x)).setText('')
         self.update_channel_combo.set_index_from_text(Config().update_channel)
+        self.custom_dcs_install_install_remove.setEnabled(bool(Config().dcs_custom_install_path))
+
+    def config_tab_update_latest_release(self, latest_release: AVRelease):
         if latest_release:
             app_version = Version(global_.APP_VERSION)
             self.latest_release = latest_release
@@ -163,10 +234,11 @@ class TabConfig(iTab):
     def _check_for_new_version(self):
         if hasattr(self, 'install_new_version_btn'):
             self.install_new_version_btn.setVisible(False)
+        self.remote_version.setText('Probing ...')
         updater.get_latest_release(
             channel=Config().update_channel,
             branch=Version(global_.APP_VERSION),
-            success_callback=I.update_config_tab,
+            success_callback=I.config_tab_update_latest_release,
         )
 
     def _install_latest_version(self):
@@ -175,7 +247,7 @@ class TabConfig(iTab):
             updater.download_and_install_release(self.latest_release, 'emft.exe')
         else:
             logger.error('no release to install')
-        # self.updater.install_latest_remote()
+            # self.updater.install_latest_remote()
 
     def _sg_browse(self):
         p = BrowseDialog.get_directory(self, 'Saved Games directory', Path(self.sg.text()).dirname())
@@ -184,7 +256,8 @@ class TabConfig(iTab):
             self.sg.setText(p)
 
     def _sg_scan(self):
-        self.sg.setText(dcs_installs.discover_saved_games_path())
+        saved_games.discover_saved_games_path()
+        self.sg.setText(saved_games.saved_games_path)
 
     def _sg_open(self):
         os.startfile(self.sg.text())
