@@ -108,7 +108,7 @@ def start_ui(test=False):
             'tab_reorder_update_view_after_remote_scan': 'tab_reorder_update_view_after_remote_scan'
         }
     )
-    from src.misc import dcs_installs
+    from src.misc.dcs_installs import dcs_installs
     dcs_installs.discover_dcs_installations()
 
     from src.ui.tab_skins import TabSkins
