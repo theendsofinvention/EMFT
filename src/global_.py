@@ -1,7 +1,7 @@
 # coding=utf-8
 
-import sys
 import os
+import sys
 
 import src.__version__
 
@@ -11,12 +11,14 @@ try:
 except KeyError:
     TESTING = False
 
-UPDATER_CONFIG = dict(current_version=src.__version__.__version__,
-                      gh_user='132nd-etcher',
-                      gh_repo='EMFT',
-                      asset_filename='EMFT.exe')
+DEFAULT_ICON = ':/ico/app.ico'
 
-UPDATER_LATEST = None
+if 'dev' in src.__version__.__version__:
+    LINK_CHANGELOG = r'''https://github.com/132nd-etcher/EMFT/blob/develop/CHANGELOG.rst'''
+else:
+    LINK_CHANGELOG = r'''https://github.com/132nd-etcher/EMFT/blob/master/CHANGELOG.rst'''
+
+LINK_REPO = r'''https://github.com/132nd-etcher/EMFT'''
 
 PATH_LOG_FILE = 'emft.debug'
 PATH_CONFIG_FILE = 'emft.config'
@@ -41,3 +43,20 @@ DCS = {
 
 QT_APP = None
 MAIN_UI = None
+
+try:
+    # noinspection PyUnresolvedReferences
+    from winreg import ConnectRegistry, HKEY_LOCAL_MACHINE, KEY_READ, KEY_WOW64_64KEY, OpenKey, QueryValueEx
+
+    a_reg = ConnectRegistry(None, HKEY_LOCAL_MACHINE)
+    try:
+        with OpenKey(a_reg, r"SOFTWARE\Microsoft\Cryptography") as aKey:
+            MACHINE_GUID = QueryValueEx(aKey, "MachineGuid")[0]
+    except FileNotFoundError:
+        try:
+            with OpenKey(a_reg, r"SOFTWARE\Microsoft\Cryptography", access=KEY_READ | KEY_WOW64_64KEY) as aKey:
+                MACHINE_GUID = QueryValueEx(aKey, "MachineGuid")[0]
+        except FileNotFoundError:
+            MACHINE_UID = False
+except ImportError:
+    MACHINE_UID = False

@@ -17,6 +17,23 @@ class AbstractMeta(ISentryContextProvider, metaclass=abc.ABCMeta):
     def load(self, data):
         """pass"""
 
+
+class AbstractMetaFile(AbstractMeta, metaclass=abc.ABCMeta):
+
+    @property
+    @abc.abstractmethod
+    def meta_header(self):
+        """"""
+
+    @property
+    @abc.abstractmethod
+    def meta_version(self):
+        """"""
+
+    @abc.abstractmethod
+    def meta_version_upgrade(self, from_version):
+        """"""
+
     @abc.abstractmethod
     def read(self):
         """Reads meta from file"""

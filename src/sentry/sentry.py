@@ -12,10 +12,11 @@ import raven.handlers.logging
 from src import global_
 from src.__version__ import __version__
 from src.sentry.sentry_context_provider import ISentryContextProvider
-from utils.custom_logging import make_logger
-from utils.singleton import Singleton
+from utils import Singleton, make_logger, nice_exit
 
 logger = make_logger(__name__)
+
+CRASH = False
 
 
 class Sentry(raven.Client, metaclass=Singleton):
@@ -73,6 +74,9 @@ class Sentry(raven.Client, metaclass=Singleton):
             assert isinstance(context_provider, ISentryContextProvider)
             SENTRY.extra_context({k: context_provider.get_context()})
         super(Sentry, self).captureException(exc_info, **kwargs)
+
+        if CRASH:
+            nice_exit(-1)
 
 
 logger.info('SENTRY: initializing')
