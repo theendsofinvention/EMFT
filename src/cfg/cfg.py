@@ -27,10 +27,20 @@ class Config(Meta, ConfigValues, metaclass=Singleton):
 
     @property
     def meta_version(self):
-        return 1
+        return 2
+
+    def upgrade_from_v1(self):
+        if self.update_channel in ['alpha', 'beta']:
+            self.__setitem__('update_channel', 'dev', _write=False)
+        return True
 
     def meta_version_upgrade(self, from_version):
-        return True
+        if from_version == self.meta_version:
+            return True
+        upgrade_func = getattr(self, 'upgrade_from_v{}'.format(from_version))
+        if upgrade_func:
+            logger.info('updating Config to meta version {}'.format(from_version))
+            return upgrade_func()
 
     def __getitem__(self, key):
         """Mutes KeyError"""

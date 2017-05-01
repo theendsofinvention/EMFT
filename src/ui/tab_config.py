@@ -26,9 +26,7 @@ class TabConfig(iTab):
     def __init__(self, parent=None):
         iTab.__init__(self, parent=parent)
         self.sg = LineEdit(Config().saved_games_path or '', self._on_change_sg, read_only=True)
-        self.update_channel_combo = Combo(self._on_change_update_channel, [
-            'stable', 'rc', 'dev', 'beta', 'alpha'
-        ])
+        self.update_channel_combo = Combo(self._on_change_update_channel, ['stable', 'rc', 'dev'])
 
         self.latest_release = None
 

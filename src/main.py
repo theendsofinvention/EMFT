@@ -2,6 +2,13 @@
 
 if __name__ == '__main__':
 
+    """Init Sentry"""
+    # noinspection PyUnresolvedReferences
+    from src.sentry import SENTRY
+    from utils.threadpool import register_sentry
+
+    register_sentry(SENTRY)
+
     """Setup logging"""
     from utils.custom_logging import make_logger
     # noinspection PyProtectedMember
@@ -16,12 +23,6 @@ if __name__ == '__main__':
     """Init config"""
     # noinspection PyUnresolvedReferences
     from src.cfg.cfg import Config
-
-    """Init Sentry"""
-    # noinspection PyUnresolvedReferences
-    from src.sentry import SENTRY
-    from utils.threadpool import register_sentry
-    register_sentry(SENTRY)
     SENTRY.register_context('config', Config())
 
     """Intercept SIGINT"""
