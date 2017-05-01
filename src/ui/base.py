@@ -126,6 +126,8 @@ class GridLayout(QGridLayout):
                     self.addLayout(child[c], r, c)
                 elif isinstance(child[c], int):
                     self.addItem(VSpacer(child[c]))
+                elif isinstance(child[c], QSpacerItem):
+                    self.addItem(child[c])
                 else:
                     raise ValueError('unmanaged child type: {}'.format(type(child[c])))
 
