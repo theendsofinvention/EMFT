@@ -30,7 +30,7 @@ class MizPath(Path):
 
 
 class Miz:
-    def __init__(self, path_to_miz_file, temp_dir=None, keep_temp_dir: bool = False):
+    def __init__(self, path_to_miz_file, temp_dir=None, keep_temp_dir: bool = False, overwrite: bool = False):
 
         self.miz_path = Path(path_to_miz_file)
 
@@ -48,6 +48,8 @@ class Miz:
 
         self.keep_temp_dir = keep_temp_dir
 
+        self.overwrite = overwrite
+
         self.tmpdir = Path(tempfile.mkdtemp('EMFT_'))
         logger.debug('temporary directory: {}'.format(self.tmpdir.abspath()))
 
@@ -61,7 +63,7 @@ class Miz:
 
     def __enter__(self):
         logger.debug('instantiating new Mission object as a context')
-        self.unzip()
+        self.unzip(self.overwrite)
         self._decode()
         return self
 
@@ -109,7 +111,12 @@ class Miz:
 
     @staticmethod
     def reorder(miz_file_path, target_dir, skip_options_file):
-        with Miz(miz_file_path) as m:
+
+        logger.info('re-ordering miz file: {}'.format(miz_file_path))
+        logger.debug('destination folder: {}'.format(target_dir))
+        logger.debug('{}option file'.format('skipping' if skip_options_file else 'including'))
+
+        with Miz(miz_file_path, overwrite=True) as m:
 
             def mirror_dir(src, dst):
                 logger.debug('{} -> {}'.format(src, dst))
@@ -133,8 +140,6 @@ class Miz:
                     assert isinstance(sub, dircmp)
                     mirror_dir(sub.left, sub.right)
 
-            m.unzip(overwrite=True)
-            m._decode()
             m._encode()
 
             if skip_options_file:

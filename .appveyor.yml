@@ -12,8 +12,9 @@ environment:
     GIT_DAEMON_PATH:   "C:\\Program Files\\Git\\mingw64\\libexec\\git-core"
     CYGWIN_GIT_PATH:   "C:\\cygwin\\bin;%GIT_DAEMON_PATH%"
     CYGWIN64_GIT_PATH: "C:\\cygwin64\\bin;%GIT_DAEMON_PATH%"
-    PYTHON: "C:\\Python35"
-    PYTHON_VERSION: "3.5.2"
+    APPVEYOR_ARTIFACT_UPLOAD_TIMEOUT: 60
+    PYTHON: "C:\\Python36"
+    PYTHON_VERSION: "3.6.1"
     GIT_PATH: "%GIT_DAEMON_PATH%"
     CODACY_PROJECT_TOKEN:
       secure: bmEooEVFoq7es4UnGWre1B59iF3PYcHts+eFirP+RxJp6IBRm2210jU2zpIpOKaD
@@ -23,17 +24,43 @@ environment:
       secure: H9M/aPctMSk1+0AWe/l5D0U3oXto404/4UYiPMCECpjy0llgb8cBKTRyr20UDWdX
     GH_MAIL:
       secure: hyFFOoK6WbxtLxy2jOGlOPbRJ33Al8E1B0QeT+qUqJ8=
+    GITTER_WH:
+      secure: +89HquiQeI4sKs1t8EZ0hEuFjD/KMPWL09tJTmKjFOuHomh3O0jWMTzif2fv3EkuH2/WNf4IrtxFa9Lyxt8mtA==
+    CODECOV_TOKEN:
+      secure: vmheTXBO6T+ryELK1KR2ykiu5wj4ltDRhUo576dG6CGGBCxjpi+BUoa55Amtdoy8
+    DISCORD_WH:
+      secure: 5D6E25n3HCcAehRtC/ZpFb3+fz57fdCVCwfE+z8L9g0lVA+w6+QsidzebBwoWs6/wRwjW1R5LoTXq69AfAKBWWhVzNHKQuw29+tSoGG2wZs=
+
 
 matrix:
     fast_finish: true
 
 init:
+  # If there is a newer build queued for the same PR, cancel this one.
+  # The AppVeyor 'rollout builds' option is supposed to serve the same
+  # purpose but is problematic because it tends to cancel builds pushed
+  # directly to master instead of just PR builds.
+  # credits: JuliaLang developers.
+  - ps: if ($env:APPVEYOR_PULL_REQUEST_NUMBER -and $env:APPVEYOR_BUILD_NUMBER -ne ((Invoke-RestMethod `
+        https://ci.appveyor.com/api/projects/$env:APPVEYOR_ACCOUNT_NAME/$env:APPVEYOR_PROJECT_SLUG/history?recordsNumber=50).builds | `
+        Where-Object pullRequestId -eq $env:APPVEYOR_PULL_REQUEST_NUMBER)[0].buildNumber) { `
+        throw "There are newer queued builds for this pull request, failing early." }
+
+  # Check that we have the expected version and architecture for Python
+  - "python --version"
+  - "python -c \"import struct; print(struct.calcsize('P') * 8)\""
+  - "pip --version"
+
   - cmd: echo %PYTHON% %PYTHON_VERSION% %PYTHON_ARCH%
+  - cmd: echo %APPVEYOR_BUILD_WORKER_IMAGE%
   - cmd: appveyor UpdateBuild -Version "%APPVEYOR_REPO_BRANCH%.%APPVEYOR_REPO_COMMIT%.%APPVEYOR_BUILD_NUMBER%"
   - git config --global credential.helper store
   - ps: Add-Content "$env:USERPROFILE\.git-credentials" "https://$($env:GH_TOKEN):x-oauth-basic@github.com`n"
   - "git config --global user.email %GH_MAIL%"
-  - "git config --global user.name 132nd-etcher"
+  - "git config --global user.name %APPVEYOR_ACCOUNT_NAME%"
+  - cmd: echo %APPVEYOR_REPO_COMMIT_TIMESTAMP%
+  - cmd: echo %APPVEYOR_REPO_COMMIT_MESSAGE%
+  - cmd: echo %APPVEYOR_REPO_COMMIT_MESSAGE_EXTENDED%
 
 cache:
   - C:\Users\appveyor\AppData\Local\pip\cache
@@ -44,11 +71,12 @@ install:
   - "%PYTHON%/Scripts/pip.exe install --disable-pip-version-check --user --upgrade pip"
   - "%PYTHON%/Scripts/pip.exe install --upgrade coverage"
   - "%PYTHON%/Scripts/pip.exe install -r requirements.txt"
-  - "%PYTHON%/Scripts/pip.exe install -r own_requirements.txt"
+  - "%PYTHON%/Scripts/pip.exe install -r own-requirements.txt"
+  - "%PYTHON%/Scripts/pip.exe install git+https://github.com/pyinstaller/pyinstaller.git@develop#egg=PyInstaller"
   - choco install gitversion.portable -pre -y
 #  - choco install gitversion.portable -y
   - git clone --branch=master https://github.com/132nd-etcher/verpatch.git C:\projects\verpatch
-  - curl -O http://esrg.sourceforge.net/utils_win_up/md5sum/crc32.exe
+#  - curl -O http://esrg.sourceforge.net/utils_win_up/md5sum/crc32.exe
 
 before_build:
   - ps: C:\ProgramData\chocolatey\bin\gitversion /l console /output buildserver /updateassemblyinfo /b (get-item env:APPVEYOR_REPO_BRANCH).Value
@@ -67,33 +95,33 @@ test_script:
   - cmd: emft.exe --test
 
 after_test:
-  - cmd: git tag %GitVersion_SemVer%
-  - cmd: git push origin %GitVersion_SemVer%
+#  - 'git tag %GitVersion_SemVer% & exit 0'
+#  - 'git push origin %GitVersion_SemVer% & exit 0'
   - "%PYTHON%/Scripts/pip.exe install git+https://github.com/132nd-etcher/ocular.py.git"
-  - "%PYTHON%/Scripts/ocular.exe --access-token %SCRUTINIZER_TOKEN%"
+  - "%PYTHON%/Scripts/ocular.exe --access-token %SCRUTINIZER_TOKEN% & exit 0"
   - "%PYTHON%/Scripts/pip.exe install codacy-coverage"
-  - "%PYTHON%/Scripts/python-codacy-coverage.exe -r coverage.xml"
+  - "%PYTHON%/Scripts/python-codacy-coverage.exe -r coverage.xml & exit 0"
 #  - "%PYTHON%/Scripts/pip.exe install coveralls"
 #  - "%PYTHON%/Scripts/coveralls.exe"
-#  - "%PYTHON%/Scripts/pip.exe install codecov"
-#  - "%PYTHON%/Scripts/codecov.exe"
+  - "%PYTHON%/Scripts/pip.exe install codecov"
+  - "%PYTHON%/Scripts/codecov.exe & exit 0"
 
 
 artifacts:
   - path: emft.exe
     name: emft
 
-branches:
-  only:
-    - master
-    - develop
-    - /release/.*/
-    - /pull/.*/
-    - /hotfix/.*/
-    - /feature/.*/
-
-  except:
-    - gh-pages
+# branches:
+#   only:
+#     - master
+#     - develop
+#     - /release/.*/
+#     - /pull/.*/
+#     - /hotfix/.*/
+#     - /feature/.*/
+# 
+#   except:
+#     - gh-pages
 
 deploy:
   - provider: GitHub
@@ -106,4 +134,17 @@ deploy:
     on:
       branch: master
       appveyor_repo_tag: false
+
+notifications:
+  - provider: Webhook
+    url: $(GITTER_WH)
+    method: GET
+    on_build_failure: true
+    on_build_status_changed: true
+
+  - provider: Webhook
+    url: https://skyhook.glitch.me/api/webhooks/315445785900744705/$(DISCORD_WH)/appveyor
+    on_build_success: true
+    on_build_failure: true
+    on_build_status_changed: true
 

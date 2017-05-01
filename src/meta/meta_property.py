@@ -1,5 +1,5 @@
 # coding=utf-8
-from src.meta.abstract import AbstractMeta
+from .abstract import AbstractMeta
 
 
 class _MetaProperty:
@@ -11,16 +11,15 @@ class _MetaProperty:
 
     """
 
-    def __init__(self, func: callable, default: object, _type: object):
+    def __init__(self, func: callable, _type: object):
         """
         Initialize the DESCRIPTOR.
 
         :param func: callable to overwrite
-        :param default: default value if there's nothing in the META yet
         :param _type: type of object allowed to be SET
         """
         self.func = func
-        self.default = default
+        self.prop_name = self.func.__name__
         self.type = _type
         self.__doc__ = func.__doc__
 
@@ -43,12 +42,12 @@ class _MetaProperty:
         if not isinstance(instance, AbstractMeta):
             raise TypeError('_MetaProperty can only be used with Meta() instances')
 
-        if instance.__getitem__(self.func.__name__) is None:
-            # Not set yet, returns default
-            return self.default
+        if instance.__getitem__(self.prop_name) is None:
+            # Not set yet, raise AttributeError
+            raise AttributeError('"{}" attribute not set yet'.format(self.prop_name))
         else:
             # Check the value against the setter (I'm being paranoid here)
-            value = self.func(instance, instance.__getitem__(self.func.__name__))
+            value = self.func(instance, instance.__getitem__(self.prop_name))
 
             # Return actual value
             return value
@@ -69,29 +68,26 @@ class _MetaProperty:
         if not isinstance(instance, AbstractMeta):
             raise TypeError('_MetaProperty can only be used with Meta() instances')
 
+        # Runs whatever code is inside the decorated method and set the result to the new value
+        value = self.func(instance, value)
+
         # noinspection PyTypeChecker
         if not isinstance(value, self.type):
             # Checks for type of "value"
             raise TypeError('expected a {}, got: {} (value: {})'.format(str(self.type), type(value), value))
 
-        if value == getattr(instance, self.func.__name__):
-            return
-
-        # Runs whatever code is inside the decorated method and set the result to the new value
-        value = self.func(instance, value)
-
         # If no exception was thrown, sets the value in the META
-        instance.__setitem__(self.func.__name__, value)
+        instance.__setitem__(self.prop_name, value)
 
         # # Broadcast a Blinker signal that the value has changed
-        # signal('{}_{}_value_changed'.format(instance.__class__.__name__, self.func.__name__)).send(
+        # signal('{}_{}_value_changed'.format(instance.__class__.__name__, self.prop_name)).send(
         #     instance.__class__.__name__, value=value)
 
     def __delete__(self, instance):
         if instance is None:
             return self
         try:
-            instance.__delitem__(self.func.__name__)
+            instance.__delitem__(self.prop_name)
         except KeyError:
             pass
 
@@ -101,14 +97,12 @@ class MetaProperty:
     Decorator-class to create properties for META instances.
     """
 
-    def __init__(self, default: object, _type: object):
+    def __init__(self, _type: object):
         """
         Initialize properties of the descriptor.
 
-        :param default: default value of the property if it isn't set yet
         :param _type:
         """
-        self.default = default
         self.type = _type
 
     def __call__(self, func: callable) -> _MetaProperty:
@@ -119,4 +113,4 @@ class MetaProperty:
         :return: decorated function as a descriptor instance of _MetaProperty
         :rtype: _MetaProperty
         """
-        return _MetaProperty(func, self.default, self.type)
+        return _MetaProperty(func, self.type)
