@@ -46,7 +46,7 @@ install:
   - "%PYTHON%/Scripts/pip.exe install -r requirements.txt"
   - "%PYTHON%/Scripts/pip.exe install -r own_requirements.txt"
   - choco install gitversion.portable -pre -y
-  - choco install gitversion.portable -y
+#  - choco install gitversion.portable -y
   - git clone --branch=master https://github.com/132nd-etcher/verpatch.git C:\projects\verpatch
   - curl -O http://esrg.sourceforge.net/utils_win_up/md5sum/crc32.exe
 
@@ -55,10 +55,6 @@ before_build:
   - cmd: appveyor UpdateBuild -Version %GitVersion_InformationalVersion%.%APPVEYOR_BUILD_NUMBER%
   - "%PYTHON%/python -m pytest --cov=src --cov-config .coveragerc --cov-report xml -c test/.pytest"
   - set PATH="c:\projects\verpatch";%PATH%
-#  - "%PYTHON%/Scripts/pip.exe install coveralls"
-#  - "%PYTHON%/Scripts/coveralls.exe"
-#  - "%PYTHON%/Scripts/pip.exe install codecov"
-#  - "%PYTHON%/Scripts/codecov.exe"
 
 build_script:
   - "%PYTHON%/python.exe -m PyInstaller src/main.py --noconfirm --onefile --clean --icon src/ui/app.ico --workpath ./build --paths %PYTHON%/Lib/site-packages/PyQt5/Qt/bin --name EMFT --distpath ./dist --windowed --log-level=WARN"
@@ -77,6 +73,10 @@ after_test:
   - "%PYTHON%/Scripts/ocular.exe --access-token %SCRUTINIZER_TOKEN%"
   - "%PYTHON%/Scripts/pip.exe install codacy-coverage"
   - "%PYTHON%/Scripts/python-codacy-coverage.exe -r coverage.xml"
+#  - "%PYTHON%/Scripts/pip.exe install coveralls"
+#  - "%PYTHON%/Scripts/coveralls.exe"
+#  - "%PYTHON%/Scripts/pip.exe install codecov"
+#  - "%PYTHON%/Scripts/codecov.exe"
 
 
 artifacts:

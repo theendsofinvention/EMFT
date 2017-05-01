@@ -26,7 +26,7 @@ class TabLog(iTab, logging.Handler):
             'NOTSET': dict(level=0, color='#808080'),
             'DEBUG': dict(level=10, color='#808080'),
             'INFO': dict(level=20, color='#000000'),
-            'WARNING': dict(level=30, color='#FFFF00'),
+            'WARNING': dict(level=30, color='#FF5500'),
             'ERROR': dict(level=40, color='#FF0000'),
             'CRITICAL': dict(level=50, color='#FF0000'),
         }
@@ -79,18 +79,6 @@ class TabLog(iTab, logging.Handler):
                             [Label('Filter module'), self.filter_line_edit_module],
                         ]
                     ),
-                    # VLayout(
-                    #     [
-                    #         HLayout([
-                    #             (Label('Filter message'), dict(stretch=0)),
-                    #             (self.filter_line_edit_msg, dict(stretch=1)),
-                    #         ]),
-                    #         HLayout([
-                    #             (Label('Filter module'), dict(stretch=0)),
-                    #             (self.filter_line_edit_module, dict(stretch=1)),
-                    #         ]),
-                    #     ]
-                    # ),
                     self.log_text,
                 ]
             )
@@ -150,4 +138,4 @@ class TabLog(iTab, logging.Handler):
         for rec in self.records:
             assert isinstance(rec, logging.LogRecord)
             if rec.levelno >= self._min_lvl:
-                self.write(self.format(rec))
+                self.write(self.format(rec), color=self.levels[rec.levelname]['color'])

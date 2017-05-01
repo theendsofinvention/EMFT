@@ -5,9 +5,9 @@ import os
 from utils import Path, Version, AVRelease, make_logger
 
 from src import global_
-from src.__version__ import __version__, __guid__
+from src.__version__ import __version__
 from src.cfg import Config
-from src.misc.dcs_installs import DCSInstalls
+from src.misc import dcs_installs
 from src.ui.base import VLayout, PushButton, GroupBox, LineEdit, Label, VSpacer, GridLayout, Combo, HLayout, HSpacer
 from src.ui.dialog_browse import BrowseDialog
 from src.ui.itab import iTab
@@ -66,10 +66,10 @@ class TabConfig(iTab):
                                 Label('Remote version'),
                                 HLayout([self.remote_version, self.install_new_version_btn, HSpacer()]),
                             ],
-                            [
-                                Label('GUID'),
-                                Label(__guid__),
-                            ],
+                            # [
+                            #     Label('GUID'),
+                            #     Label(__guid__),
+                            # ],
                         ],
                         [0, 1]
                     )
@@ -135,9 +135,13 @@ class TabConfig(iTab):
     def update_config_tab(self, latest_release: AVRelease):
         self.remote_version.set_text_color('black')
         for x in ['stable', 'beta', 'alpha']:
-            getattr(self, '{}_install'.format(x)).setText(getattr(DCSInstalls(), x).install_path)
-            getattr(self, '{}_variant'.format(x)).setText(getattr(DCSInstalls(), x).saved_games)
-            getattr(self, '{}_version'.format(x)).setText(getattr(DCSInstalls(), x).version)
+            dcs_install = getattr(dcs_installs, x)
+            if dcs_install:
+                getattr(self, '{}_install'.format(x)).setText(dcs_install.install_path)
+                getattr(self, '{}_variant'.format(x)).setText(dcs_install.saved_games)
+                getattr(self, '{}_version'.format(x)).setText(dcs_install.version)
+            else:
+                getattr(self, '{}_install'.format(x)).setText('not found')
         self.update_channel_combo.set_index_from_text(Config().update_channel)
         if latest_release:
             app_version = Version(global_.APP_VERSION)
@@ -180,7 +184,7 @@ class TabConfig(iTab):
             self.sg.setText(p)
 
     def _sg_scan(self):
-        self.sg.setText(DCSInstalls().discover_saved_games_path())
+        self.sg.setText(dcs_installs.discover_saved_games_path())
 
     def _sg_open(self):
         os.startfile(self.sg.text())

@@ -235,6 +235,7 @@ class Miz:
 
         logger.debug('checking miz content')
 
+        # noinspection PyTypeChecker
         for miz_item in map(
                 join,
                 [self.tmpdir.abspath()],

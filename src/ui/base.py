@@ -1,16 +1,27 @@
 # coding=utf-8
 import abc
 
-from PyQt5.QtCore import Qt
-from PyQt5.QtGui import QKeySequence, QIcon
+from PyQt5.QtCore import Qt, QAbstractTableModel, QModelIndex, QVariant, QSortFilterProxyModel
+from PyQt5.QtGui import QKeySequence, QIcon, QContextMenuEvent
 from PyQt5.QtWidgets import QGroupBox, QBoxLayout, QSpacerItem, QWidget, QHBoxLayout, QVBoxLayout, QPushButton, \
     QRadioButton, QComboBox, QShortcut, QCheckBox, QLineEdit, QLabel, QPlainTextEdit, QSizePolicy, QGridLayout, \
-    QMessageBox
+    QMessageBox, QTableView, QAbstractItemView, QMenu, QMenuBar
+from utils import make_logger
 
 
 class Widget(QWidget):
     def __init__(self, parent=None):
         QWidget.__init__(self, parent=parent, flags=Qt.Widget)
+
+
+LEFT_MARGIN = 10
+RIGHT_MARGIN = 10
+TOP_MARGIN = 10
+BOTTOM_MARGIN = 10
+
+DEFAULT_MARGINS = (LEFT_MARGIN, RIGHT_MARGIN, TOP_MARGIN, BOTTOM_MARGIN)
+
+logger = make_logger(__name__)
 
 
 class Expandable:
@@ -32,11 +43,11 @@ class Expandable:
 class GroupBox(QGroupBox):
     def __init__(self, title=None, layout=None):
         QGroupBox.__init__(self)
-        self.setContentsMargins(40, 0, 0, 0)
         if title:
             self.setTitle(title)
         if layout:
             self.setLayout(layout)
+        self.setContentsMargins(*DEFAULT_MARGINS)
 
 
 class _WithChildren:
@@ -97,9 +108,9 @@ class GridLayout(QGridLayout):
 
     # noinspection PyArgumentList
     def add_children(self, children: list):
-        for r in range(len(children)):
+        for r in range(len(children)):  # "r" is the row
             child = children[r]
-            for c in range(len(child)):
+            for c in range(len(child)):  # "c" is the column
                 if child[c] is None:
                     continue
                 elif isinstance(child[c], QWidget):
@@ -121,14 +132,30 @@ class GridLayout(QGridLayout):
 
 class HLayout(QHBoxLayout, _WithChildren):
     def __init__(self, children: list):
+        """
+        Creates a horizontal layout.
+        Children can be either a single item, or a tuple including a configuration dictionary.
+        Parameters that can be included in the configuration dictionary are:
+            Stretch: "weight" of the item in the layout
+        :param children: list of children
+        """
         super(HLayout, self).__init__()
-        self.setContentsMargins(0, 0, 0, 0)
+        self.setContentsMargins(*DEFAULT_MARGINS)
         self.add_children(children)
 
 
 class VLayout(QVBoxLayout, _WithChildren):
     def __init__(self, children: list):
+        """
+        Creates a vertical layout.
+        Children can be either a single item, or a tuple including a configuration dictionary.
+        Parameters that can be included in the configuration dictionary are:
+            Stretch: "weight" of the item in the layout
+
+        :param children: list of children
+        """
         super(VLayout, self).__init__()
+        self.setContentsMargins(*DEFAULT_MARGINS)
         self.add_children(children)
 
 
@@ -164,11 +191,13 @@ class Combo(QComboBox):
         self.currentTextChanged.connect(on_change)
 
     def set_index_from_text(self, text):
+        # noinspection PyUnresolvedReferences
         self.currentTextChanged.disconnect()
         idx = self.findText(text, Qt.MatchExactly)
         if idx < 0:
             raise ValueError(text)
         self.setCurrentIndex(idx)
+        # noinspection PyUnresolvedReferences
         self.currentTextChanged.connect(self.on_change)
 
 
@@ -180,11 +209,11 @@ class Shortcut(QShortcut):
 
 
 class LineEdit(QLineEdit, Expandable):
-    def __init__(self, text, func: callable = None, read_only=False, clear_btn_enabled=False):
+    def __init__(self, text, on_text_changed: callable = None, read_only=False, clear_btn_enabled=False):
         QLineEdit.__init__(self, text)
-        if func:
+        if on_text_changed:
             # noinspection PyUnresolvedReferences
-            self.textChanged.connect(func)
+            self.textChanged.connect(on_text_changed)
         self.setReadOnly(read_only)
         self.setClearButtonEnabled(clear_btn_enabled)
 
@@ -234,7 +263,7 @@ class VSpacer(QSpacerItem):
             QSpacerItem.__init__(self, 1, size)
 
 
-class WithMsgBoxAdapter():
+class WithMsgBoxAdapter:
     @abc.abstractmethod
     def msg(self, text: str, follow_up: callable = None, title: str = None):
         pass
@@ -308,3 +337,132 @@ class WithMsgBox(WithMsgBoxAdapter):
             title = 'Please confirm'
 
         self._run_box(text=text, follow_up=follow_up, title=title, follow_up_on_no=follow_up_on_no, is_question=True)
+
+
+class Menu(QMenu):
+    def __init__(self, title: str = '', parent=None):
+        super(Menu, self).__init__(title, parent)
+        self.actions = {}
+
+    def add_action(self, text: str, func: callable):
+        action = self.addAction(text)
+        self.actions[action] = func
+
+
+class MenuBar(QMenuBar):
+    def __init__(self, parent=None):
+        super(MenuBar, self).__init__(parent)
+        raise NotImplementedError('plop')
+
+
+class _TableViewWithRowContextMenu:
+    # noinspection PyPep8Naming
+    @abc.abstractmethod
+    def selectionModel(self):
+        """"""
+
+    def __init__(self, menu=None):
+        self._menu = menu
+
+    # noinspection PyPep8Naming
+    def contextMenuEvent(self, event):  # TODO
+        logger.debug('in')
+        if self._menu:
+            logger.debug('menu')
+            if self.selectionModel().selection().indexes():
+                selected_rows = set()
+                logger.debug('indexes')
+                for i in self.selectionModel().selection().indexes():
+                    selected_rows.add(i.row())
+
+                if selected_rows:
+
+                    assert isinstance(self._menu, Menu)
+                    assert isinstance(event, QContextMenuEvent)
+
+                    action = self._menu.exec(event.globalPos())
+                    if action:
+                        func = self._menu.actions[action]
+                        for row in selected_rows:
+                            func(row)
+
+
+class TableView(QTableView):
+    def __init__(self, parent=None):
+        super(TableView, self).__init__(parent=parent)
+        self.setSelectionBehavior(QAbstractItemView.SelectRows)
+        self.horizontalHeader().setStretchLastSection(True)
+        self.setSortingEnabled(True)
+        self.setSortingEnabled(True)
+        self.verticalHeader().hide()
+
+
+class TableViewWithSingleRowMenu(TableView, _TableViewWithRowContextMenu):
+    def __init__(self, menu, parent=None):
+        TableView.__init__(self, parent)
+        _TableViewWithRowContextMenu.__init__(self, menu)
+
+
+class TableProxy(QSortFilterProxyModel):
+    def __init__(self, parent=None):
+        super(TableProxy, self).__init__(parent)
+        self.setDynamicSortFilter(False)
+        self._filter = None
+
+    def default_sort(self):
+        self.sort(0, Qt.AscendingOrder)
+
+    def sort(self, p_int, order=None):
+        super(TableProxy, self).sort(p_int, order)
+
+    def filterAcceptsRow(self, row: int, index: QModelIndex):
+        if self._filter:
+            model = self.sourceModel()
+            for column, filter_ in enumerate(self._filter):
+                if filter_:
+                    item_text = model.data(model.index(row, column), role=Qt.DisplayRole)
+                    if filter_ not in item_text:
+                        return False
+        return True
+
+    def filter(self, *args):
+        self._filter = args
+        self.invalidateFilter()
+
+
+class TableModel(QAbstractTableModel):
+    def __init__(self, data: list, header_data: list, parent=None):
+        super(TableModel, self).__init__(parent=parent)
+        self._data = data[:]
+        self._header_data = header_data[:]
+
+    # def sort(self, p_int, order=None):
+    #     print('sorting model')
+    #     super(TableModel, self).sort(p_int, order)
+
+    def reset_data(self, new_data):
+        self.beginResetModel()
+        self._data = new_data[:]
+        self.endResetModel()
+        self.sort(0, Qt.AscendingOrder)
+
+    def rowCount(self, parent=None, *args, **kwargs):
+        return len(self._data)
+
+    def columnCount(self, parent=None, *args, **kwargs):
+        return len(self._header_data)
+
+    def data(self, index: QModelIndex, role=Qt.DisplayRole):
+        if role == Qt.DisplayRole:
+            if index.isValid():
+                item = self._data[index.row()]
+                if hasattr(item, '__len__'):
+                    return item[index.column()]
+                return item
+        return QVariant()
+
+    def headerData(self, col, orientation=Qt.Horizontal, role=Qt.DisplayRole):
+        if role == Qt.DisplayRole:
+            if orientation == Qt.Horizontal:
+                return self._header_data[col]
+        return QVariant()

@@ -5,7 +5,7 @@ import os
 import webbrowser
 from distutils.version import LooseVersion
 
-from PyQt5.QtWidgets import QLineEdit, QSpacerItem, QSizePolicy, QLabel
+from PyQt5.QtWidgets import QLineEdit, QLabel
 from natsort import natsorted
 from utils.custom_logging import make_logger
 from utils.custom_path import Path
@@ -14,7 +14,7 @@ from utils.threadpool import ThreadPool
 from src.cfg.cfg import Config
 from src.misc import appveyor, downloader, github
 from src.miz.miz import Miz
-from src.ui.base import GroupBox, HLayout, VLayout, PushButton, Radio, Checkbox, Label, Combo, GridLayout
+from src.ui.base import GroupBox, HLayout, VLayout, PushButton, Radio, Checkbox, Label, Combo, GridLayout, VSpacer
 from src.ui.dialog_browse import BrowseDialog
 from src.ui.itab import iTab
 from src.ui.main_ui_interface import I
@@ -80,41 +80,20 @@ class _SingleLayout:
         self.single_miz_output_folder_browse = PushButton('Browse', self.browse_for_single_miz_output_folder)
         self.single_miz_output_folder_open = PushButton('Open', self.open_single_miz_output_folder)
 
-        # single_miz_path_layout = HLayout([
-        #     QLabel('Source MIZ: '),
-        #     (self.single_miz, dict(stretch=1)),
-        #     (self.single_miz_browse, dict(stretch=0)),
-        #     (self.single_miz_open, dict(stretch=0)),
-        # ])
-        #
-        # single_miz_output_layout = HLayout([
-        #     QLabel('Output folder: '),
-        #     (self.single_miz_output_folder, dict(stretch=1)),
-        #     (self.single_miz_output_folder_browse, dict(stretch=0)),
-        #     (self.single_miz_output_folder_open, dict(stretch=0)),
-        #
-        # ])
-
         self.single_miz_reorder_btn = PushButton('Reorder MIZ file', self.single_reorder)
         self.single_miz_reorder_btn.setMinimumHeight(40)
         self.single_miz_reorder_btn.setMinimumWidth(400)
 
-        # single_miz_btn_layout = HLayout([
-        #     self.single_miz_reorder_btn
-        # ])
-
         self.single_layout = VLayout([
             GridLayout(
                 [
-                    [(QLabel('Source MIZ'), dict(align='r')), self.single_miz, self.single_miz_browse,
+                    [(Label('Source MIZ'), dict(align='r')), self.single_miz, self.single_miz_browse,
                      self.single_miz_open],
-                    [(QLabel('Output folder'), dict(align='r')), self.single_miz_output_folder,
+                    [(Label('Output folder'), dict(align='r')), self.single_miz_output_folder,
                      self.single_miz_output_folder_browse,
                      self.single_miz_output_folder_open],
                 ],
             ),
-            # QSpacerItem(1, 10, QSizePolicy.Expanding, QSizePolicy.Expanding),
-            # single_miz_btn_layout,
             self.single_miz_reorder_btn,
         ])
 
@@ -193,11 +172,8 @@ class _AutoLayout:
         self.auto_src_le.setEnabled(False)
         self.auto_src_browse_btn = PushButton('Browse', self.auto_src_browse)
         self.auto_src_open_btn = PushButton('Open', self.auto_src_open)
-
-        # scan_layout.setContentsMargins(source_folder_label.width(), 0, 0, 0)
         self.auto_scan_label_local = QLabel('')
         self.auto_scan_label_remote = Label('')
-        # self.scan_label.setMinimumWidth(self.auto_folder_path.width())
         self.auto_scan_combo_branch = Combo(self._branch_changed, ['All'] + github.get_available_branches())
         try:
             self.auto_scan_combo_branch.set_index_from_text(Config().selected_TRMT_branch)
@@ -223,24 +199,21 @@ class _AutoLayout:
         self.auto_reorder_btn = PushButton('Reorder MIZ file', self.auto_reorder)
         self.auto_reorder_btn.setMinimumHeight(40)
         self.auto_reorder_btn.setMinimumWidth(400)
-        auto_btn_layout = HLayout([
-            self.auto_reorder_btn
-        ])
 
         self.auto_layout = VLayout([
-            20,
+
             auto_help,
-            40,
+
             GridLayout(
                 [
                     [
-                        (QLabel('Source folder'), dict(align='r')),
+                        (Label('Source folder'), dict(align='r')),
                         self.auto_src_le,
                         self.auto_src_browse_btn,
                         self.auto_src_open_btn,
                     ],
                     [
-                        (QLabel('Output folder'), dict(align='r')),
+                        (Label('Output folder'), dict(align='r')),
                         self.auto_out_le,
                         self.auto_out_browse_btn,
                         self.auto_out_open_btn,
@@ -253,9 +226,7 @@ class _AutoLayout:
                     ],
                 ]
             ),
-            # output_layout,
-            # scan_layout,
-            auto_btn_layout
+            self.auto_reorder_btn
         ])
 
         self.auto_group.setLayout(self.auto_layout)
@@ -390,30 +361,36 @@ class TabReorder(iTab, _SingleLayout, _AutoLayout):
                            'This lets you reorder them alphabetically before you push them in a SCM.\n\n'
                            'It is recommended to set the "Output folder" to your local SCM repository.')
 
-        self.check_skip_options = Checkbox('Skip "options" file', self.toggle_skip_options)
-        skip_options_help_text = QLabel(
-            'The "options" file at the root of the MIZ is player-specific, and is of very relative import for the MIZ'
-            ' file itself. To avoid having irrelevant changes in the SCM, it can be safely skipped during reordering.')
+        self.check_skip_options = Checkbox(
+            'Skip "options" file: the "options" file at the root of the MIZ is player-specific, and is of very relative'
+            ' import for the MIZ file itself. To avoid having irrelevant changes in the SCM, it can be safely skipped'
+            ' during reordering.',
+            self.toggle_skip_options
+        )
 
         self.radio_single = Radio('Specific MIZ file', self.toggle_radios)
         self.radio_auto = Radio('Latest TRMT', self.toggle_radios)
 
-        layout = VLayout([
-            QSpacerItem(1, 10, QSizePolicy.Expanding, QSizePolicy.Expanding),
-            help_text,
-            QSpacerItem(1, 10, QSizePolicy.Expanding, QSizePolicy.Expanding),
-            self.check_skip_options,
-            skip_options_help_text,
-            QSpacerItem(1, 10, QSizePolicy.Expanding, QSizePolicy.Expanding),
-            self.radio_single,
-            self.single_group,
-            QSpacerItem(1, 10, QSizePolicy.Expanding, QSizePolicy.Expanding),
-            self.radio_auto,
-            self.auto_group,
-            QSpacerItem(1, 10, QSizePolicy.Expanding, QSizePolicy.Expanding),
-        ])
+        self.setLayout(
+            VLayout(
+                [
+                    help_text,
 
-        self.setLayout(layout)
+                    GroupBox(
+                        'Options',
+                        VLayout([self.check_skip_options, ])
+                    ),
+
+                    40,
+
+                    self.radio_single, self.single_group,
+
+                    self.radio_auto, self.auto_group,
+
+                    VSpacer()
+                ]
+            )
+        )
 
         self.radio_single.setChecked(not Config().auto_mode)
         self.radio_auto.setChecked(Config().auto_mode)
