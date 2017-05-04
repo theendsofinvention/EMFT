@@ -153,7 +153,7 @@ class TabConfig(iTab):
         self.install_new_version_btn.setVisible(False)
 
     def _show_changelog(self):
-        webbrowser.open_new_tab(r'''https://github.com/132nd-etcher/EMFT/blob/develop/CHANGELOG.rst''')
+        webbrowser.open_new_tab(global_.LINK_CHANGELOG)
 
     def update_config_tab(self, latest_release: AVRelease):
         self.remote_version.set_text_color('black')
