@@ -13,6 +13,9 @@ except KeyError:
 
 UPDATER_LATEST = None
 
+LINK_CHANGELOG = r'''https://github.com/132nd-etcher/EMFT/blob/master/CHANGELOG.rst'''
+LINK_REPO = r'''https://github.com/132nd-etcher/EMFT'''
+
 PATH_LOG_FILE = 'emft.debug'
 PATH_CONFIG_FILE = 'emft.config'
 
