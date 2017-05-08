@@ -9,8 +9,8 @@ from src import global_
 from src.__version__ import __version__
 from src.cfg import Config
 from src.misc.dcs import dcs_installs
-from src.ui.base import VLayout, PushButton, GroupBox, LineEdit, Label, VSpacer, GridLayout, Combo, HSpacer, HLayout
-from src.ui.dialog_browse import BrowseDialog
+from src.ui.base import VLayout, PushButton, GroupBox, LineEdit, Label, VSpacer, GridLayout, Combo, HSpacer, HLayout, \
+    BrowseDialog
 from src.ui.itab import iTab
 from src.ui.main_ui_interface import I
 from src.updater import updater
@@ -155,7 +155,7 @@ class TabConfig(iTab):
     def _show_changelog(self):
         webbrowser.open_new_tab(global_.LINK_CHANGELOG)
 
-    def update_config_tab(self, latest_release: AVRelease):
+    def config_tab_update_dcs_installs(self):
         self.remote_version.set_text_color('black')
         for x in ['stable', 'beta', 'alpha']:
             dcs_install = getattr(dcs_installs, x)
@@ -166,6 +166,8 @@ class TabConfig(iTab):
             else:
                 getattr(self, '{}_install'.format(x)).setText('not found')
         self.update_channel_combo.set_index_from_text(Config().update_channel)
+
+    def update_config_tab(self, latest_release: AVRelease):
         if latest_release:
             app_version = Version(global_.APP_VERSION)
             self.latest_release = latest_release
