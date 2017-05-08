@@ -98,7 +98,7 @@ def start_ui(test=False):
     global_.MAIN_UI.add_tab(TabReorder())
 
     logger.info('loading module: dcs_installs')
-    from src.misc.dcs import dcs_installs
+    from src.misc.fs import dcs_installs
     dcs_installs.discover_dcs_installations()
 
     logger.info('loading tab: skins')
