@@ -7,7 +7,7 @@ from utils import create_new_paste
 
 from src import global_
 from src.cfg import Config
-from src.misc.logging_handler import PersistentLoggingFollower
+from src.misc.logging_handler import PersistentLoggingFollower, persistent_logging_handler
 from src.sentry import SENTRY
 from src.ui.base import PlainTextEdit
 from src.ui.base import VLayout, Combo, PushButton, HLayout, LineEdit, Label, GridLayout
@@ -86,6 +86,7 @@ class TabLog(iTab, PersistentLoggingFollower, TabLogAdapter):
             )
         )
         self._redraw()
+        persistent_logging_handler.add_follower(self)
 
     @property
     def min_lvl(self):
