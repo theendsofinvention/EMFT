@@ -7,6 +7,4 @@ class DCSSkin:
         self.skin_nice_name = skin_nice_name or name
 
     def __repr__(self):
-        return 'DCSSkin("{}", "{}", "{}", "{}")'.format(
-            self.name, self.ac, self.root_folder, self.skin_nice_name
-        )
+        return 'DCSSkin("{}", "{}", "{}", "{}")'.format(self.name, self.ac, self.root_folder, self.skin_nice_name)

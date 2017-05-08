@@ -8,7 +8,6 @@ TAB_NAME = 'Config'
 
 
 class TabConfigAdapter:
-
     @MainUiTabMethod(TAB_NAME)
     @abc.abstractmethod
     def config_tab_update_dcs_installs(self, *args, **kwargs):
@@ -18,4 +17,3 @@ class TabConfigAdapter:
     @abc.abstractmethod
     def config_tab_update_latest_release(self, *args, **kwargs):
         """"""
-
