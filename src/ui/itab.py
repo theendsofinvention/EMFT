@@ -5,13 +5,11 @@ import abc
 from PyQt5.QtCore import Qt
 from PyQt5.QtWidgets import QWidget
 
-
 # noinspection PyPep8Naming
 from src import global_
 
 
 class iTab(QWidget):
-
     def __init__(self, parent=None):
         QWidget.__init__(self, parent, flags=Qt.Widget)
         self.setContentsMargins(20, 20, 20, 20)
