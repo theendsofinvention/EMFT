@@ -18,6 +18,7 @@ from src.ui.base import GroupBox, HLayout, VLayout, PushButton, Radio, Checkbox,
     box_question, BrowseDialog
 from src.ui.itab import iTab
 from src.ui.main_ui_interface import I
+from .tab_reorder_adapter import TabReorderAdapter, TAB_NAME
 
 try:
     import winreg
@@ -326,7 +327,11 @@ class _AutoLayout:
         """"""
 
 
-class TabReorder(iTab, _SingleLayout, _AutoLayout):
+class TabReorder(iTab, _SingleLayout, _AutoLayout, TabReorderAdapter):
+    @property
+    def tab_title(self):
+        return TAB_NAME
+
     def __init__(self, parent=None):
         iTab.__init__(self, parent=parent)
         _SingleLayout.__init__(self)
@@ -388,10 +393,6 @@ class TabReorder(iTab, _SingleLayout, _AutoLayout):
         self.single_group.setEnabled(self.radio_single.isChecked())
         self.auto_group.setEnabled(self.radio_auto.isChecked())
         Config().auto_mode = self.radio_auto.isChecked()
-
-    @property
-    def tab_title(self):
-        return 'Reorder lua tables'
 
     @property
     def skip_options_file(self) -> bool:

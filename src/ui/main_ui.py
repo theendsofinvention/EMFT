@@ -62,17 +62,9 @@ class MainUi(QMainWindow, MainUiThreading, MainUiProgress, WithMsgBox):
     def write_log(self, value: str, color: str):
         self.helpers['write_log'](value, color)
 
-    def tab_reorder_update_view_after_remote_scan(self):
-        self.helpers['tab_reorder_update_view_after_remote_scan']()
-
-    def update_config_tab(self, version_check_result=None):
-        self.helpers['update_config_tab'](version_check_result)
-
-    def add_tab(self, tab: iTab, helpers: dict = None):
+    def add_tab(self, tab: iTab):
+        setattr(self, 'tab_{}'.format(tab.tab_title), tab)
         self.tabs.addTab(tab, tab.tab_title)
-        if helpers:
-            for k in helpers.keys():
-                self.helpers[k] = getattr(tab, helpers[k])
 
     def show(self):
         self.setWindowTitle(
@@ -102,45 +94,21 @@ def start_ui(test=False):
     global_.QT_APP = QApplication([])
     global_.MAIN_UI = MainUi()
 
-    global_.MAIN_UI.add_tab(
-        TabReorder(),
-        helpers={
-            'tab_reorder_update_view_after_remote_scan': 'tab_reorder_update_view_after_remote_scan'
-        }
-    )
+    global_.MAIN_UI.add_tab(TabReorder())
     from src.misc.dcs import dcs_installs
     dcs_installs.discover_dcs_installations()
 
     from src.ui.tab_skins import TabSkins
-    global_.MAIN_UI.add_tab(
-        TabSkins(),
-        helpers={}
-    )
+    global_.MAIN_UI.add_tab(TabSkins())
 
     from src.ui.tab_config import TabConfig
-    global_.MAIN_UI.add_tab(
-        TabConfig(),
-        helpers={
-            'update_config_tab': 'update_config_tab'
-        }
-    )
+    global_.MAIN_UI.add_tab(TabConfig())
 
     from src.ui.tab_log import TabLog
-    tab_log = TabLog()
-    from src.misc.logging_handler import persistent_logging_handler
-    persistent_logging_handler.add_follower(tab_log)
-    global_.MAIN_UI.add_tab(
-        tab_log,
-        helpers={
-            'write_log': 'write'
-        }
-    )
+    global_.MAIN_UI.add_tab(TabLog())
 
     from src.ui.tab_about import TabAbout
-    global_.MAIN_UI.add_tab(
-        TabAbout(),
-        helpers={}
-    )
+    global_.MAIN_UI.add_tab(TabAbout())
 
     global_.MAIN_UI.show()
 
@@ -168,8 +136,6 @@ def start_ui(test=False):
         cancel_update_hook=cancel_update_hook,
         pre_update_hook=pre_update_hook,
     )
-
-    global_.MAIN_UI.update_config_tab()
 
     if test:
         logger.critical('RUNNING IN TEST MODE')

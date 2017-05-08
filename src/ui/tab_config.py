@@ -14,14 +14,16 @@ from src.ui.base import VLayout, PushButton, GroupBox, LineEdit, Label, VSpacer,
 from src.ui.itab import iTab
 from src.ui.main_ui_interface import I
 from src.updater import updater
+from .tab_config_adapter import TAB_NAME, TabConfigAdapter
 
 logger = make_logger(__name__)
 
 
-class TabConfig(iTab):
+class TabConfig(iTab, TabConfigAdapter):
+
     @property
     def tab_title(self) -> str:
-        return 'Config'
+        return TAB_NAME
 
     def __init__(self, parent=None):
         iTab.__init__(self, parent=parent)
@@ -167,7 +169,7 @@ class TabConfig(iTab):
                 getattr(self, '{}_install'.format(x)).setText('not found')
         self.update_channel_combo.set_index_from_text(Config().update_channel)
 
-    def update_config_tab(self, latest_release: AVRelease):
+    def config_tab_update_latest_release(self, latest_release: AVRelease):
         if latest_release:
             app_version = Version(global_.APP_VERSION)
             self.latest_release = latest_release
@@ -191,7 +193,7 @@ class TabConfig(iTab):
         updater.get_latest_release(
             channel=Config().update_channel,
             branch=Version(global_.APP_VERSION),
-            success_callback=I.update_config_tab,
+            success_callback=I.config_tab_update_latest_release,
         )
 
     def _install_latest_version(self):
