@@ -8,6 +8,7 @@ New
 
 Changes
 ~~~~~~~
+- Skin filters are now case insensitive. [132nd-etcher]
 - Remove 'beta' and 'alpha' as update channels. [132nd-etcher]
 
 Fix
