@@ -1005,6 +1005,12 @@ class Group(Country):
                                                                                       self.group_index, unit_index)
             yield self.__units[unit_index]
 
+    def first_unit(self) -> 'BaseUnit':
+        return list(self.units)[0]
+
+    def group_size(self) -> int:
+        return len(list(self.units))
+
     def get_unit_by_name(self, unit_name):
         for unit in self.units:
             assert isinstance(unit, BaseUnit)
