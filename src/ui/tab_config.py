@@ -8,7 +8,7 @@ from utils import Path, Version, AVRelease, make_logger
 from src import global_
 from src.__version__ import __version__
 from src.cfg import Config
-from src.misc.dcs_installs import dcs_installs
+from src.misc.dcs import dcs_installs
 from src.ui.base import VLayout, PushButton, GroupBox, LineEdit, Label, VSpacer, GridLayout, Combo, HSpacer, HLayout
 from src.ui.dialog_browse import BrowseDialog
 from src.ui.itab import iTab
