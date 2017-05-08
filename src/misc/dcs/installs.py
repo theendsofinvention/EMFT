@@ -1,4 +1,5 @@
 # coding=utf-8
+from src.misc.dcs.skin import DCSSkin
 
 try:
     import winreg
@@ -50,19 +51,6 @@ class AutoexecCFG:
                 if m:
                     self._vfs.add(m.group('path'))
         logger.debug('found {} VFS path(s)'.format(len(self._vfs)))
-
-
-class DCSSkin:
-    def __init__(self, name, ac, root_folder, skin_nice_name):
-        self.name = name
-        self.ac = ac
-        self.root_folder = root_folder
-        self.skin_nice_name = skin_nice_name or name
-
-    def __repr__(self):
-        return 'DCSSkin("{}", "{}", "{}", "{}")'.format(
-            self.name, self.ac, self.root_folder, self.skin_nice_name
-        )
 
 
 class DCSInstall:
