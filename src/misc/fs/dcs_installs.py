@@ -1,25 +1,19 @@
 # coding=utf-8
-from src.misc.dcs.skin import DCSSkin
+from .dcs_skin import DCSSkin
 from src.ui.main_ui_interface import I
-
-try:
-    import winreg
-except ImportError:
-    from unittest.mock import MagicMock
-
-    winreg = MagicMock()
 
 import os
 import re
 
 from utils import make_logger, Path
 
+from ._winreg import winreg, A_REG
+from .saved_games import saved_games_path
+
 from src import global_
 from src.cfg.cfg import Config
 
 logger = make_logger(__name__)
-
-A_REG = winreg.ConnectRegistry(None, winreg.HKEY_CURRENT_USER)
 
 
 class InvalidSavedGamesPath(ValueError):
@@ -57,9 +51,9 @@ class AutoexecCFG:
 class DCSInstall:
     RE_SKIN_NICE_NAME = re.compile(r'name = "(?P<skin_nice_name>.*)"')
 
-    def __init__(self, install_path, saved_games_path, version, label):
+    def __init__(self, install_path, saved_games_path_, version, label):
         self.__install = install_path if install_path else None
-        self.__sg = saved_games_path if saved_games_path else None
+        self.__sg = saved_games_path_ if saved_games_path_ else None
         self.__version = str(version) if version else None
         self.__label = label
         self.__skins = {}
@@ -179,30 +173,10 @@ class DCSInstalls:
         }
 
     @staticmethod
-    def discover_saved_games_path() -> Path:
-        logger.debug('searching for base "Saved Games" folder')
-        try:
-            logger.debug('trying "User Shell Folders"')
-            with winreg.OpenKey(A_REG,
-                                r"SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\User Shell Folders") as aKey:
-                # noinspection SpellCheckingInspection
-                base_sg = Path(winreg.QueryValueEx(aKey, "{4C5C32FF-BB9D-43B0-B5B4-2D72E54EAAA4}")[0])
-        except FileNotFoundError:
-            logger.debug('failed, trying "Shell Folders"')
-            try:
-                with winreg.OpenKey(A_REG,
-                                    r"SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\Shell Folders") as aKey:
-                    # noinspection SpellCheckingInspection
-                    base_sg = Path(winreg.QueryValueEx(aKey, "{4C5C32FF-BB9D-43B0-B5B4-2D72E54EAAA4}")[0])
-            except FileNotFoundError:
-                logger.debug('darn it, another fail, falling back to "~"')
-                base_sg = Path('~').expanduser().abspath()
-        return base_sg
-
-    def _get_base_saved_games_path(self):
+    def _get_base_saved_games_path():
         if Config().saved_games_path is None:
             logger.debug('no Saved Games path in Config, looking it up')
-            base_sg = self.discover_saved_games_path()
+            base_sg = saved_games_path
         else:
             logger.debug('Saved Games path found in Config')
             base_sg = Path(Config().saved_games_path)
