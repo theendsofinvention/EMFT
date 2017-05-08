@@ -23,8 +23,8 @@ class TabLog(iTab, PersistentLoggingFollower, TabLogAdapter):
 
     @property
     def fmt_(self):
-        return '%(asctime)s: [%(levelname)8s]: (%(threadName)-9s) - %(name)s - %(funcName)s - %(message)s'
-        # return '%(asctime)s: %(levelname)8s: [%(threadName)-9s]: %(module)s.%(funcName)s - %(message)s'
+        # return '%(asctime)s: [%(levelname)8s]: (%(threadName)-9s) - %(name)s - %(funcName)s - %(message)s'
+        return '%(asctime)s: %(levelname)8s: [%(threadName)-9s]: %(module)s.%(funcName)s - %(message)s'
 
     @property
     def tab_title(self) -> str:
