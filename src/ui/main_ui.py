@@ -105,6 +105,10 @@ def start_ui(test=False):
     from src.ui.tab_skins import TabSkins
     global_.MAIN_UI.add_tab(TabSkins())
 
+    logger.info('loading tab: roster')
+    from src.ui.tab_roster import TabRoster
+    global_.MAIN_UI.add_tab(TabRoster())
+
     logger.info('loading tab: config')
     from src.ui.tab_config import TabConfig
     global_.MAIN_UI.add_tab(TabConfig())
