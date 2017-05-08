@@ -13,9 +13,10 @@ from src.ui.base import PlainTextEdit
 from src.ui.base import VLayout, Combo, PushButton, HLayout, LineEdit, Label, GridLayout
 from src.ui.itab import iTab
 from src.ui.main_ui_interface import I
+from .tab_log_adapter import TAB_NAME, TabLogAdapter
 
 
-class TabLog(iTab, PersistentLoggingFollower):
+class TabLog(iTab, PersistentLoggingFollower, TabLogAdapter):
     @property
     def datefmt_(self):
         return '%H:%M:%S'
@@ -27,7 +28,7 @@ class TabLog(iTab, PersistentLoggingFollower):
 
     @property
     def tab_title(self) -> str:
-        return 'Log'
+        return TAB_NAME
 
     def __init__(self, parent=None):
         PersistentLoggingFollower.__init__(self)
@@ -106,9 +107,9 @@ class TabLog(iTab, PersistentLoggingFollower):
 
     def handle_record(self, record: logging.LogRecord):
         if record.levelno >= self._sanitize_level(self.min_lvl):
-            I.write_log(self.format(record), str(self.colors[record.levelname]))
+            I.tab_log_write(self.format(record), str(self.colors[record.levelname]))
 
-    def write(self, msg, color='#000000', bold=False):
+    def tab_log_write(self, msg, color='#000000', bold=False):
         msg = '<font color="{}">{}</font>'.format(color, msg)
         if bold:
             msg = '<b>{}</b>'.format(msg)
@@ -126,9 +127,9 @@ class TabLog(iTab, PersistentLoggingFollower):
         url = create_new_paste('\n'.join(content))
         if url:
             SENTRY.captureMessage('Logfile', extra={'log_url': url})
-            self.write('Log file sent; thank you !')
+            self.tab_log_write('Log file sent; thank you !')
         else:
-            self.write('Could not send log file')
+            self.tab_log_write('Could not send log file')
 
     def _clean(self):
         self.log_text.clear()
