@@ -15,8 +15,7 @@ from src.cfg.cfg import Config
 from src.misc import appveyor, downloader, github
 from src.miz.miz import Miz
 from src.ui.base import GroupBox, HLayout, VLayout, PushButton, Radio, Checkbox, Label, Combo, GridLayout, VSpacer, \
-    box_question
-from src.ui.dialog_browse import BrowseDialog
+    box_question, BrowseDialog
 from src.ui.itab import iTab
 from src.ui.main_ui_interface import I
 
