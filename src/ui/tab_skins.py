@@ -9,6 +9,7 @@ from src.misc.fs import dcs_installs, DCSInstall, DCSSkin
 from src.ui.base import VLayout, Combo, HLayout, Label, HSpacer, TableModel, TableViewWithSingleRowMenu, \
     TableProxy, LineEdit, GroupBox, GridLayout, Menu, Checkbox
 from src.ui.itab import iTab
+from .tab_skins_adapter import TAB_NAME
 
 logger = make_logger(__name__)
 
@@ -20,7 +21,7 @@ RE_LOAD_LIVERY_LINE = re.compile(r'^LoadLivery\("(?P<path>.*)"\)$')
 class TabSkins(iTab):
     @property
     def tab_title(self) -> str:
-        return 'Skins'
+        return TAB_NAME
 
     def __init__(self, parent=None):
         super(TabSkins, self).__init__(parent)
