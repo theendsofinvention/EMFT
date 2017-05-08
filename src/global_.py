@@ -13,7 +13,11 @@ except KeyError:
 
 UPDATER_LATEST = None
 
-LINK_CHANGELOG = r'''https://github.com/132nd-etcher/EMFT/blob/master/CHANGELOG.rst'''
+if 'dev' in src.__version__.__version__:
+    LINK_CHANGELOG = r'''https://github.com/132nd-etcher/EMFT/blob/develop/CHANGELOG.rst'''
+else:
+    LINK_CHANGELOG = r'''https://github.com/132nd-etcher/EMFT/blob/master/CHANGELOG.rst'''
+
 LINK_REPO = r'''https://github.com/132nd-etcher/EMFT'''
 
 PATH_LOG_FILE = 'emft.debug'

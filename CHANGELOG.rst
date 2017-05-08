@@ -10,4 +10,8 @@ Changes
 ~~~~~~~
 - Remove 'beta' and 'alpha' as update channels. [132nd-etcher]
 
+Fix
+~~~
+- Show develop changelog on experimental versions. [132nd-etcher]
+
 
