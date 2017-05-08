@@ -13,7 +13,7 @@ class MainUiProgress:
     progress = None
 
     @staticmethod
-    def progress_start(title, length, label):
+    def progress_start(title: str = '', length: int = 100, label: str = ''):
         MainUiProgress.progress = QProgressDialog()
         MainUiProgress.progress.setWindowFlags(Qt.FramelessWindowHint)
         MainUiProgress.progress.setWindowFlags(Qt.WindowTitleHint)
