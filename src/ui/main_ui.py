@@ -89,24 +89,31 @@ class MainUi(QMainWindow, MainUiThreading, MainUiProgress, WithMsgBox):
 def start_ui(test=False):
     from PyQt5.QtWidgets import QApplication
     import sys
-    from src.ui.tab_reorder import TabReorder
-    logger.debug('starting QtApp object')
+    logger.info('starting application')
     global_.QT_APP = QApplication([])
     global_.MAIN_UI = MainUi()
 
+    logger.info('loading module: re-order')
+    from src.ui.tab_reorder import TabReorder
     global_.MAIN_UI.add_tab(TabReorder())
+
+    logger.info('loading module: dcs_installs')
     from src.misc.dcs import dcs_installs
     dcs_installs.discover_dcs_installations()
 
+    logger.info('loading tab: skins')
     from src.ui.tab_skins import TabSkins
     global_.MAIN_UI.add_tab(TabSkins())
 
+    logger.info('loading tab: config')
     from src.ui.tab_config import TabConfig
     global_.MAIN_UI.add_tab(TabConfig())
 
+    logger.info('loading tab: log')
     from src.ui.tab_log import TabLog
     global_.MAIN_UI.add_tab(TabLog())
 
+    logger.info('loading tab: about')
     from src.ui.tab_about import TabAbout
     global_.MAIN_UI.add_tab(TabAbout())
 
@@ -123,12 +130,13 @@ def start_ui(test=False):
     def cancel_update_hook():
         I.show()
 
+    logger.info('loading adapter: Progress')
     from utils import Progress
     # noinspection PyTypeChecker
     Progress.register_adapter(I)
 
+    logger.info('loading module: updater')
     from src.updater import updater
-
     updater.find_and_install_latest_release(
         current_version=global_.APP_VERSION,
         executable_path='emft.exe',
@@ -151,4 +159,5 @@ def start_ui(test=False):
         pool = ThreadPool(1, 'test', _daemon=True)
         pool.queue_task(test_hook)
 
+    logger.info('starting GUI')
     sys.exit(global_.QT_APP.exec())
