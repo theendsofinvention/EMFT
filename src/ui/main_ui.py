@@ -177,10 +177,12 @@ def start_ui(test=False):
         from utils import ThreadPool, nice_exit
 
         def test_hook():
+            logger.critical('TEST MODE: waiting 10 seconds')
             time.sleep(10)
+            logger.critical('TEST MODE: end of timer')
             nice_exit()
 
-        pool = ThreadPool(1, 'test')
+        pool = ThreadPool(1, 'test', _daemon=True)
         pool.queue_task(test_hook)
 
     sys.exit(global_.QT_APP.exec())
