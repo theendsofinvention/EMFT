@@ -7,7 +7,7 @@ from utils import make_logger
 from src.cfg import Config
 from src.misc.fs import dcs_installs, DCSInstall, DCSSkin
 from src.ui.base import VLayout, Combo, HLayout, Label, HSpacer, TableModel, TableViewWithSingleRowMenu, \
-    TableProxy, LineEdit, GroupBox, GridLayout, Menu, Checkbox
+    TableProxy, LineEdit, GroupBox, GridLayout, Menu, Checkbox, PushButton
 from src.ui.itab import iTab
 from .tab_skins_adapter import TAB_NAME
 
@@ -52,6 +52,11 @@ class TabSkins(iTab):
             list(x.label for x in dcs_installs.present_dcs_installations),
         )
 
+        self.refresh_skins_btn = PushButton('Refresh skins list', self._refresh_skins_for_active_install)
+
+        for x in {self.combo_active_dcs_installation, self.refresh_skins_btn}:
+            x.setVisible(len(list(dcs_installs.present_dcs_installations)) > 0)
+
         if Config().skins_active_dcs_installation:
             try:
                 self.combo_active_dcs_installation.set_index_from_text(Config().skins_active_dcs_installation)
@@ -87,6 +92,7 @@ class TabSkins(iTab):
                         [
                             Label('Active DCS installation:'),
                             self.combo_active_dcs_installation,
+                            self.refresh_skins_btn,
                             self.no_install_label,
                             HSpacer(),
                         ]
@@ -115,6 +121,11 @@ class TabSkins(iTab):
 
     def _context_open_folder(self, row):
         os.startfile(self.proxy.data(self.proxy.index(row, 2)))
+
+    def _refresh_skins_for_active_install(self):
+        if self._active_dcs_install:
+            self._active_dcs_install.discover_skins()
+            self._display_list_of_skins_for_currently_selected_install()
 
     # def _show_skin_in_model_viewer(self, row):
     #     skin_name = self.proxy.data(self.proxy.index(row, 0))
