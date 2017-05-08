@@ -89,6 +89,11 @@ class ConfigValues:
         return value
 
     # noinspection PyPep8Naming
+    @MetaProperty(None, str)
+    def roster_last_dir(self, value: str):
+        return value
+
+    # noinspection PyPep8Naming
     @MetaProperty('stable', str)
     def update_channel(self, value: str):
         if value not in ['stable', 'rc', 'dev', 'beta', 'alpha']:

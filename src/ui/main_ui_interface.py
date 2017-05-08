@@ -8,6 +8,7 @@ from .base import WithMsgBoxAdapter
 from .tab_config_adapter import TabConfigAdapter
 from .tab_log_adapter import TabLogAdapter
 from .tab_reorder_adapter import TabReorderAdapter
+from .tab_roster_adapter import TabRosterAdapter
 
 
 class MainUiMethod:
@@ -20,7 +21,7 @@ class MainUiMethod:
         global_.MAIN_UI.do('main_ui', self.func.__name__, *args, **kwargs)
 
 
-class I(ProgressAdapter, WithMsgBoxAdapter, TabConfigAdapter, TabLogAdapter, TabReorderAdapter):
+class I(ProgressAdapter, WithMsgBoxAdapter, TabConfigAdapter, TabLogAdapter, TabReorderAdapter, TabRosterAdapter):
     @MainUiMethod
     def confirm(self, text: str, follow_up: callable, title: str = None, follow_up_on_no: callable = None):
         """"""
