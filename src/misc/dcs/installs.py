@@ -1,5 +1,6 @@
 # coding=utf-8
 from src.misc.dcs.skin import DCSSkin
+from src.ui.main_ui_interface import I
 
 try:
     import winreg
@@ -277,6 +278,8 @@ class DCSInstalls:
 
             install.discover_skins()
             install.discover_autoexec()
+
+            I.config_tab_update_dcs_installs()
 
     def __get_props(self, channel):
         return self.installs_props[channel]['install'], \
