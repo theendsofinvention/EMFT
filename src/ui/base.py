@@ -424,7 +424,7 @@ class TableProxy(QSortFilterProxyModel):
             for column, filter_ in enumerate(self._filter):
                 if filter_:
                     item_text = model.data(model.index(row, column), role=Qt.DisplayRole)
-                    if filter_ not in item_text:
+                    if filter_.lower() not in item_text.lower():
                         return False
         return True
 
