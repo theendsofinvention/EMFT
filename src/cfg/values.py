@@ -99,3 +99,13 @@ class ConfigValues:
         if value not in ['stable', 'rc', 'dev', 'beta', 'alpha']:
             raise ValueError('unknown update channel: {}'.format(value))
         return value
+
+    # noinspection PyPep8Naming
+    @MetaProperty(None, str)
+    def dcs_custom_install_path(self, value: str):
+        return value
+
+    # noinspection PyPep8Naming
+    @MetaProperty(None, str)
+    def dcs_custom_variant_path(self, value: str):
+        return value

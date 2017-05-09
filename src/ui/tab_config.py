@@ -8,7 +8,7 @@ from utils import Path, Version, AVRelease, make_logger
 from src import global_
 from src.__version__ import __version__
 from src.cfg import Config
-from src.misc.fs import dcs_installs
+from src.misc.fs import dcs_installs, saved_games
 from src.ui.base import VLayout, PushButton, GroupBox, LineEdit, Label, VSpacer, GridLayout, Combo, HSpacer, HLayout, \
     BrowseDialog
 from src.ui.itab import iTab
@@ -115,7 +115,7 @@ class TabConfig(iTab, TabConfigAdapter):
         )
 
         dcs_installations = []
-        for x, y in [('stable', 'Stable'), ('beta', 'Open beta'), ('alpha', 'Open alpha')]:
+        for x, y in [('stable', 'Stable'), ('beta', 'Open beta'), ('alpha', 'Open alpha'), ('custom', 'Custom')]:
             setattr(self, '{}_group'.format(x), GroupBox(y))
             setattr(self, '{}_install'.format(x), Label(''))
             setattr(self, '{}_variant'.format(x), Label(''))
@@ -131,17 +131,36 @@ class TabConfig(iTab, TabConfigAdapter):
                 )
             )
             dcs_installations.append(getattr(self, '{}_group'.format(x)))
-            dcs_installations.append(HSpacer())
+            # dcs_installations.append(HSpacer())
+
+        self.custom_dcs_install_install_set = PushButton('Set', self._custom_dcs_install_set)
+        self.custom_dcs_install_install_remove = PushButton('Remove', self._custom_dcs_install_remove)
 
         dcs_installations = GroupBox(
             'DCS Installations',
-            HLayout(
+            GridLayout([
+                [HLayout([dcs_installations[0]]), HLayout([dcs_installations[1]])],
+                [HLayout([dcs_installations[2]]), HLayout([dcs_installations[3]])],
                 [
-                    *dcs_installations[:-1]
+                    HSpacer(),
+                    HLayout(
+                        [
+                            Label('Custom DCS installation:'),
+                            self.custom_dcs_install_install_set,
+                            self.custom_dcs_install_install_remove,
+                            HSpacer()
+                        ]
+                    )
                 ]
-            )
+                # HLayout([*dcs_installations[0:2]]),
+                # HLayout([*dcs_installations[2:]]),
+            ]),
+            # HLayout(
+            #     [
+            #         *dcs_installations[:-1]
+            #     ]
+            # )
         )
-
         self.setLayout(
             VLayout(
                 [
@@ -150,19 +169,37 @@ class TabConfig(iTab, TabConfigAdapter):
                     sg_path_layout,
                     VSpacer(),
                     dcs_installations,
-                    # VSpacer(),
+                    VSpacer(),
                 ]
             )
         )
 
         self.install_new_version_btn.setVisible(False)
 
-    def _show_changelog(self):
+    def _custom_dcs_install_set(self):
+        logger.debug('setting custom DCS install')
+        install_dir = BrowseDialog.get_directory(self, 'DCS installation directory')
+        if not install_dir:
+            logger.debug('user cancelled')
+            return
+        variant = BrowseDialog.get_directory(self, 'Variant directory (DCS subdir in Saved Games)',
+                                             init_dir=saved_games.saved_games_path)
+        if not variant:
+            logger.debug('user cancelled')
+            return
+        dcs_installs.add_custom(install_dir, variant)
+
+    @staticmethod
+    def _custom_dcs_install_remove():
+        dcs_installs.remove_custom()
+
+    @staticmethod
+    def _show_changelog():
         webbrowser.open_new_tab(global_.LINK_CHANGELOG)
 
     def config_tab_update_dcs_installs(self):
         self.remote_version.set_text_color('black')
-        for x in ['stable', 'beta', 'alpha']:
+        for x in ['stable', 'beta', 'alpha', 'custom']:
             dcs_install = getattr(dcs_installs, x)
             if dcs_install:
                 getattr(self, '{}_install'.format(x)).setText(dcs_install.install_path)
@@ -170,7 +207,10 @@ class TabConfig(iTab, TabConfigAdapter):
                 getattr(self, '{}_version'.format(x)).setText(dcs_install.version)
             else:
                 getattr(self, '{}_install'.format(x)).setText('not found')
+                getattr(self, '{}_variant'.format(x)).setText('')
+                getattr(self, '{}_version'.format(x)).setText('')
         self.update_channel_combo.set_index_from_text(Config().update_channel)
+        self.custom_dcs_install_install_remove.setEnabled(bool(Config().dcs_custom_install_path))
 
     def config_tab_update_latest_release(self, latest_release: AVRelease):
         if latest_release:
@@ -214,7 +254,8 @@ class TabConfig(iTab, TabConfigAdapter):
             self.sg.setText(p)
 
     def _sg_scan(self):
-        self.sg.setText(dcs_installs.discover_saved_games_path())
+        saved_games.discover_saved_games_path()
+        self.sg.setText(saved_games.saved_games_path)
 
     def _sg_open(self):
         os.startfile(self.sg.text())
