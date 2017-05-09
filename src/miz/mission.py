@@ -230,6 +230,11 @@ class Mission(BaseMissionObject):
     def __repr__(self):
         return 'Mission({})'.format(self.d)
 
+    def farps(self) -> typing.Generator['Static', None, None]:
+        for coa in [self.blue_coa, self.red_coa]:
+            for farp in coa.farps:
+                yield farp
+
 
 # noinspection PyProtectedMember
 class Coalition(BaseMissionObject):
@@ -317,6 +322,23 @@ class Coalition(BaseMissionObject):
             for group in country.groups:
                 assert isinstance(group, Group)
                 yield group
+
+    @property
+    def statics(self) -> typing.Generator['Static', None, None]:
+        for country in self.countries:
+            assert isinstance(country, Country)
+            for static in country.statics:
+                assert isinstance(static, Static)
+                yield static
+
+    @property
+    def farps(self) -> typing.Generator['Static', None, None]:
+        for country in self.countries:
+            assert isinstance(country, Country)
+            for static in country.statics:
+                assert isinstance(static, Static)
+                if static.static_is_farp:
+                    yield static
 
     def get_groups_from_category(self, category):
         Mission.validator_group_category.validate(category, 'get_groups_from_category')
@@ -792,6 +814,7 @@ class Country(Coalition):
             'ship': {},
         }
         self.country_index = country_index
+        self.__static = {}
 
     def __repr__(self):
         return 'Country({}, {}, {})'.format(self._section_country, self.coa_color, self.country_index)
@@ -823,6 +846,15 @@ class Country(Coalition):
                                                                            self.country_index, group_category,
                                                                            group_index)
                     yield self.__groups[group_category][group_index]
+
+    @property
+    def statics(self) -> typing.Generator['Static', None, None]:
+        if 'static' in self._section_this_country.keys():
+            for static_index in self._section_this_country['static']['group']:
+                if static_index not in self.__static:
+                    self.__static[static_index] = Static(self.d, self.l10n, self.coa_color,
+                                                         self.country_index, static_index)
+                yield self.__static[static_index]
 
     def get_groups_from_category(self, category):
         Mission.validator_group_category.validate(category, 'get_groups_from_category')
@@ -872,6 +904,51 @@ class Country(Coalition):
             assert isinstance(unit, BaseUnit)
             if unit.group_category == category:
                 yield unit
+
+
+class Static(Country):
+    def __init__(self, mission_dict, l10n, coa_color, country_index, static_index):
+        super(Static, self).__init__(mission_dict, l10n, coa_color, country_index)
+        self.static_index = static_index
+
+    @property
+    def static_id(self):
+        return self._section_static['groupId']
+
+    @static_id.setter
+    def static_id(self, value):
+        valid_int.validate(value, 'groupId')
+        self._section_static['groupId'] = value
+
+    @property
+    def _section_static(self):
+        return self._section_this_country['static']['group'][self.static_index]
+
+    @property
+    def _static_name_key(self):
+        return self._section_static['name']
+
+    @property
+    def static_name(self):
+        return self.l10n[self._static_name_key]
+
+    @static_name.setter
+    def static_name(self, value):
+        validator_group_or_unit_name.validate(value, 'group name')
+        self.l10n[self._static_name_key] = value
+
+    @property
+    def static_category(self):
+        return self._section_static['units'][1]['category']
+
+    @property
+    def static_is_farp(self):
+        return self.static_category == 'Heliports'
+
+    @property
+    def static_position(self):
+        unit = self._section_static['units'][1]
+        return unit['x'], unit['y']
 
 
 # noinspection PyProtectedMember
