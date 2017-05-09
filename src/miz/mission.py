@@ -1,4 +1,6 @@
 # coding=utf-8
+
+import typing
 from calendar import timegm
 from itertools import chain
 from time import strftime, gmtime, strptime
@@ -9,6 +11,9 @@ from utils import Logged, valid_str, valid_positive_int, Validator, valid_bool, 
 EPOCH_DELTA = 1306886400
 
 logger = make_logger(__name__)
+
+validator_group_or_unit_name = Validator(_type=str, _regex=r'[a-zA-Z0-9\_\-\#]+',
+                                         exc=ValueError, logger=logger)
 
 
 class BaseMissionObject(Logged):
@@ -969,8 +974,10 @@ class Group(Country):
         def _section_route(self):
             return self.parent_group._section_group['route']['points']
 
-    validator_group_or_unit_name = Validator(_type=str, _regex=r'[a-zA-Z0-9\_\-\#]+',
-                                             exc=ValueError, logger=logger)
+        @property
+        def points(self):
+            raise NotImplementedError('uh')
+
     validator_group_route = Validator(_type=Route, exc=ValueError, logger=logger)
     units_class_enum = None
 
@@ -1022,7 +1029,7 @@ class Group(Country):
 
     @group_name.setter
     def group_name(self, value):
-        self.validator_group_or_unit_name.validate(value, 'group name')
+        validator_group_or_unit_name.validate(value, 'group name')
         self.l10n[self._group_name_key] = value
 
     @property
@@ -1150,7 +1157,7 @@ class BaseUnit(Group):
 
     @unit_name.setter
     def unit_name(self, value):
-        self.validator_group_or_unit_name.validate(value, 'unit name')
+        validator_group_or_unit_name.validate(value, 'unit name')
         self.l10n[self._unit_name_key] = value
 
     @property
