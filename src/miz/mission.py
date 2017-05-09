@@ -958,10 +958,17 @@ class Static(Country):
 
 # noinspection PyProtectedMember
 class Group(Country):
-
     attribs = ('group_category', 'group_index', 'group_hidden', 'group_start_time', '_group_name_key')
 
     class Route:
+
+        class Point:
+            def __init__(self, parent_route):
+                assert isinstance(parent_route, Group.Route)
+                self.parent_route = parent_route
+
+            def __repr__(self):
+                return 'Route({})'.format(self.parent_route.parent_group.group_name)
 
         def __init__(self, parent_group):
             assert isinstance(parent_group, Group)
@@ -1005,7 +1012,7 @@ class Group(Country):
         return self._section_group == other._section_group
 
     @property
-    def group_route(self):
+    def group_route(self) -> 'Group.Route':
         if self.__group_route is None:
             self.__group_route = Group.Route(self)
         return self.__group_route
