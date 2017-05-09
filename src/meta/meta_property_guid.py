@@ -9,15 +9,6 @@ class _MetaGUIDProperty(_MetaProperty):
 
     def __get__(self, instance, owner=None):
         """
-        Retrieves value.
-
-        If instance is None, returns the descriptor object to allow access to "default" and "type"
-
-        If instance is a valid META object, returns instance.__getitem__() if it exists in the META or returns DEFAULT.
-
-        :param instance: instance of AbstractMeta
-        :param owner: actual Class of the META instance
-        :return: value of this DESCRIPTOR (DEFAULT if it isn't defined)
         """
         if instance is None:
             # Calling from Class object
@@ -71,19 +62,23 @@ class _MetaGUIDProperty(_MetaProperty):
             raise TypeError('expected a {}, got: {} (value: {})'.format(str(self.type), type(value), value))
 
         previous_value = None
-        value_holder = getattr(instance, self.prop_name)
+
+        try:
+            value_holder = getattr(instance, '_data')[self.prop_name]
+        except KeyError:
+            value_holder = dict()
 
         if value_holder is None:
             value_holder = dict()
 
-        if self.prop_name in value_holder:
+        if MACHINE_GUID in value_holder:
             previous_value = value_holder[MACHINE_GUID]
-
-        if value == previous_value:
-            return
 
         # Runs whatever code is inside the decorated method and set the result to the new value
         value = self.func(instance, value)
+
+        if value == previous_value:
+            return
 
         # If no exception was thrown, sets the value in the META
         value_holder[MACHINE_GUID] = value
@@ -101,8 +96,9 @@ class _MetaGUIDProperty(_MetaProperty):
                 value_holder = getattr(instance, self.prop_name)
             except AttributeError:
                 pass
-            if isinstance(value_holder, dict):
-                instance.__delitem__(self.prop_name)
+            else:
+                if isinstance(value_holder, dict):
+                    instance.__delitem__(self.prop_name)
         except KeyError:
             pass
 
