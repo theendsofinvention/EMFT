@@ -43,3 +43,20 @@ DCS = {
 
 QT_APP = None
 MAIN_UI = None
+
+try:
+    # noinspection PyUnresolvedReferences
+    from winreg import ConnectRegistry, HKEY_LOCAL_MACHINE, KEY_READ, KEY_WOW64_64KEY, OpenKey, QueryValueEx
+
+    a_reg = ConnectRegistry(None, HKEY_LOCAL_MACHINE)
+    try:
+        with OpenKey(a_reg, r"SOFTWARE\Microsoft\Cryptography") as aKey:
+            MACHINE_GUID = QueryValueEx(aKey, "MachineGuid")[0]
+    except FileNotFoundError:
+        try:
+            with OpenKey(a_reg, r"SOFTWARE\Microsoft\Cryptography", access=KEY_READ | KEY_WOW64_64KEY) as aKey:
+                MACHINE_GUID = QueryValueEx(aKey, "MachineGuid")[0]
+        except FileNotFoundError:
+            MACHINE_UID = False
+except ImportError:
+    MACHINE_UID = False

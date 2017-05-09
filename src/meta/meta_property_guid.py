@@ -1,29 +1,11 @@
 # coding=utf-8
+
+from .meta_property import MetaProperty, _MetaProperty
+from src.global_ import MACHINE_GUID
 from .abstract import AbstractMeta
 
 
-class _MetaProperty:
-    """
-    Actual descriptor object created during MetaProperty.__call___ below.
-
-    Accessing a _MetaProperty from the META class itself (SomeMeta._MetaProperty) gives access to the object itself,
-    with "default", "type", "__doc__", "key" and "func".
-
-    """
-
-    def __init__(self, func: callable, default: object, _type: object):
-        """
-        Initialize the DESCRIPTOR.
-
-        :param func: callable to overwrite
-        :param default: default value if there's nothing in the META yet
-        :param _type: type of object allowed to be SET
-        """
-        self.func = func
-        self.prop_name = self.func.__name__
-        self.default = default
-        self.type = _type
-        self.__doc__ = func.__doc__
+class _MetaGUIDProperty(_MetaProperty):
 
     def __get__(self, instance, owner=None):
         """
@@ -44,12 +26,25 @@ class _MetaProperty:
         if not isinstance(instance, AbstractMeta):
             raise TypeError('_MetaProperty can only be used with Meta() instances')
 
-        if instance.__getitem__(self.prop_name) is None:
+        value_holder = instance.__getitem__(self.prop_name)
+
+        if value_holder is None:
+
             # Not set yet, returns default
             return self.default
+
         else:
+
+            assert isinstance(value_holder, dict), type(value_holder)
+
+            if MACHINE_GUID not in value_holder:
+                # No value for this machine, returns default
+                return self.default
+
+            value = value_holder[MACHINE_GUID]
+
             # Check the value against the setter (I'm being paranoid here)
-            value = self.func(instance, instance.__getitem__(self.prop_name))
+            value = self.func(instance, value)
 
             # Return actual value
             return value
@@ -75,14 +70,24 @@ class _MetaProperty:
             # Checks for type of "value"
             raise TypeError('expected a {}, got: {} (value: {})'.format(str(self.type), type(value), value))
 
-        if value == getattr(instance, self.prop_name):
+        previous_value = None
+        value_holder = getattr(instance, self.prop_name)
+
+        if value_holder is None:
+            value_holder = dict()
+
+        if self.prop_name in value_holder:
+            previous_value = value_holder[MACHINE_GUID]
+
+        if value == previous_value:
             return
 
         # Runs whatever code is inside the decorated method and set the result to the new value
         value = self.func(instance, value)
 
         # If no exception was thrown, sets the value in the META
-        instance.__setitem__(self.prop_name, value)
+        value_holder[MACHINE_GUID] = value
+        instance.__setitem__(self.prop_name, value_holder)
 
         # # Broadcast a Blinker signal that the value has changed
         # signal('{}_{}_value_changed'.format(instance.__class__.__name__, self.prop_name)).send(
@@ -92,25 +97,17 @@ class _MetaProperty:
         if instance is None:
             return self
         try:
-            instance.__delitem__(self.prop_name)
+            try:
+                value_holder = getattr(instance, self.prop_name)
+            except AttributeError:
+                pass
+            if isinstance(value_holder, dict):
+                instance.__delitem__(self.prop_name)
         except KeyError:
             pass
 
 
-class MetaProperty:
-    """
-    Decorator-class to create properties for META instances.
-    """
-
-    def __init__(self, default: object, _type: object):
-        """
-        Initialize properties of the descriptor.
-
-        :param default: default value of the property if it isn't set yet
-        :param _type:
-        """
-        self.default = default
-        self.type = _type
+class MetaGUIDProperty(MetaProperty):
 
     def __call__(self, func: callable) -> _MetaProperty:
         """
@@ -120,4 +117,4 @@ class MetaProperty:
         :return: decorated function as a descriptor instance of _MetaProperty
         :rtype: _MetaProperty
         """
-        return _MetaProperty(func, self.default, self.type)
+        return _MetaGUIDProperty(func, self.default, self.type)

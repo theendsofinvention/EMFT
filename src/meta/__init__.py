@@ -4,3 +4,4 @@ from .abstract import AbstractMeta
 from .meta import Meta
 from .meta_property import MetaProperty
 from .meta_singleton import MetaSingleton
+from .meta_property_guid import MetaGUIDProperty
