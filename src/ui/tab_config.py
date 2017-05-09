@@ -23,6 +23,7 @@ class TabConfig(iTab, TabConfigAdapter):
 
     def tab_clicked(self):
         self._check_for_new_version()
+        self._sg_scan()
 
     @property
     def tab_title(self) -> str:
@@ -233,6 +234,7 @@ class TabConfig(iTab, TabConfigAdapter):
     def _check_for_new_version(self):
         if hasattr(self, 'install_new_version_btn'):
             self.install_new_version_btn.setVisible(False)
+        self.remote_version.setText('Probing ...')
         updater.get_latest_release(
             channel=Config().update_channel,
             branch=Version(global_.APP_VERSION),

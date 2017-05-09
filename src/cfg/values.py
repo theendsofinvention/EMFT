@@ -3,13 +3,13 @@
 import path
 from utils.custom_logging import make_logger
 
-from src.meta import MetaProperty
+from src.meta import MetaProperty, MetaGUIDProperty
 
 logger = make_logger(__name__)
 
 
 class ConfigValues:
-    @MetaProperty(None, str)
+    @MetaGUIDProperty(None, str)
     def saved_games_path(self, value: str):
         p = path.Path(value)
         if not p.exists():
@@ -18,7 +18,7 @@ class ConfigValues:
             raise TypeError('path is not a directory: {}'.format(p.abspath()))
         return str(p.abspath())
 
-    @MetaProperty(None, str)
+    @MetaGUIDProperty(None, str)
     def single_miz_output_folder(self, value: str):
         p = path.Path(value)
         if not p.exists():
@@ -27,7 +27,7 @@ class ConfigValues:
             return None
         return str(p.abspath())
 
-    @MetaProperty(None, str)
+    @MetaGUIDProperty(None, str)
     def auto_source_folder(self, value: str):
         p = path.Path(value)
         if not p.exists():
@@ -36,7 +36,7 @@ class ConfigValues:
             return None
         return str(p.abspath())
 
-    @MetaProperty(None, str)
+    @MetaGUIDProperty(None, str)
     def auto_output_folder(self, value: str):
         p = path.Path(value)
         if not p.exists():
@@ -45,7 +45,7 @@ class ConfigValues:
             return None
         return str(p.abspath())
 
-    @MetaProperty(None, str)
+    @MetaGUIDProperty(None, str)
     def single_miz_last(self, value: str):
         p = path.Path(value)
         if not p.exists():
@@ -84,12 +84,12 @@ class ConfigValues:
         return value
 
     # noinspection PyPep8Naming
-    @MetaProperty(None, str)
+    @MetaGUIDProperty(None, str)
     def skins_active_dcs_installation(self, value: str):
         return value
 
     # noinspection PyPep8Naming
-    @MetaProperty(None, str)
+    @MetaGUIDProperty(None, str)
     def roster_last_dir(self, value: str):
         return value
 
@@ -101,11 +101,11 @@ class ConfigValues:
         return value
 
     # noinspection PyPep8Naming
-    @MetaProperty(None, str)
+    @MetaGUIDProperty(None, str)
     def dcs_custom_install_path(self, value: str):
         return value
 
     # noinspection PyPep8Naming
-    @MetaProperty(None, str)
+    @MetaGUIDProperty(None, str)
     def dcs_custom_variant_path(self, value: str):
         return value
