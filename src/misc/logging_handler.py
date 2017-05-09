@@ -96,8 +96,8 @@ class PersistentLoggingFollower(logging.Formatter):
     def _sanitize_level(level):
         return _sanitize_level(level)
 
+    @staticmethod
     def filter_records(
-            self,
             minimum_level=logging.NOTSET,
             msg_filter: str or None = None,
             module_filter: str or None = None,

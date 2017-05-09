@@ -3,8 +3,6 @@
 from utils import make_logger
 
 from src import global_
-from src.__version__ import __version__
-
 from src.ui.base import VLayout, Label, HSpacer, GridLayout, VSpacer
 from src.ui.itab import iTab
 

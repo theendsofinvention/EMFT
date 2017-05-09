@@ -8,9 +8,8 @@ from .main_ui_msgbox_adapter import MainUiMsgBoxAdapter
 
 
 class MainUiMsgBox(MainUiMsgBoxAdapter):
-
+    @staticmethod
     def _run_box(
-            self,
             text: str,
             title: str,
             ico: str,

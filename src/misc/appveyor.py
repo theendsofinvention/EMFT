@@ -17,6 +17,7 @@ def __url(*params):
     return '/'.join([base_url] + [p for p in params])
 
 
+# noinspection PyTypeChecker
 def get_latest_remote_version(branch='All') -> AVResult:
     logger.debug('querying AV for latest version')
     if branch == 'All':

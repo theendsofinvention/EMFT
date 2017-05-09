@@ -1011,8 +1011,10 @@ class Group(Country):
                 '"other" must be an AbstractUnit instance; got: {}'.format(type(other)))
         return self._section_group == other._section_group
 
+    # noinspection PyTypeChecker
     @property
     def group_route(self) -> 'Group.Route':
+        #  TODO
         if self.__group_route is None:
             self.__group_route = Group.Route(self)
         return self.__group_route
