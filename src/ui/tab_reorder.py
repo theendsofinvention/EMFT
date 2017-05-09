@@ -276,11 +276,6 @@ class _AutoLayout:
     def scan(self):
         """"""
 
-    @property
-    @abc.abstractmethod
-    def pool(self) -> ThreadPool:
-        """"""
-
     @staticmethod
     def get_av_token():
         # noinspection SpellCheckingInspection
@@ -337,9 +332,7 @@ class TabReorder(iTab, _SingleLayout, _AutoLayout, TabReorderAdapter):
         _SingleLayout.__init__(self)
         _AutoLayout.__init__(self)
 
-        self.remote_version, self.remote_branch, self.local_version = None, None, None
-
-        self._pool = ThreadPool(_basename='reorder', _num_threads=1, _daemon=True)
+        self._remote = None
 
         help_text = QLabel('By design, LUA tables are unordered, which makes tracking changes extremely difficult.\n\n'
                            'This lets you reorder them alphabetically before you push them in a SCM.\n\n'
@@ -381,10 +374,6 @@ class TabReorder(iTab, _SingleLayout, _AutoLayout, TabReorderAdapter):
         self.check_skip_options.setChecked(Config().skip_options_file)
         self.toggle_radios()
         self.scan()
-
-    @property
-    def pool(self) -> ThreadPool:
-        return self._pool
 
     def toggle_skip_options(self, *_):
         Config().skip_options_file = self.check_skip_options.isChecked()
