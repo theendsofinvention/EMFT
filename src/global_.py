@@ -11,7 +11,7 @@ try:
 except KeyError:
     TESTING = False
 
-UPDATER_LATEST = None
+DEFAULT_ICON = ':/ico/app.ico'
 
 if 'dev' in src.__version__.__version__:
     LINK_CHANGELOG = r'''https://github.com/132nd-etcher/EMFT/blob/develop/CHANGELOG.rst'''
