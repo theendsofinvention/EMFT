@@ -9,7 +9,10 @@ from src.miz.miz import Miz, Mission
 from src.miz.mission import Group, FlyingUnit
 from src.cfg import Config
 from .main_ui_interface import I
-from utils import Path, ThreadPool
+from utils import Path, ThreadPool, make_logger
+
+
+logger = make_logger(__name__)
 
 
 class TabRoster(iTab):
@@ -23,6 +26,7 @@ class TabRoster(iTab):
         self.load_miz_btn = PushButton('Load MIZ file', self._load_miz)
         self.miz_label = Label('No MIZ file loaded')
         self._miz = None
+        self._miz_path = None
 
         self.table = TableView()
         self.model = TableModel(list(), ['Group name', 'Unit type', 'Livery'])
@@ -58,8 +62,15 @@ class TabRoster(iTab):
             try:
                 livery = unit.livery
             except KeyError:
+                msg = 'no livery found for unit with "{}" ("{}"), falling back to default'
+                logger.error(msg.format(unit.unit_id, unit.unit_type))
                 livery = 'Default'
             data.append([group.group_name, unit.unit_type, livery])
+
+        if len(data) == 0:
+            logger.error('no client group found in: {}'.format(self._miz_path.abspath()))
+            self.main_ui.error('No client group found in this MIZ file.')
+
         self.model.reset_data(data)
         self.table.resizeColumnsToContents()
 
@@ -69,8 +80,11 @@ class TabRoster(iTab):
             'Select MIZ file',
             _filter=['*.miz'],
             init_dir=self._last_dir or saved_games_path.abspath())
+
         if not miz:
             return
+
+        self._miz_path = miz
 
         self._last_dir = str(miz.dirname())
         Config().roster_last_dir = self._last_dir
