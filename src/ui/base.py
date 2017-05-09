@@ -193,9 +193,23 @@ class Combo(QComboBox):
         # noinspection PyUnresolvedReferences
         self.currentTextChanged.connect(on_change)
 
-    def set_index_from_text(self, text):
+    def __enter__(self):
+        try:
+            # noinspection PyUnresolvedReferences
+            self.currentTextChanged.disconnect()
+        except TypeError:
+            pass
+
+    def __exit__(self, exc_type, exc_val, exc_tb):
         # noinspection PyUnresolvedReferences
-        self.currentTextChanged.disconnect()
+        self.currentTextChanged.connect(self.on_change)
+
+    def set_index_from_text(self, text):
+        try:
+            # noinspection PyUnresolvedReferences
+            self.currentTextChanged.disconnect()
+        except TypeError:
+            pass
         idx = self.findText(text, Qt.MatchExactly)
         if idx < 0:
             raise ValueError(text)
