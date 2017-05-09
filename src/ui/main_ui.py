@@ -147,7 +147,9 @@ def start_ui(test=False):
     if test:
         logger.critical('RUNNING IN TEST MODE')
         import time
+        import src.sentry.sentry
         from utils import ThreadPool, nice_exit
+        src.sentry.sentry.CRASH = True
 
         def test_hook():
             logger.critical('TEST MODE: waiting 10 seconds')
