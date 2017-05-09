@@ -57,7 +57,7 @@ class MainUiMsgBox(MainUiMsgBoxAdapter):
     def msg(self, text: str, follow_up: callable = None, title: str = None, ico: str = None):
         self._run_box(text=text, follow_up_on_yes=follow_up, title=title, ico=ico)
 
-    def error(self, text: str, follow_up: callable = None, title: str = None, ico: str = None):
+    def error(self, text: str, follow_up: callable = None, title: str = 'Error', ico: str = None):
         self._run_box(text=text, follow_up_on_yes=follow_up, title=title, ico=ico)
 
     def confirm(
