@@ -4,7 +4,7 @@ Convenience module for storing/restoring per-user configuration values
 """
 # noinspection PyProtectedMember
 from src import global_
-from src.meta.meta import Meta
+from src.meta import Meta
 from utils.custom_logging import make_logger
 from utils.singleton import Singleton
 from .values import ConfigValues

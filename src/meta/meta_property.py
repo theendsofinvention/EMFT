@@ -1,5 +1,5 @@
 # coding=utf-8
-from src.meta.abstract import AbstractMeta
+from .abstract import AbstractMeta
 
 
 class _MetaProperty:
