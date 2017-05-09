@@ -21,6 +21,9 @@ logger = make_logger(__name__)
 
 class TabConfig(iTab, TabConfigAdapter):
 
+    def tab_clicked(self):
+        self._check_for_new_version()
+
     @property
     def tab_title(self) -> str:
         return TAB_NAME

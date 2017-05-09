@@ -327,6 +327,9 @@ class _AutoLayout:
 
 
 class TabReorder(iTab, _SingleLayout, _AutoLayout, TabReorderAdapter):
+    def tab_clicked(self):
+        pass
+
     @property
     def tab_title(self):
         return TAB_NAME

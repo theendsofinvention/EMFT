@@ -12,6 +12,9 @@ logger = make_logger(__name__)
 
 
 class TabAbout(iTab):
+    def tab_clicked(self):
+        pass
+
     @property
     def tab_title(self) -> str:
         return 'About'

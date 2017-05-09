@@ -15,7 +15,10 @@ from utils import Path, ThreadPool, make_logger
 logger = make_logger(__name__)
 
 
-class TabRoster(iTab):
+class TabRoster(iTab, TabRosterAdapter):
+    def tab_clicked(self):
+        pass
+
     @property
     def tab_title(self):
         return TAB_NAME

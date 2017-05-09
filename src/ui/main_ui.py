@@ -3,7 +3,7 @@ from queue import Queue
 
 from PyQt5.QtCore import Qt
 from PyQt5.QtGui import QIcon, QKeySequence
-from PyQt5.QtWidgets import QMainWindow, QTabWidget
+from PyQt5.QtWidgets import QMainWindow
 from utils import make_logger, nice_exit
 
 # noinspection PyProtectedMember
@@ -13,6 +13,7 @@ from .base import Shortcut, VLayout, Widget
 from .itab import iTab
 from .main_ui_interface import I
 from .main_ui_mixins import MainUiMixins
+from .main_ui_tab_widget import MainUiTabWidget
 
 logger = make_logger(__name__)
 
@@ -34,7 +35,7 @@ class MainUi(QMainWindow, MainUiMixins):
 
         self.resize(1024, 768)
 
-        self.tabs = QTabWidget()
+        self.tabs = MainUiTabWidget()
 
         layout = VLayout(
             [

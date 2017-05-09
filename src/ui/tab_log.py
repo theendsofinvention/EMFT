@@ -17,6 +17,9 @@ from .tab_log_adapter import TAB_NAME, TabLogAdapter
 
 
 class TabLog(iTab, PersistentLoggingFollower, TabLogAdapter):
+    def tab_clicked(self):
+        pass
+
     @property
     def datefmt_(self):
         return '%H:%M:%S'
