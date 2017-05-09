@@ -328,7 +328,7 @@ class _AutoLayout:
 
 class TabReorder(iTab, _SingleLayout, _AutoLayout, TabReorderAdapter):
     def tab_clicked(self):
-        pass
+        self.scan()
 
     @property
     def tab_title(self):
@@ -340,6 +340,7 @@ class TabReorder(iTab, _SingleLayout, _AutoLayout, TabReorderAdapter):
         _AutoLayout.__init__(self)
 
         self._remote = None
+        self.local_version = None
 
         help_text = QLabel('By design, LUA tables are unordered, which makes tracking changes extremely difficult.\n\n'
                            'This lets you reorder them alphabetically before you push them in a SCM.\n\n'
@@ -380,7 +381,6 @@ class TabReorder(iTab, _SingleLayout, _AutoLayout, TabReorderAdapter):
         self.radio_auto.setChecked(Config().auto_mode)
         self.check_skip_options.setChecked(Config().skip_options_file)
         self.toggle_radios()
-        self.scan()
 
     def toggle_skip_options(self, *_):
         Config().skip_options_file = self.check_skip_options.isChecked()
@@ -476,6 +476,7 @@ class TabReorder(iTab, _SingleLayout, _AutoLayout, TabReorderAdapter):
     def scan(self, *_):
         self.auto_scan_label_remote.set_text_color('black')
         self.auto_scan_label_remote.setText('Probing...')
+        self.auto_scan_label_local.setText('Probing...')
         self.main_ui.pool.queue_task(task=self._scan, _task_callback=self._scan_callback)
 
     @property
