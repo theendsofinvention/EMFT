@@ -247,7 +247,7 @@ class DCSInstalls:
             logger.debug('{}: install found: {}'.format(k, install_path.abspath()))
 
             self.installs_props[k]['install'] = str(install_path.abspath())
-            if k =='custom':
+            if k == 'custom':
                 self.installs_props[k]['sg'] = Config().dcs_custom_variant_path
             else:
                 self.installs_props[k]['sg'] = self.get_variant(k)
@@ -347,7 +347,6 @@ class DCSInstalls:
 
         I.config_tab_update_dcs_installs()
         I.tab_skins_update_dcs_installs_combo()
-
 
 
 dcs_installs = DCSInstalls()

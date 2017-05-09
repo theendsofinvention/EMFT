@@ -5,7 +5,6 @@ from .itab import iTab
 
 
 class MainUiTabWidget(QTabWidget):
-
     def __init__(self, parent=None):
         QTabWidget.__init__(self, parent)
         self._tabs = []

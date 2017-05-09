@@ -34,7 +34,6 @@ class TabSkins(iTab, TabSkinsAdapter):
             with self.combo_active_dcs_installation:
                 self.combo_active_dcs_installation.setCurrentIndex(0)
 
-
     @property
     def tab_title(self) -> str:
         return TAB_NAME

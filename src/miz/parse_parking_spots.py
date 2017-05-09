@@ -1,12 +1,13 @@
 # coding=utf-8
 
+from collections import defaultdict
+
 import click
-from collections import defaultdict, OrderedDict
+
 
 @click.command()
 @click.argument('miz_path', type=click.Path(exists=True, file_okay=True, dir_okay=False, readable=True))
 def main(miz_path):
-
     from src.miz.miz import Miz
     with Miz(miz_path) as m:
         mis = m.mission
@@ -20,23 +21,20 @@ def main(miz_path):
 
     import pickle
     with open('_parking_spots.py', mode='w') as f:
-        f.write('parkings = {}'.format(pickle.dumps(result)))
+        f.write('parkings = {}\n'.format(pickle.dumps(result)))
 
-    # # print(out)
-    # import src.miz.out
-    # with open('out.py') as f:
-    #     res = pickle.loads(src.miz.out.parkings)
+        # # print(out)
+        # import src.miz.out
+        # with open('out.py') as f:
+        #     res = pickle.loads(src.miz.out.parkings)
 
-    # print(res)
+        # print(res)
 
-    # for k in result:
-    #     parkings[k] = result[k]
-    #
-    # parkings.write()
+        # for k in result:
+        #     parkings[k] = result[k]
+        #
+        # parkings.write()
 
 
 if __name__ == '__main__':
     main()
-
-
-
