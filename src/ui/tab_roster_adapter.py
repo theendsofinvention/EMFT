@@ -1,6 +1,6 @@
 # coding=utf-8
 import abc
-from src.ui.itab import MainUiTabMethod
+from .itab import MainUiTabMethod
 
 
 TAB_NAME = 'Roster'
