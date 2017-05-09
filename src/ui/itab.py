@@ -27,6 +27,10 @@ class iTab(QWidget):
     def main_ui(self) -> MainUiMixinsAdapter:
         return self._main_ui
 
+    @abc.abstractmethod
+    def tab_clicked(self):
+        raise NotImplementedError()
+
 
 class _MainUiTabMethod:
     def __init__(self, func, tab_name):

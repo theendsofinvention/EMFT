@@ -18,7 +18,20 @@ RE_LOAD_MODEL_LINE = re.compile(r'^LoadModel\("(?P<path>.*)"\)$')
 RE_LOAD_LIVERY_LINE = re.compile(r'^LoadLivery\("(?P<path>.*)"\)$')
 
 
-class TabSkins(iTab):
+    def tab_clicked(self):
+        self._refresh_skins_for_active_install()
+
+    def tab_skins_update_dcs_installs_combo(self):
+        with self.combo_active_dcs_installation:
+            self.combo_active_dcs_installation.clear()
+            self.combo_active_dcs_installation.addItems(list(x.label for x in dcs_installs.present_dcs_installations))
+        try:
+            self.combo_active_dcs_installation.set_index_from_text(Config().skins_active_dcs_installation)
+        except ValueError:
+            with self.combo_active_dcs_installation:
+                self.combo_active_dcs_installation.setCurrentIndex(0)
+
+
     @property
     def tab_title(self) -> str:
         return TAB_NAME
