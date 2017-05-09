@@ -3,7 +3,7 @@
 import path
 from utils.custom_logging import make_logger
 
-from src.meta.meta_property import MetaProperty
+from src.meta import MetaProperty
 
 logger = make_logger(__name__)
 
