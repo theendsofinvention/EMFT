@@ -4,21 +4,20 @@ from queue import Queue
 from PyQt5.QtCore import Qt
 from PyQt5.QtGui import QIcon, QKeySequence
 from PyQt5.QtWidgets import QMainWindow, QTabWidget
-from utils import make_logger
+from utils import make_logger, nice_exit
 
 # noinspection PyProtectedMember
 from src import global_
 from src.cfg import Config
-from .base import Shortcut, VLayout, Widget, WithMsgBox
+from .base import Shortcut, VLayout, Widget
 from .itab import iTab
 from .main_ui_interface import I
-from .main_ui_progress import MainUiProgress
-from .main_ui_threading import MainUiThreading
+from .main_ui_mixins import MainUiMixins
 
 logger = make_logger(__name__)
 
 
-class MainUi(QMainWindow, MainUiThreading, MainUiProgress, WithMsgBox):
+class MainUi(QMainWindow, MainUiMixins):
     threading_queue = Queue()
 
     def __init__(self):
@@ -32,8 +31,6 @@ class MainUi(QMainWindow, MainUiThreading, MainUiProgress, WithMsgBox):
             self,
             flags=flags
         )
-
-        WithMsgBox.__init__(self, global_.APP_SHORT_NAME, ':/ico/app.ico')
 
         self.resize(1024, 768)
 
@@ -52,25 +49,20 @@ class MainUi(QMainWindow, MainUiThreading, MainUiProgress, WithMsgBox):
 
         self.setCentralWidget(window)
 
-        self.setWindowIcon(QIcon(':/ico/app.ico'))
+        self.setWindowIcon(QIcon(global_.DEFAULT_ICON))
 
         self.exit_shortcut = Shortcut(QKeySequence(Qt.Key_Escape), self, self.exit)
 
-    def show_log_tab(self):
-        self.tabs.setCurrentIndex(self.tabs.count() - 1)
-
-    def write_log(self, value: str, color: str):
-        self.helpers['write_log'](value, color)
+        self.setWindowTitle(
+            '{} v{} - {}'.format(global_.APP_SHORT_NAME,
+                                 global_.APP_VERSION,
+                                 global_.APP_RELEASE_NAME))
 
     def add_tab(self, tab: iTab):
         setattr(self, 'tab_{}'.format(tab.tab_title), tab)
         self.tabs.addTab(tab, tab.tab_title)
 
     def show(self):
-        self.setWindowTitle(
-            '{} v{} - {}'.format(global_.APP_SHORT_NAME,
-                                 global_.APP_VERSION,
-                                 global_.APP_RELEASE_NAME))
         self.setWindowState(self.windowState() & Qt.WindowMinimized | Qt.WindowActive)
         self.activateWindow()
         super(QMainWindow, self).show()
@@ -81,6 +73,7 @@ class MainUi(QMainWindow, MainUiThreading, MainUiProgress, WithMsgBox):
     def exit(code=0):
         if global_.QT_APP:
             global_.QT_APP.exit(code)
+        nice_exit(code)
 
     def closeEvent(self, event):
         self.exit()
@@ -91,11 +84,12 @@ def start_ui(test=False):
     import sys
     logger.info('starting application')
     global_.QT_APP = QApplication([])
-    global_.MAIN_UI = MainUi()
+    main_ui = MainUi()
+    global_.MAIN_UI = main_ui
 
     logger.info('loading module: re-order')
     from src.ui.tab_reorder import TabReorder
-    global_.MAIN_UI.add_tab(TabReorder())
+    global_.MAIN_UI.add_tab(TabReorder(main_ui))
 
     logger.info('loading module: dcs_installs')
     from src.misc.fs import dcs_installs
@@ -103,23 +97,23 @@ def start_ui(test=False):
 
     logger.info('loading tab: skins')
     from src.ui.tab_skins import TabSkins
-    global_.MAIN_UI.add_tab(TabSkins())
+    global_.MAIN_UI.add_tab(TabSkins(main_ui))
 
     logger.info('loading tab: roster')
     from src.ui.tab_roster import TabRoster
-    global_.MAIN_UI.add_tab(TabRoster())
+    global_.MAIN_UI.add_tab(TabRoster(main_ui))
 
     logger.info('loading tab: config')
     from src.ui.tab_config import TabConfig
-    global_.MAIN_UI.add_tab(TabConfig())
+    global_.MAIN_UI.add_tab(TabConfig(main_ui))
 
     logger.info('loading tab: log')
     from src.ui.tab_log import TabLog
-    global_.MAIN_UI.add_tab(TabLog())
+    global_.MAIN_UI.add_tab(TabLog(main_ui))
 
     logger.info('loading tab: about')
     from src.ui.tab_about import TabAbout
-    global_.MAIN_UI.add_tab(TabAbout())
+    global_.MAIN_UI.add_tab(TabAbout(main_ui))
 
     global_.MAIN_UI.show()
 
