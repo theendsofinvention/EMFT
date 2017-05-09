@@ -9,7 +9,7 @@ from src.misc.fs import dcs_installs, DCSInstall, DCSSkin
 from src.ui.base import VLayout, Combo, HLayout, Label, HSpacer, TableModel, TableViewWithSingleRowMenu, \
     TableProxy, LineEdit, GroupBox, GridLayout, Menu, Checkbox, PushButton
 from src.ui.itab import iTab
-from .tab_skins_adapter import TAB_NAME
+from .main_ui_interface import I
 from .tab_skins_adapter import TAB_NAME, TabSkinsAdapter
 
 logger = make_logger(__name__)
@@ -64,8 +64,7 @@ class TabSkins(iTab, TabSkinsAdapter):
         self.filter_folder = _make_filter()
 
         self.combo_active_dcs_installation = Combo(
-            self._on_active_dcs_installation_change,
-            list(x.label for x in dcs_installs.present_dcs_installations),
+            self._on_active_dcs_installation_change
         )
 
         self.refresh_skins_btn = PushButton('Refresh skins list', self._refresh_skins_for_active_install)
@@ -207,15 +206,27 @@ class TabSkins(iTab, TabSkinsAdapter):
         if self.combo_active_dcs_installation.currentText():
             return getattr(dcs_installs, self.combo_active_dcs_installation.currentText())
 
+    def tab_skins_show_skins_scan_result(self, scan_result):
+        self.model.reset_data(scan_result)
+        self.table.resizeColumnsToContents()
+
     def _display_list_of_skins_for_currently_selected_install(self):
-        def skin_to_data_line(skin: DCSSkin):
-            return [skin.skin_nice_name, skin.ac, skin.root_folder]
+
+        def gather_data():
+            return [
+                [skin.skin_nice_name, skin.ac, skin.root_folder]
+                for skin in self._active_dcs_install.skins.values()
+            ]
 
         if self._active_dcs_install:
-            self.model.reset_data(
-                [skin_to_data_line(skin) for skin in self._active_dcs_install.skins.values()]
+            self.main_ui.pool.queue_task(
+                task=gather_data,
+                _task_callback=I.tab_skins_show_skins_scan_result
             )
-            self.table.resizeColumnsToContents()
+            # self.model.reset_data(
+            #     [skin_to_data_line(skin) for skin in self._active_dcs_install.skins.values()]
+            # )
+            # self.table.resizeColumnsToContents()
 
     def _on_active_dcs_installation_change(self):
         Config().skins_active_dcs_installation = self.combo_active_dcs_installation.currentText()
