@@ -7,11 +7,12 @@ import re
 
 from utils import make_logger, Path
 
+from src.cfg import Config
 from ._winreg import winreg, A_REG
 from .saved_games import saved_games_path
 
 from src import global_
-from src.cfg.cfg import Config
+# from src.cfg.cfg import Config
 
 logger = make_logger(__name__)
 
@@ -46,6 +47,10 @@ class AutoexecCFG:
                 if m:
                     self._vfs.add(m.group('path'))
         logger.debug('found {} VFS path(s)'.format(len(self._vfs)))
+
+    @property
+    def path(self) -> Path:
+        return self._path
 
 
 class DCSInstall:
@@ -83,6 +88,10 @@ class DCSInstall:
     @property
     def version(self):
         return self.__version
+
+    @property
+    def autoexec(self):
+        return self.__autoexec
 
     @property
     def skins(self):
@@ -149,7 +158,6 @@ class DCSInstalls:
                 'install': None,
                 'sg': None,
                 'version': None,
-                'config_attrib': 'dcs_install_path_stable',
                 'autoexec_cfg': None,
             },
             'beta': {
@@ -158,7 +166,6 @@ class DCSInstalls:
                 'install': None,
                 'sg': None,
                 'version': None,
-                'config_attrib': 'dcs_install_path_beta',
                 'autoexec_cfg': None,
             },
             'alpha': {
@@ -167,22 +174,17 @@ class DCSInstalls:
                 'install': None,
                 'sg': None,
                 'version': None,
-                'config_attrib': 'dcs_install_path_alpha',
+                'autoexec_cfg': None,
+            },
+            'custom': {
+                'reg_key': None,
+                'sg_default': None,
+                'install': None,
+                'sg': None,
+                'version': None,
                 'autoexec_cfg': None,
             },
         }
-
-    @staticmethod
-    def _get_base_saved_games_path():
-        if Config().saved_games_path is None:
-            logger.debug('no Saved Games path in Config, looking it up')
-            base_sg = saved_games_path
-        else:
-            logger.debug('Saved Games path found in Config')
-            base_sg = Path(Config().saved_games_path)
-        base_sg.must_be_a_dir(InvalidSavedGamesPath)
-        logger.debug('using Saved Games path: {}'.format(base_sg.abspath()))
-        return base_sg
 
     def __discover_install_path(self, k) -> Path or None:
         try:
@@ -198,7 +200,8 @@ class DCSInstalls:
             return None
 
     def get_install_path(self, k) -> Path or None:
-        logger.debug('{}: reading config'.format(k))
+        if k == 'custom':
+            return Config().dcs_custom_install_path
         install_path = self.__discover_install_path(k)
         if install_path is None:
             logger.debug('{}: no install path found'.format(k))
@@ -209,26 +212,29 @@ class DCSInstalls:
 
     def get_variant(self, k):
         install_path = Path(self.installs_props[k]['install'])
-        sg_path = Path(Config().saved_games_path)
         variant_path = Path(install_path.joinpath('dcs_variant.txt'))
         logger.debug('{}: looking for variant: {}'.format(k, variant_path.abspath()))
         if variant_path.exists():
             logger.debug('{}: found variant: "{}"; reading'.format(k, variant_path.abspath()))
-            return sg_path.abspath().joinpath('DCS.{}'.format(variant_path.text()))
+            return saved_games_path.abspath().joinpath('DCS.{}'.format(variant_path.text()))
         else:
             logger.debug('{}: no variant, falling back to default: {}'.format(k, self.installs_props[k]['sg_default']))
-            return sg_path.abspath().joinpath(self.installs_props[k]['sg_default'])
+            return saved_games_path.abspath().joinpath(self.installs_props[k]['sg_default'])
 
     def discover_dcs_installations(self):
         logger.debug('looking for local DCS installations')
 
-        if Config().saved_games_path is None:
-            Config().saved_games_path = self._get_base_saved_games_path()
-
         for k in self.installs_props:
+
             logger.debug('{}: searching for paths'.format(k))
 
-            install_path = self.get_install_path(k)
+            if k == 'custom':
+                install_path = Config().dcs_custom_install_path
+                if isinstance(install_path, str):
+                    install_path = Path(install_path)
+            else:
+                install_path = self.get_install_path(k)
+
             if install_path is None:
                 logger.info('{}: no installation found, skipping'.format(k))
                 continue
@@ -241,7 +247,12 @@ class DCSInstalls:
             logger.debug('{}: install found: {}'.format(k, install_path.abspath()))
 
             self.installs_props[k]['install'] = str(install_path.abspath())
-            self.installs_props[k]['sg'] = self.get_variant(k)
+            if k =='custom':
+                self.installs_props[k]['sg'] = Config().dcs_custom_variant_path
+            else:
+                self.installs_props[k]['sg'] = self.get_variant(k)
+
+            logger.debug('{}: getting version info from executable: {}'.format(k, exe.abspath()))
             self.installs_props[k]['version'] = exe.get_win32_file_info().file_version
 
             logger.debug('{}: set "Saved Games" path to: {}'.format(k, self.installs_props[k]['sg']))
@@ -254,6 +265,7 @@ class DCSInstalls:
             install.discover_autoexec()
 
             I.config_tab_update_dcs_installs()
+            I.tab_skins_update_dcs_installs_combo()
 
     def __get_props(self, channel):
         return self.installs_props[channel]['install'], \
@@ -272,6 +284,10 @@ class DCSInstalls:
         return self._installs.get('alpha', None)
 
     @property
+    def custom(self) -> DCSInstall:
+        return self._installs.get('custom', None)
+
+    @property
     def present_dcs_installations(self):
         for x in self:
             if x and x.install_path:
@@ -281,9 +297,57 @@ class DCSInstalls:
         yield self.stable
         yield self.beta
         yield self.alpha
+        yield self.custom
 
     def __getitem__(self, item) -> DCSInstall:
         return getattr(self, item)
+
+    def add_custom(self, install_dir: Path, variant_dir: Path):
+
+        msg = 'custom: adding custom DCS installation; install_dir: "{}" Variant: "{}"'
+        logger.info(msg.format(install_dir.abspath(), variant_dir.abspath()))
+
+        exe = Path(install_dir.joinpath('bin').joinpath('dcs.exe'))
+        logger.debug('custom: looking for dcs.exe: "{}"'.format(exe.abspath()))
+        if not exe.exists():
+            msg = '"dcs.exe" not found in:{{}}{}'.format(install_dir.abspath())
+            logger.error(msg.format(''))
+            I.error(msg.format('\n\n'))
+            return
+
+        logger.debug('custom: install found: {}'.format(install_dir.abspath()))
+
+        self.installs_props['custom']['install'] = str(install_dir.abspath())
+        self.installs_props['custom']['sg'] = str(variant_dir.abspath())
+
+        logger.debug('custom: getting version info from executable: {}'.format(exe.abspath()))
+        self.installs_props['custom']['version'] = exe.get_win32_file_info().file_version
+
+        logger.debug('custom: set "Saved Games" path to: {}'.format(self.installs_props['custom']['sg']))
+
+        install = DCSInstall(*self.__get_props('custom'))
+
+        self._installs['custom'] = install
+
+        install.discover_skins()
+        install.discover_autoexec()
+
+        Config().dcs_custom_install_path = self.installs_props['custom']['install']
+        Config().dcs_custom_variant_path = self.installs_props['custom']['sg']
+
+        I.config_tab_update_dcs_installs()
+        I.tab_skins_update_dcs_installs_combo()
+
+    def remove_custom(self):
+
+        Config().dcs_custom_install_path = ''
+        Config().dcs_custom_variant_path = ''
+
+        del self._installs['custom']
+
+        I.config_tab_update_dcs_installs()
+        I.tab_skins_update_dcs_installs_combo()
+
 
 
 dcs_installs = DCSInstalls()
