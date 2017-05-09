@@ -9,9 +9,9 @@ from PyQt5.QtWidgets import QLineEdit, QLabel
 from natsort import natsorted
 from utils.custom_logging import make_logger
 from utils.custom_path import Path
-from utils.threadpool import ThreadPool
 
 from src.cfg.cfg import Config
+from src.misc.fs import saved_games_path
 from src.misc import appveyor, downloader, github
 from src.miz.miz import Miz
 from src.ui.base import GroupBox, HLayout, VLayout, PushButton, Radio, Checkbox, Label, Combo, GridLayout, VSpacer, \
@@ -121,8 +121,12 @@ class _SingleLayout:
             os.startfile(self.single_miz_path.dirname())
 
     def browse_for_single_miz(self):
-        init_dir = get_saved_games_path()
-        p = BrowseDialog.get_existing_file(self, 'Select MIZ file', _filter=['*.miz'], init_dir=init_dir.abspath())
+        if Config().single_miz_last:
+            init_dir = Path(Config().single_miz_last).dirname()
+        else:
+            init_dir = saved_games_path.abspath()
+        p = BrowseDialog.get_existing_file(
+            self, 'Select MIZ file', _filter=['*.miz'], init_dir=init_dir)
         if p:
             p = Path(p)
             self.single_miz.setText(p.abspath())
@@ -165,7 +169,7 @@ class _AutoLayout:
         self.auto_group = GroupBox()
         auto_help = QLabel('Looks for the latest TRMT MIZ (must be named "TRMT_*.miz") in the source folder.')
 
-        self._latest_trmt = None
+        self._latest_trmt_path = None
 
         self.auto_src_le = QLineEdit()
         if Config().auto_source_folder:
@@ -296,7 +300,7 @@ class _AutoLayout:
         if self.auto_src_path:
             init_dir = self.auto_src_path.dirname()
         else:
-            init_dir = get_saved_games_path()
+            init_dir = saved_games_path
         p = BrowseDialog.get_directory(self, 'Select source directory', init_dir=init_dir.abspath())
         if p:
             p = Path(p)
@@ -310,7 +314,7 @@ class _AutoLayout:
 
     @property
     def latest_trmt(self) -> Path or None:
-        return self._latest_trmt
+        return self._latest_trmt_path
 
     @abc.abstractmethod
     def reorder_miz(self, miz_file, output_dir, skip_options_file):
@@ -395,7 +399,7 @@ class TabReorder(iTab, _SingleLayout, _AutoLayout, TabReorderAdapter):
                 'if you think this is a bug.'.format(miz_file))
 
     def reorder_miz(self, miz_file, output_dir, skip_options_file):
-        self.pool.queue_task(
+        self.main_ui.pool.queue_task(
             Miz.reorder,
             [
                 miz_file,
@@ -412,31 +416,7 @@ class TabReorder(iTab, _SingleLayout, _AutoLayout, TabReorderAdapter):
 
     def _branch_changed(self):
         Config().selected_TRMT_branch = self.selected_branch
-        if hasattr(self, 'pool'):
-            self.scan()
-
-    def _scan(self):
-
-        if self.auto_src_path:
-            try:
-                logger.debug('looking for latest local TRMT version')
-                self._latest_trmt = natsorted(
-                    [Path(f).abspath() for f in Path(self.auto_src_path).listdir('TRMT_*.miz')]).pop()
-            except IndexError:
-                self._latest_trmt = None
-                self.local_version = None
-                logger.debug('no local TRMT found')
-            else:
-                self.local_version = Path(self._latest_trmt).namebase.replace('TRMT_', '')
-                logger.debug('latest local TRMT found: {}'.format(self.local_version))
-
-            # noinspection PyBroadException
-            try:
-                logger.debug('looking for latest remote TRMT version')
-                self.remote_version, self.remote_branch = appveyor.get_latest_remote_version(self.selected_branch)
-            except:
-                logger.debug('no remote TRMT found')
-                self.remote_version = None
+        self.scan()
 
     def tab_reorder_update_view_after_remote_scan(self):
         if self.local_version:
@@ -444,11 +424,11 @@ class TabReorder(iTab, _SingleLayout, _AutoLayout, TabReorderAdapter):
         else:
             self.auto_scan_label_local.setText('No TRMT local MIZ file found.')
 
-        if self.remote_version:
-            self.auto_scan_label_remote.setText('{} ({})'.format(self.remote_version, self.remote_branch))
-            logger.debug('latest remote TRMT found: {}'.format(self.remote_version))
+        if self.remote:
+            self.auto_scan_label_remote.setText('{} ({})'.format(self.remote.version, self.remote.branch))
+            logger.debug('latest remote TRMT found: {}'.format(self.remote.version))
             if self.local_version:
-                if LooseVersion(self.local_version) < LooseVersion(self.remote_version):
+                if LooseVersion(self.local_version) < LooseVersion(self.remote.version):
                     self.auto_scan_label_remote.set_text_color('green')
                     logger.debug('remote TRMT is newer than local')
                 else:
@@ -456,38 +436,66 @@ class TabReorder(iTab, _SingleLayout, _AutoLayout, TabReorderAdapter):
             else:
                 self.auto_scan_label_remote.set_text_color('green')
 
-    def scan(self):
+    def __scan_local(self):
+
+        if self.auto_src_path:
+            try:
+                logger.debug('looking for latest local TRMT version')
+                self._latest_trmt_path = natsorted(
+                    [Path(f).abspath() for f in Path(self.auto_src_path).listdir('TRMT_*.miz')]).pop()
+            except IndexError:
+                self._latest_trmt_path = None
+                self.local_version = None
+                logger.debug('no local TRMT found')
+            else:
+                self.local_version = Path(self._latest_trmt_path).namebase.replace('TRMT_', '')
+                logger.debug('latest local TRMT found: {}'.format(self.local_version))
+
+    def __scan_remote(self):
+
+        # noinspection PyBroadException
+        try:
+            logger.debug('looking for latest remote TRMT version')
+            self._remote = appveyor.get_latest_remote_version(self.selected_branch)
+        except:
+            logger.debug('no remote TRMT found')
+            self._remote = None
+
+    def _scan(self):
+        if self.auto_src_path:
+            self.__scan_local()
+            self.__scan_remote()
+
+    @staticmethod
+    def _scan_callback(*_):
+        I.tab_reorder_update_view_after_remote_scan()
+
+    def scan(self, *_):
         self.auto_scan_label_remote.set_text_color('black')
         self.auto_scan_label_remote.setText('Probing...')
-        self.remote_version, self.remote_branch, self.local_version = None, None, None
-        self.pool.queue_task(task=self._scan)
-        self.pool.queue_task(task=I.tab_reorder_update_view_after_remote_scan)
+        self.main_ui.pool.queue_task(task=self._scan, _task_callback=self._scan_callback)
 
-    def _auto_download(self, local_file, dl_url, file_size):
-
-        downloader.download(
-            url=dl_url,
-            local_file=local_file,
-            progress_title='Downloading {}'.format(dl_url.split('/').pop()),
-            progress_text=local_file,
-            file_size=file_size
-        )
-
-        self.scan()
+    @property
+    def remote(self) -> appveyor.AVResult:
+        return self._remote
 
     def auto_download(self):
-        dl_url, file_size, local_file_name = appveyor.latest_version_download_url(self.selected_branch)
-        local_file = Path(self.auto_src_path).joinpath(local_file_name).abspath()
 
-        if local_file.exists():
-            if not box_question(self, 'Local file already exists; do you want to overwrite?'):
-                return
+        if self.remote:
+            local_file = Path(self.auto_src_path).joinpath(self.remote.file_name).abspath()
 
-        self.pool.queue_task(
-            self._auto_download,
-            kwargs=dict(
-                local_file=local_file,
-                dl_url=dl_url,
-                file_size=file_size,
-            ),
-        )
+            if local_file.exists():
+                if not box_question(self, 'Local file already exists; do you want to overwrite?'):
+                    return
+
+            self.main_ui.pool.queue_task(
+                downloader.download,
+                kwargs=dict(
+                    url=self.remote.download_url,
+                    local_file=local_file,
+                    progress_title='Downloading {}'.format(self.remote.download_url.split('/').pop()),
+                    progress_text=self.remote.file_name,
+                    file_size=self.remote.file_size
+                ),
+                _task_callback=self.scan
+            )
