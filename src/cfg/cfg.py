@@ -47,11 +47,9 @@ class Config(Meta, ConfigValues, metaclass=Singleton):
             'dcs_custom_install_path',
             'dcs_custom_variant_path'
         ]:
-            print('removing key: {}'.format(key))
             try:
                 del self.data[key]
             except KeyError:
-                print('FAILED: {}'.format(key))
                 pass
         return True
 

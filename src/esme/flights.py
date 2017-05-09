@@ -29,7 +29,6 @@ class Flights(Logged):
         del self.d[flight.id]
 
     def populate_from_miz(self, miz):
-        print(miz.mission)
         for group in miz.mission.groups:
             if group.group_is_client_group:
                 flight = Flight(group)
