@@ -24,7 +24,6 @@ class BaseMissionObject(Logged):
             raise TypeError('mission_dict should be an dict, got: {}'.format(type(mission_dict)))
 
         if not isinstance(l10n, dict):
-            print(l10n)
             raise TypeError('l10n should be an dict, got: {}'.format(type(l10n)))
 
         self.d = mission_dict
