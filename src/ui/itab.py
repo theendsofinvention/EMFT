@@ -8,16 +8,24 @@ from PyQt5.QtWidgets import QWidget
 # noinspection PyPep8Naming
 from src import global_
 
+from .main_ui_mixins_adapter import MainUiMixinsAdapter
 
+
+# noinspection PyPep8Naming
 class iTab(QWidget):
-    def __init__(self, parent=None):
+    def __init__(self, parent):
         QWidget.__init__(self, parent, flags=Qt.Widget)
         self.setContentsMargins(20, 20, 20, 20)
+        self._main_ui = parent
 
     @property
     @abc.abstractmethod
     def tab_title(self) -> str:
         """"""
+
+    @property
+    def main_ui(self) -> MainUiMixinsAdapter:
+        return self._main_ui
 
 
 class _MainUiTabMethod:
