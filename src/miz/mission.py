@@ -1048,7 +1048,7 @@ class Group(Country):
     @group_id.setter
     def group_id(self, value):
         valid_int.validate(value, 'groupId')
-        self._section_group['goupId'] = value
+        self._section_group['groupId'] = value
 
     @property
     def group_start_delay(self):
