@@ -10,6 +10,7 @@ from src.ui.base import VLayout, Combo, HLayout, Label, HSpacer, TableModel, Tab
     TableProxy, LineEdit, GroupBox, GridLayout, Menu, Checkbox, PushButton
 from src.ui.itab import iTab
 from .tab_skins_adapter import TAB_NAME
+from .tab_skins_adapter import TAB_NAME, TabSkinsAdapter
 
 logger = make_logger(__name__)
 
@@ -17,6 +18,8 @@ RE_MOUNT_LINE = re.compile(r'^mount_vfs_texture_path\("(?P<path>.*)"\)\n$')
 RE_LOAD_MODEL_LINE = re.compile(r'^LoadModel\("(?P<path>.*)"\)$')
 RE_LOAD_LIVERY_LINE = re.compile(r'^LoadLivery\("(?P<path>.*)"\)$')
 
+
+class TabSkins(iTab, TabSkinsAdapter):
 
     def tab_clicked(self):
         self._refresh_skins_for_active_install()
