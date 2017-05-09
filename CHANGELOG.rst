@@ -3,6 +3,20 @@
 
 New
 ~~~
+- Path settings are now dependent on the current Windows GUID. [132nd-
+  etcher]
+
+  WARNING: all previous settings will be lost !
+  Namely:
+  - Saved Games path
+  - Output folder for single miz re-ordering
+  - Last miz file for single miz re-ordering
+  - Source & output folder for automated miz re-ordering
+  - active DCS installation of Skins tab
+  - Last directory for the Roster tab
+  - Custom DCS installation paths
+
+  Fixes #12
 - Roster tab detects position of aircrafts; (Tbilisi, Vaziani, Soganlug,
   Senaki, Kutaisi and any FARP) [132nd-etcher]
 - Allow for one custom DCS installation. [132nd-etcher]
@@ -19,6 +33,7 @@ Changes
 
 Fix
 ~~~
+- Scan for TRMT crash fixed when no local TRMT exists. [132nd-etcher]
 - Fixed performances on skins tab update. [132nd-etcher]
 - Saved_games path wasn't read from Config. [132nd-etcher]
 - Show develop changelog on experimental versions. [132nd-etcher]
