@@ -1126,6 +1126,10 @@ class Group(Country):
         assert isinstance(first_unit, BaseUnit)
         return first_unit.skill == 'Client'
 
+    @property
+    def group_start_position(self):
+        return self.group_route._section_route[1]['action']
+
 
 # noinspection PyProtectedMember
 class BaseUnit(Group):
