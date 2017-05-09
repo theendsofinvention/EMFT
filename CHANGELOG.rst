@@ -33,9 +33,14 @@ Changes
 
 Fix
 ~~~
+- Fix bug in config file handling. [132nd-etcher]
 - Scan for TRMT crash fixed when no local TRMT exists. [132nd-etcher]
 - Fixed performances on skins tab update. [132nd-etcher]
 - Saved_games path wasn't read from Config. [132nd-etcher]
 - Show develop changelog on experimental versions. [132nd-etcher]
+
+Other
+~~~~~
+- Create README.md. [132nd-etcher]
 
 
