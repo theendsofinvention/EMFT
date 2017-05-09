@@ -1,16 +1,17 @@
 # coding=utf-8
 
-from .itab import iTab
-from .tab_roster_adapter import TAB_NAME
-from .base import TableView, TableProxy, TableModel, GridLayout, VLayout, HLayout, BrowseDialog, LineEdit, PushButton,\
-    Label, HSpacer
-from src.misc.fs import saved_games_path
-from src.miz.miz import Miz, Mission
-from src.miz.mission import Group, FlyingUnit
-from src.cfg import Config
-from .main_ui_interface import I
 from utils import Path, ThreadPool, make_logger
 
+from src.cfg import Config
+from src.misc.fs import saved_games_path
+from src.miz import Miz, Mission, parking_spots
+from src.miz.mission import Group, FlyingUnit
+from .base import TableView, TableProxy, TableModel, VLayout, HLayout, BrowseDialog, PushButton, \
+    Label, HSpacer
+from .itab import iTab
+from .main_ui_interface import I
+from .tab_roster_adapter import TAB_NAME
+from .tab_roster_adapter import TabRosterAdapter
 
 logger = make_logger(__name__)
 
@@ -31,18 +32,18 @@ class TabRoster(iTab, TabRosterAdapter):
         self._miz = None
         self._miz_path = None
 
-        self.table = TableView()
-        self.model = TableModel(list(), ['Group name', 'Unit type', 'Livery'])
-        self.proxy = TableProxy()
+        self.miz_table = TableView()
+        self.miz_model = TableModel(list(), ['Group name', 'Unit type', 'Livery', 'Position'])
+        self.miz_proxy = TableProxy()
 
-        self.proxy.setSourceModel(self.model)
-        self.table.setModel(self.proxy)
+        self.miz_proxy.setSourceModel(self.miz_model)
+        self.miz_table.setModel(self.miz_proxy)
 
         self.setLayout(
             VLayout(
                 [
                     HLayout([self.load_miz_btn, self.miz_label, HSpacer()]),
-                    self.table
+                    self.miz_table
                 ]
             )
         )
@@ -57,6 +58,11 @@ class TabRoster(iTab, TabRosterAdapter):
         return self._miz
 
     def tab_roster_show_miz_in_table(self, *_):
+
+        parking_spots.clear_farps()
+        for farp in self.miz.farps():
+            parking_spots.add_farp(farp)
+
         data = []
         for group in self.miz.get_clients_groups():
             assert isinstance(group, Group)
@@ -65,19 +71,35 @@ class TabRoster(iTab, TabRosterAdapter):
             try:
                 livery = unit.livery
             except KeyError:
-                msg = 'no livery found for unit with "{}" ("{}"), falling back to default'
+                msg = 'no livery found for unit with id "{}" ("{}"), falling back to default'
                 logger.error(msg.format(unit.unit_id, unit.unit_type))
-                livery = 'Default'
-            data.append([group.group_name, unit.unit_type, livery])
+                livery = '--default-- (no skin found for this A/C type)'
+
+            line = [group.group_name, unit.unit_type, livery]
+
+            start_pos = group.group_start_position
+            # print(group.first_unit().unit_position)
+            if start_pos == 'From Parking Area':
+                start_pos = parking_spots.unit_pos_to_spot(group.first_unit().unit_position)
+
+                if start_pos:
+                    line.append('{start_pos.airport}: {start_pos.spot}'.format(start_pos=start_pos))
+                else:
+                    raise Exception(group.group_id)
+            else:
+                line.append(start_pos)
+
+            data.append(line)
 
         if len(data) == 0:
             logger.error('no client group found in: {}'.format(self._miz_path.abspath()))
             self.main_ui.error('No client group found in this MIZ file.')
 
-        self.model.reset_data(data)
-        self.table.resizeColumnsToContents()
+        self.miz_model.reset_data(data)
+        self.miz_table.resizeColumnsToContents()
 
     def _load_miz(self):
+
         miz = BrowseDialog.get_existing_file(
             self,
             'Select MIZ file',
