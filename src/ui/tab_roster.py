@@ -141,7 +141,7 @@ class TabRoster(iTab, TabRosterAdapter):
 
         for group in self.miz.get_clients_groups():
             assert isinstance(group, Group)
-            unit = group.first_unit()
+            unit = group.first_unit
             assert isinstance(unit, FlyingUnit)
             try:
                 livery = unit.livery
