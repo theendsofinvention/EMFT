@@ -28,7 +28,7 @@ class Config(Meta, ConfigValues, metaclass=Singleton):
 
     @property
     def meta_version(self):
-        return 3
+        return 4
 
     def upgrade_from_v1(self):
         if self.update_channel in ['alpha', 'beta']:
@@ -51,6 +51,11 @@ class Config(Meta, ConfigValues, metaclass=Singleton):
                 del self.data[key]
             except KeyError:
                 pass
+        return True
+
+    def upgrade_from_v3(self):
+        self._data['roster_miz_last_dir'] = dict(self._data['roster_last_dir'])
+        del self._data['roster_last_dir']
         return True
 
     def meta_version_upgrade(self, from_version):

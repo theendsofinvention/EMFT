@@ -90,7 +90,12 @@ class ConfigValues:
 
     # noinspection PyPep8Naming
     @MetaGUIDProperty(None, str)
-    def roster_last_dir(self, value: str):
+    def roster_roster_last_dir(self, value: str):
+        return value
+
+    # noinspection PyPep8Naming
+    @MetaGUIDProperty(None, str)
+    def roster_miz_last_dir(self, value: str):
         return value
 
     # noinspection PyPep8Naming
