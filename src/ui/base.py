@@ -3,7 +3,7 @@ import abc
 import typing
 
 from PyQt5.QtCore import Qt, QAbstractTableModel, QModelIndex, QVariant, QSortFilterProxyModel
-from PyQt5.QtGui import QKeySequence, QIcon, QContextMenuEvent
+from PyQt5.QtGui import QKeySequence, QIcon, QContextMenuEvent, QBrush, QColor
 from PyQt5.QtWidgets import QGroupBox, QBoxLayout, QSpacerItem, QWidget, QHBoxLayout, QVBoxLayout, QPushButton, \
     QRadioButton, QComboBox, QShortcut, QCheckBox, QLineEdit, QLabel, QPlainTextEdit, QSizePolicy, QGridLayout, \
     QMessageBox, QTableView, QAbstractItemView, QMenu, QMenuBar, QFileDialog
@@ -372,18 +372,24 @@ class TableProxy(QSortFilterProxyModel):
 
 
 class TableModel(QAbstractTableModel):
-    def __init__(self, data: list, header_data: list, parent=None):
+    def __init__(self, data: list, header_data: list, parent=None, bg: list = None, fg: list = None):
         super(TableModel, self).__init__(parent=parent)
         self._data = data[:]
         self._header_data = header_data[:]
+        self._bg = bg
+        self._fg = fg
 
     # def sort(self, p_int, order=None):
     #     print('sorting model')
     #     super(TableModel, self).sort(p_int, order)
 
-    def reset_data(self, new_data):
+    def reset_data(self, new_data: list, bg: list = None, fg: list = None):
         self.beginResetModel()
         self._data = new_data[:]
+        if bg:
+            self._bg = bg
+        if fg:
+            self._fg = fg
         self.endResetModel()
         self.sort(0, Qt.AscendingOrder)
 
@@ -393,13 +399,34 @@ class TableModel(QAbstractTableModel):
     def columnCount(self, parent=None, *args, **kwargs):
         return len(self._header_data)
 
+    @staticmethod
+    def _get_color(color):
+        if isinstance(color, str):
+            return QColor(color)
+        elif isinstance(color, tuple):
+            return QColor(*color)
+        else:
+            raise TypeError(type(color))
+
     def data(self, index: QModelIndex, role=Qt.DisplayRole):
-        if role == Qt.DisplayRole:
-            if index.isValid():
-                item = self._data[index.row()]
-                if hasattr(item, '__len__'):
-                    return item[index.column()]
-                return item
+        if index.isValid():
+            if role == Qt.DisplayRole:
+                    item = self._data[index.row()]
+                    if hasattr(item, '__len__'):
+                        return item[index.column()]
+                    return item
+            elif self._bg and role == Qt.BackgroundColorRole and self._bg[index.row()]:
+                c = self._bg[index.row()]
+                if isinstance(c, list):
+                    return QVariant(self._get_color(c[index.column()]))
+                else:
+                    return QVariant(self._get_color(c))
+            elif self._fg and role == Qt.ForegroundRole and self._fg[index.row()]:
+                c = self._fg[index.row()]
+                if isinstance(c, list):
+                    return QVariant(self._get_color(c[index.column()]))
+                else:
+                    return QVariant(self._get_color(c))
         return QVariant()
 
     def headerData(self, col, orientation=Qt.Horizontal, role=Qt.DisplayRole):
