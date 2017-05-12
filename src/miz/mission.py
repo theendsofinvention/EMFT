@@ -1097,6 +1097,7 @@ class Group(Country):
                                                                                       self.group_index, unit_index)
             yield self.__units[unit_index]
 
+    @property
     def first_unit(self) -> 'BaseUnit':
         return list(self.units)[0]
 
