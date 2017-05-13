@@ -562,6 +562,8 @@ class BrowseDialog(QFileDialog):
         dialog.setNameFilters(filter_)
         dialog.setDirectory(init_dir)
         dialog.setAcceptMode(QFileDialog.AcceptOpen)
+        if filter_:
+            dialog.setDefaultSuffix(filter_[0])
         # dialog.setOption(QFileDialog.ReadOnly)
         return dialog
 
