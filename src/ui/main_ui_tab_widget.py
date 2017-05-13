@@ -1,19 +1,51 @@
 # coding=utf-8
+import abc
 
-from PyQt5.QtWidgets import QTabWidget
-from .itab import iTab
+from src import global_
+from src.ui.base import TabChild
+from src.ui.main_ui_mixins_adapter import MainUiMixinsAdapter
 
 
-class MainUiTabWidget(QTabWidget):
-    def __init__(self, parent=None):
-        QTabWidget.__init__(self, parent)
-        self._tabs = []
-        # noinspection PyUnresolvedReferences
-        self.currentChanged.connect(self._current_index_changed)
+class MainUiTabChild(TabChild):
 
-    def addTab(self, tab: iTab, *__args):
-        self._tabs.append(tab)
-        super(MainUiTabWidget, self).addTab(tab, *__args)
+    def __init__(self, parent: MainUiMixinsAdapter):
+        TabChild.__init__(self, parent)
+        self._main_ui = parent
 
-    def _current_index_changed(self, tab_index):
-        self._tabs[tab_index].tab_clicked()
+    @property
+    def main_ui(self) -> MainUiMixinsAdapter:
+        return self._main_ui
+
+    @abc.abstractmethod
+    def tab_clicked(self):
+        raise NotImplementedError()
+
+
+class _MainUiTabMethod:
+    def __init__(self, func, tab_name):
+        self.func = func
+        self.tab_name = tab_name
+
+    def __call__(self, *args, **kwargs):
+        if global_.MAIN_UI is None:
+            raise RuntimeError('Main UI not initialized')
+        global_.MAIN_UI.do('tab_{}'.format(self.tab_name), self.func.__name__, *args, **kwargs)
+
+
+class MainUiTabMethod:
+    """
+    Decorator-class to create properties for META instances.
+    """
+
+    def __init__(self, tab_name: str):
+        self.tab_name = tab_name
+
+    def __call__(self, func: callable):
+        """
+        Creates a DESCRIPTOR instance for a method of a META instance.
+
+        :param func: function to decorate
+        :return: decorated function as a descriptor instance of _MetaProperty
+        :rtype: _MetaProperty
+        """
+        return _MainUiTabMethod(func, self.tab_name)

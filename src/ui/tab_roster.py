@@ -11,7 +11,7 @@ from src.miz.mission import Group, FlyingUnit
 from .base import TableView, TableProxy, TableModel, VLayout, HLayout, BrowseDialog, PushButton, \
     Label, HSpacer, VSpacer
 from .base import QAbstractTableModel, QModelIndex, Qt, QSortFilterProxyModel
-from .itab import iTab
+from src.ui.main_ui_tab_widget import MainUiTabChild
 from .main_ui_interface import I
 from .tab_roster_adapter import TAB_NAME
 from .tab_roster_adapter import TabRosterAdapter
@@ -22,7 +22,7 @@ from collections.abc import Sequence
 logger = make_logger(__name__)
 
 
-class TabRoster(iTab, TabRosterAdapter):
+class TabChildRoster(MainUiTabChild, TabRosterAdapter):
     def tab_clicked(self):
         pass
 
@@ -31,7 +31,7 @@ class TabRoster(iTab, TabRosterAdapter):
         return TAB_NAME
 
     def __init__(self, parent=None):
-        iTab.__init__(self, parent)
+        MainUiTabChild.__init__(self, parent)
 
         self.roster = Roster()
 

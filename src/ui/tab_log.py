@@ -11,12 +11,12 @@ from src.misc.logging_handler import PersistentLoggingFollower, persistent_loggi
 from src.sentry import SENTRY
 from src.ui.base import PlainTextEdit
 from src.ui.base import VLayout, Combo, PushButton, HLayout, LineEdit, Label, GridLayout
-from src.ui.itab import iTab
+from src.ui.main_ui_tab_widget import MainUiTabChild
 from src.ui.main_ui_interface import I
 from .tab_log_adapter import TAB_NAME, TabLogAdapter
 
 
-class TabLog(iTab, PersistentLoggingFollower, TabLogAdapter):
+class TabChildLog(MainUiTabChild, PersistentLoggingFollower, TabLogAdapter):
     def tab_clicked(self):
         pass
 
@@ -35,7 +35,7 @@ class TabLog(iTab, PersistentLoggingFollower, TabLogAdapter):
 
     def __init__(self, parent=None):
         PersistentLoggingFollower.__init__(self)
-        iTab.__init__(self, parent=parent)
+        MainUiTabChild.__init__(self, parent=parent)
 
         self.colors = {
             'NOTSET': '#808080',

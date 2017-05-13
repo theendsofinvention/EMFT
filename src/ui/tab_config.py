@@ -11,7 +11,7 @@ from src.cfg import Config
 from src.misc.fs import dcs_installs, saved_games
 from src.ui.base import VLayout, PushButton, GroupBox, LineEdit, Label, VSpacer, GridLayout, Combo, HSpacer, HLayout, \
     BrowseDialog
-from src.ui.itab import iTab
+from src.ui.main_ui_tab_widget import MainUiTabChild
 from src.ui.main_ui_interface import I
 from src.updater import updater
 from .tab_config_adapter import TAB_NAME, TabConfigAdapter
@@ -19,7 +19,7 @@ from .tab_config_adapter import TAB_NAME, TabConfigAdapter
 logger = make_logger(__name__)
 
 
-class TabConfig(iTab, TabConfigAdapter):
+class TabChildConfig(MainUiTabChild, TabConfigAdapter):
 
     def tab_clicked(self):
         self._check_for_new_version()
@@ -30,7 +30,7 @@ class TabConfig(iTab, TabConfigAdapter):
         return TAB_NAME
 
     def __init__(self, parent=None):
-        iTab.__init__(self, parent=parent)
+        MainUiTabChild.__init__(self, parent=parent)
         self.sg = LineEdit(Config().saved_games_path or '', self._on_change_sg, read_only=True)
         self.update_channel_combo = Combo(self._on_change_update_channel, ['stable', 'rc', 'dev'])
 

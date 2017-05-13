@@ -8,7 +8,7 @@ from src.cfg import Config
 from src.misc.fs import dcs_installs, DCSInstall, DCSSkin
 from src.ui.base import VLayout, Combo, HLayout, Label, HSpacer, TableModel, TableViewWithSingleRowMenu, \
     TableProxy, LineEdit, GroupBox, GridLayout, Menu, Checkbox, PushButton
-from src.ui.itab import iTab
+from src.ui.main_ui_tab_widget import MainUiTabChild
 from .main_ui_interface import I
 from .tab_skins_adapter import TAB_NAME, TabSkinsAdapter
 
@@ -19,7 +19,7 @@ RE_LOAD_MODEL_LINE = re.compile(r'^LoadModel\("(?P<path>.*)"\)$')
 RE_LOAD_LIVERY_LINE = re.compile(r'^LoadLivery\("(?P<path>.*)"\)$')
 
 
-class TabSkins(iTab, TabSkinsAdapter):
+class TabChildSkins(MainUiTabChild, TabSkinsAdapter):
 
     def tab_clicked(self):
         self._refresh_skins_for_active_install()
@@ -39,7 +39,7 @@ class TabSkins(iTab, TabSkinsAdapter):
         return TAB_NAME
 
     def __init__(self, parent=None):
-        super(TabSkins, self).__init__(parent)
+        super(TabChildSkins, self).__init__(parent)
 
         self.no_install_label = Label('No DSC installation found on this system')
         self.no_install_label.set_text_color('red')

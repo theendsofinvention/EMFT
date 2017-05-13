@@ -1,12 +1,13 @@
 # coding=utf-8
 import abc
 import typing
+from abc import abstractmethod
 
 from PyQt5.QtCore import Qt, QAbstractTableModel, QModelIndex, QVariant, QSortFilterProxyModel
-from PyQt5.QtGui import QKeySequence, QIcon, QContextMenuEvent, QBrush, QColor
+from PyQt5.QtGui import QKeySequence, QIcon, QContextMenuEvent, QColor
 from PyQt5.QtWidgets import QGroupBox, QBoxLayout, QSpacerItem, QWidget, QHBoxLayout, QVBoxLayout, QPushButton, \
     QRadioButton, QComboBox, QShortcut, QCheckBox, QLineEdit, QLabel, QPlainTextEdit, QSizePolicy, QGridLayout, \
-    QMessageBox, QTableView, QAbstractItemView, QMenu, QMenuBar, QFileDialog
+    QMessageBox, QTableView, QAbstractItemView, QMenu, QMenuBar, QFileDialog, QTabWidget
 from utils import make_logger, Path
 
 
@@ -515,3 +516,34 @@ class BrowseDialog(QFileDialog):
         dialog.setFileMode(QFileDialog.Directory)
         dialog.setOption(QFileDialog.ShowDirsOnly)
         return dialog.parse_single_result()
+
+
+class TabChild(QWidget):
+    def __init__(self, parent):
+        QWidget.__init__(self, parent, flags=Qt.Widget)
+        self.setContentsMargins(20, 20, 20, 20)
+        self._main_ui = parent
+
+    @abstractmethod
+    def tab_clicked(self):
+        pass
+
+    @property
+    @abc.abstractmethod
+    def tab_title(self) -> str:
+        """"""
+
+
+class TabWidget(QTabWidget):
+    def __init__(self, parent=None):
+        QTabWidget.__init__(self, parent)
+        self._tabs = []
+        # noinspection PyUnresolvedReferences
+        self.currentChanged.connect(self._current_index_changed)
+
+    def addTab(self, tab: 'TabChild', *__args):
+        self._tabs.append(tab)
+        super(TabWidget, self).addTab(tab, *__args)
+
+    def _current_index_changed(self, tab_index):
+        self._tabs[tab_index].tab_clicked()
