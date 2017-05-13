@@ -552,41 +552,41 @@ class BrowseDialog(QFileDialog):
             return None
 
     @staticmethod
-    def make(parent, title: str, _filter: typing.List[str] = None, init_dir: str = '.'):
-        if _filter is None:
-            _filter = ['*.*']
+    def make(parent, title: str, filter_: typing.List[str] = None, init_dir: str = '.'):
+        if filter_ is None:
+            filter_ = ['*.*']
         dialog = BrowseDialog(parent, title)
         dialog.setOption(QFileDialog.DontResolveSymlinks)
         dialog.setOption(QFileDialog.DontUseCustomDirectoryIcons)
         dialog.setFileMode(QFileDialog.AnyFile)
-        dialog.setNameFilters(_filter)
+        dialog.setNameFilters(filter_)
         dialog.setDirectory(init_dir)
         dialog.setAcceptMode(QFileDialog.AcceptOpen)
         # dialog.setOption(QFileDialog.ReadOnly)
         return dialog
 
     @staticmethod
-    def get_file(parent, title: str, _filter: typing.List[str] = None, init_dir: str = '.') -> Path or None:
-        dialog = BrowseDialog.make(parent, title, _filter, init_dir)
+    def get_file(parent, title: str, filter_: typing.List[str] = None, init_dir: str = '.') -> Path or None:
+        dialog = BrowseDialog.make(parent, title, filter_, init_dir)
         dialog.setFileMode(QFileDialog.AnyFile)
         return dialog.parse_single_result()
 
     @staticmethod
-    def get_existing_file(parent, title: str, _filter: typing.List[str] = None, init_dir: str = '.') -> Path or None:
-        dialog = BrowseDialog.make(parent, title, _filter, init_dir)
+    def get_existing_file(parent, title: str, filter_: typing.List[str] = None, init_dir: str = '.') -> Path or None:
+        dialog = BrowseDialog.make(parent, title, filter_, init_dir)
         dialog.setFileMode(QFileDialog.ExistingFile)
         return dialog.parse_single_result()
 
     @staticmethod
-    def get_existing_files(parent, title: str, _filter: typing.List[str] = None,
+    def get_existing_files(parent, title: str, filter_: typing.List[str] = None,
                            init_dir: str = '.') -> typing.List[Path] or None:
-        dialog = BrowseDialog.make(parent, title, _filter, init_dir)
+        dialog = BrowseDialog.make(parent, title, filter_, init_dir)
         dialog.setFileMode(QFileDialog.ExistingFiles)
         return dialog.parse_multiple_results()
 
     @staticmethod
-    def save_file(parent, title: str, _filter: typing.List[str] = None, init_dir: str = '.') -> Path or None:
-        dialog = BrowseDialog.make(parent, title, _filter, init_dir)
+    def save_file(parent, title: str, filter_: typing.List[str] = None, init_dir: str = '.') -> Path or None:
+        dialog = BrowseDialog.make(parent, title, filter_, init_dir)
         dialog.setFileMode(QFileDialog.AnyFile)
         dialog.setAcceptMode(QFileDialog.AcceptSave)
         return dialog.parse_single_result()
