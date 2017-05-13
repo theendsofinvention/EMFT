@@ -4,12 +4,12 @@ from utils import make_logger
 
 from src import global_
 from src.ui.base import VLayout, Label, HSpacer, GridLayout, VSpacer
-from src.ui.itab import iTab
+from src.ui.main_ui_tab_widget import MainUiTabChild
 
 logger = make_logger(__name__)
 
 
-class TabAbout(iTab):
+class TabChildAbout(MainUiTabChild):
     def tab_clicked(self):
         pass
 
@@ -18,7 +18,7 @@ class TabAbout(iTab):
         return 'About'
 
     def __init__(self, parent=None):
-        super(TabAbout, self).__init__(parent)
+        super(TabChildAbout, self).__init__(parent)
 
         repo_label = Label(
             '''<a href='{link}'>{link}</a>'''.format(link=global_.LINK_REPO)

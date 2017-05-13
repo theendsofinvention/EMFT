@@ -10,10 +10,10 @@ from utils import make_logger, nice_exit
 from src import global_
 from src.cfg import Config
 from .base import Shortcut, VLayout, Widget
-from .itab import iTab
+from src.ui.main_ui_tab_widget import MainUiTabChild
 from .main_ui_interface import I
 from .main_ui_mixins import MainUiMixins
-from .main_ui_tab_widget import MainUiTabWidget
+from src.ui.base import TabWidget
 
 logger = make_logger(__name__)
 
@@ -35,7 +35,7 @@ class MainUi(QMainWindow, MainUiMixins):
 
         self.resize(1024, 768)
 
-        self.tabs = MainUiTabWidget()
+        self.tabs = TabWidget()
 
         layout = VLayout(
             [
@@ -59,7 +59,7 @@ class MainUi(QMainWindow, MainUiMixins):
                                  global_.APP_VERSION,
                                  global_.APP_RELEASE_NAME))
 
-    def add_tab(self, tab: iTab):
+    def add_tab(self, tab: MainUiTabChild):
         setattr(self, 'tab_{}'.format(tab.tab_title), tab)
         self.tabs.addTab(tab, tab.tab_title)
 
@@ -89,32 +89,32 @@ def start_ui(test=False):
     global_.MAIN_UI = main_ui
 
     logger.info('loading module: re-order')
-    from src.ui.tab_reorder import TabReorder
-    global_.MAIN_UI.add_tab(TabReorder(main_ui))
+    from src.ui.tab_reorder import TabChildReorder
+    global_.MAIN_UI.add_tab(TabChildReorder(main_ui))
 
     logger.info('loading module: dcs_installs')
     from src.misc.fs import dcs_installs
     dcs_installs.discover_dcs_installations()
 
     logger.info('loading tab: skins')
-    from src.ui.tab_skins import TabSkins
-    global_.MAIN_UI.add_tab(TabSkins(main_ui))
+    from src.ui.tab_skins import TabChildSkins
+    global_.MAIN_UI.add_tab(TabChildSkins(main_ui))
 
     logger.info('loading tab: roster')
-    from src.ui.tab_roster import TabRoster
-    global_.MAIN_UI.add_tab(TabRoster(main_ui))
+    from src.ui.tab_roster import TabChildRoster
+    global_.MAIN_UI.add_tab(TabChildRoster(main_ui))
 
     logger.info('loading tab: config')
-    from src.ui.tab_config import TabConfig
-    global_.MAIN_UI.add_tab(TabConfig(main_ui))
+    from src.ui.tab_config import TabChildConfig
+    global_.MAIN_UI.add_tab(TabChildConfig(main_ui))
 
     logger.info('loading tab: log')
-    from src.ui.tab_log import TabLog
-    global_.MAIN_UI.add_tab(TabLog(main_ui))
+    from src.ui.tab_log import TabChildLog
+    global_.MAIN_UI.add_tab(TabChildLog(main_ui))
 
     logger.info('loading tab: about')
-    from src.ui.tab_about import TabAbout
-    global_.MAIN_UI.add_tab(TabAbout(main_ui))
+    from src.ui.tab_about import TabChildAbout
+    global_.MAIN_UI.add_tab(TabChildAbout(main_ui))
 
     global_.MAIN_UI.show()
 

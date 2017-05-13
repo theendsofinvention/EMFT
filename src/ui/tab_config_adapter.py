@@ -2,7 +2,7 @@
 
 import abc
 
-from src.ui.itab import MainUiTabMethod
+from src.ui.main_ui_tab_widget import MainUiTabMethod
 
 TAB_NAME = 'Config'
 

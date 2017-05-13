@@ -16,7 +16,7 @@ from src.misc import appveyor, downloader, github
 from src.miz.miz import Miz
 from src.ui.base import GroupBox, HLayout, VLayout, PushButton, Radio, Checkbox, Label, Combo, GridLayout, VSpacer, \
     box_question, BrowseDialog
-from src.ui.itab import iTab
+from src.ui.main_ui_tab_widget import MainUiTabChild
 from src.ui.main_ui_interface import I
 from .tab_reorder_adapter import TabReorderAdapter, TAB_NAME
 
@@ -326,7 +326,7 @@ class _AutoLayout:
         """"""
 
 
-class TabReorder(iTab, _SingleLayout, _AutoLayout, TabReorderAdapter):
+class TabChildReorder(MainUiTabChild, _SingleLayout, _AutoLayout, TabReorderAdapter):
     def tab_clicked(self):
         self.scan()
 
@@ -335,7 +335,7 @@ class TabReorder(iTab, _SingleLayout, _AutoLayout, TabReorderAdapter):
         return TAB_NAME
 
     def __init__(self, parent=None):
-        iTab.__init__(self, parent=parent)
+        MainUiTabChild.__init__(self, parent=parent)
         _SingleLayout.__init__(self)
         _AutoLayout.__init__(self)
 
