@@ -381,24 +381,31 @@ class TableProxy(QSortFilterProxyModel):
 
 
 class TableModel(QAbstractTableModel):
-    def __init__(self, data: list, header_data: list, parent=None, bg: list = None, fg: list = None):
+
+    align = {
+        'c': Qt.AlignCenter,
+        'l': Qt.AlignLeft,
+        'r': Qt.AlignRight,
+    }
+
+
+    def __init__(self, data: list, header_data: list, parent=None, bg: list = None, fg: list = None, align: list = None):
         super(TableModel, self).__init__(parent=parent)
         self._data = data[:]
         self._header_data = header_data[:]
         self._bg = bg
         self._fg = fg
+        self._align = align
 
-    # def sort(self, p_int, order=None):
-    #     print('sorting model')
-    #     super(TableModel, self).sort(p_int, order)
-
-    def reset_data(self, new_data: list, bg: list = None, fg: list = None):
+    def reset_data(self, new_data: list, bg: list = None, fg: list = None, align: list = None):
         self.beginResetModel()
         self._data = new_data[:]
         if bg:
             self._bg = bg
         if fg:
             self._fg = fg
+        if align:
+            self._align = align
         self.endResetModel()
         self.sort(0, Qt.AscendingOrder)
 
@@ -436,6 +443,8 @@ class TableModel(QAbstractTableModel):
                     return QVariant(self._get_color(c[index.column()]))
                 else:
                     return QVariant(self._get_color(c))
+            elif self._align and role == Qt.TextAlignmentRole:
+                return TableModel.align[self._align[index.column()]]
         return QVariant()
 
     def headerData(self, col, orientation=Qt.Horizontal, role=Qt.DisplayRole):
