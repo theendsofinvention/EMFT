@@ -3,11 +3,12 @@ import abc
 import typing
 from abc import abstractmethod
 
-from PyQt5.QtCore import Qt, QAbstractTableModel, QModelIndex, QVariant, QSortFilterProxyModel
+from PyQt5.QtCore import Qt, QAbstractTableModel, QModelIndex, QVariant, QSortFilterProxyModel, QAbstractItemModel
 from PyQt5.QtGui import QKeySequence, QIcon, QContextMenuEvent, QColor
 from PyQt5.QtWidgets import QGroupBox, QBoxLayout, QSpacerItem, QWidget, QHBoxLayout, QVBoxLayout, QPushButton, \
     QRadioButton, QComboBox, QShortcut, QCheckBox, QLineEdit, QLabel, QPlainTextEdit, QSizePolicy, QGridLayout, \
-    QMessageBox, QTableView, QAbstractItemView, QMenu, QMenuBar, QFileDialog, QTabWidget
+    QMessageBox, QTableView, QAbstractItemView, QMenu, QMenuBar, QFileDialog, QTabWidget, QDoubleSpinBox,\
+    QStyledItemDelegate, QStyleOptionViewItem
 from utils import make_logger, Path
 
 
@@ -338,6 +339,13 @@ class TableView(QTableView):
         self.setSortingEnabled(True)
         self.verticalHeader().hide()
 
+    def setModel(self, model: QAbstractItemModel):
+        if isinstance(model, TableEditableModel):
+            for i, delegate in enumerate(model.delegates):
+                if delegate:
+                    self.setItemDelegateForColumn(i, delegate)
+        return super(TableView, self).setModel(model)
+
 
 class TableViewWithSingleRowMenu(TableView, _TableViewWithRowContextMenu):
     def __init__(self, menu, parent=None):
@@ -435,6 +443,68 @@ class TableModel(QAbstractTableModel):
             if orientation == Qt.Horizontal:
                 return self._header_data[col]
         return QVariant()
+
+
+class TableEditableModel(TableModel):
+
+    class FloatDelegate(QStyledItemDelegate):
+
+        def __init__(self, min_value: float, max_value: float, parent=None):
+            QStyledItemDelegate.__init__(self, parent)
+            self._min = min_value
+            self._max = max_value
+
+        def displayText(self, value, locale):
+            return '{:07.3f}'.format(value)
+
+        def createEditor(self, parent: QWidget, style: QStyleOptionViewItem, index: QModelIndex):
+            editor = QDoubleSpinBox(parent)
+            editor.setMinimum(self._min)
+            editor.setMaximum(self._max)
+            editor.setDecimals(3)
+            editor.setValue(index.data(Qt.DisplayRole))
+            return editor
+
+        def setEditorData(self, editor: QWidget, index: QModelIndex):
+            editor.setValue(index.data(Qt.DisplayRole))
+
+        def setModelData(self, editor: QWidget, model: QAbstractItemModel, index: QModelIndex):
+            editor.interpretText()
+            model.setData(index, editor.value())
+
+
+    def __init__(
+            self,
+            data: list,
+            header_data: list,
+            delegates:list,
+            parent=None,
+            bg: list = None,
+            fg: list = None,
+            align: list = None
+    ):
+
+        TableModel.__init__(self, data, header_data, parent, bg, fg, align)
+        self.delegates = delegates
+
+    def flags(self, index: QModelIndex):
+        if index.isValid():
+            if self.delegates[index.column()] is not None:
+                return super(TableEditableModel, self).flags(index) | Qt.ItemIsEditable
+        return super(TableEditableModel, self).flags(index)
+
+    def data(self, index: QModelIndex, role=Qt.DisplayRole):
+        if role == Qt.EditRole:
+            return super(TableEditableModel, self).data(index, Qt.DisplayRole)
+        return super(TableEditableModel, self).data(index, role)
+
+    def setData(self, index: QModelIndex, value, role=Qt.EditRole):
+        if index.isValid():
+            self._data[index.row()][index.column()] = value
+            # noinspection PyUnresolvedReferences
+            self.dataChanged.emit(index, index)
+            return True
+        return super(TableEditableModel, self).setData(index, value, role)
 
 
 def box_info(parent, title: str, text: str):
