@@ -81,7 +81,7 @@ class BaseMissionObject(Logged):
                 return group
         return None
 
-    def get_clients_groups(self):
+    def get_clients_groups(self) -> typing.Generator['FlyingUnit', None, None]:
         for group in self.groups:
             assert isinstance(group, Group)
             if group.group_is_client_group:
@@ -288,7 +288,7 @@ class Coalition(BaseMissionObject):
         return self._section_coalition['country']
 
     @property
-    def countries(self):
+    def countries(self) -> typing.Generator['Country', None, None]:
         for k in self._section_country:
             if k not in self._countries.keys():
                 country = Country(self.d, self.l10n, self.coa_color, k)
@@ -297,7 +297,7 @@ class Coalition(BaseMissionObject):
                 self._countries_by_name[country.country_name] = country
             yield self._countries[k]
 
-    def get_country_by_name(self, country_name):
+    def get_country_by_name(self, country_name) -> 'Country':
         valid_str.validate(country_name, 'get_country_by_name', exc=ValueError)
         if country_name not in self._countries_by_name.keys():
             for country in self.countries:
@@ -308,7 +308,7 @@ class Coalition(BaseMissionObject):
         else:
             return self._countries_by_name[country_name]
 
-    def get_country_by_id(self, country_id):
+    def get_country_by_id(self, country_id) -> 'Country':
         valid_positive_int.validate(country_id, 'get_country_by_id', exc=ValueError)
         if country_id not in self._countries_by_id.keys():
             for country in self.countries:
@@ -320,7 +320,7 @@ class Coalition(BaseMissionObject):
             return self._countries_by_id[country_id]
 
     @property
-    def groups(self):
+    def groups(self) -> typing.Generator['Group', None, None]:
         for country in self.countries:
             assert isinstance(country, Country)
             for group in country.groups:
@@ -344,7 +344,7 @@ class Coalition(BaseMissionObject):
                 if static.static_is_farp:
                     yield static
 
-    def get_groups_from_category(self, category):
+    def get_groups_from_category(self, category) -> typing.Generator['Group', None, None]:
         Mission.validator_group_category.validate(category, 'get_groups_from_category')
         for group in self.groups:
             assert isinstance(group, Group)
@@ -352,20 +352,20 @@ class Coalition(BaseMissionObject):
                 yield group
 
     @property
-    def units(self):
+    def units(self) -> typing.Generator['BaseUnit', None, None]:
         for group in self.groups:
             assert isinstance(group, Group)
             for unit in group.units:
                 yield unit
 
-    def get_units_from_category(self, category):
+    def get_units_from_category(self, category) -> typing.Generator['BaseUnit', None, None]:
         Mission.validator_group_category.validate(category, 'group category')
         for unit in self.units:
             assert isinstance(unit, BaseUnit)
             if unit.group_category == category:
                 yield unit
 
-    def get_group_by_id(self, group_id):
+    def get_group_by_id(self, group_id) -> 'Group':
         valid_positive_int.validate(group_id, 'get_group_by_id')
         for group in self.groups:
             assert isinstance(group, Group)
@@ -373,7 +373,7 @@ class Coalition(BaseMissionObject):
                 return group
         return None
 
-    def get_group_by_name(self, group_name):
+    def get_group_by_name(self, group_name) -> 'Group':
         valid_str.validate(group_name, 'get_group_by_name')
         for group in self.groups:
             assert isinstance(group, Group)
@@ -381,7 +381,7 @@ class Coalition(BaseMissionObject):
                 return group
         return None
 
-    def get_unit_by_name(self, unit_name):
+    def get_unit_by_name(self, unit_name) -> 'BaseUnit':
         valid_str.validate(unit_name, 'get_unit_by_name')
         for unit in self.units:
             assert isinstance(unit, BaseUnit)
@@ -389,7 +389,7 @@ class Coalition(BaseMissionObject):
                 return unit
         return None
 
-    def get_unit_by_id(self, unit_id):
+    def get_unit_by_id(self, unit_id) -> 'BaseUnit':
         valid_positive_int.validate(unit_id, 'get_unit_by_id')
         for unit in self.units:
             assert isinstance(unit, BaseUnit)
@@ -841,7 +841,7 @@ class Country(Coalition):
         return self._section_this_country['name']
 
     @property
-    def groups(self):
+    def groups(self) -> typing.Generator['Group', None, None]:
         for group_category in Mission.valid_group_categories:
             if group_category in self._section_this_country.keys():
                 for group_index in self._section_this_country[group_category]['group']:
@@ -860,21 +860,21 @@ class Country(Coalition):
                                                          self.country_index, static_index)
                 yield self.__static[static_index]
 
-    def get_groups_from_category(self, category):
+    def get_groups_from_category(self, category) -> typing.Generator['Group', None, None]:
         Mission.validator_group_category.validate(category, 'get_groups_from_category')
         for group in self.groups:
             assert isinstance(group, Group)
             if group.group_category == category:
                 yield group
 
-    def get_group_by_id(self, group_id):
+    def get_group_by_id(self, group_id) -> typing.Generator['Group', None, None]:
         for group in self.groups:
             assert isinstance(group, Group)
             if group.group_id == group_id:
                 return group
         return None
 
-    def get_group_by_name(self, group_name):
+    def get_group_by_name(self, group_name) -> typing.Generator['Group', None, None]:
         for group in self.groups:
             assert isinstance(group, Group)
             if group.group_name == group_name:
@@ -882,27 +882,27 @@ class Country(Coalition):
         return None
 
     @property
-    def units(self):
+    def units(self) -> typing.Generator['BaseUnit', None, None]:
         for group in self.groups:
             assert isinstance(group, Group)
             for unit in group.units:
                 yield unit
 
-    def get_unit_by_name(self, unit_name):
+    def get_unit_by_name(self, unit_name) -> 'BaseUnit':
         for unit in self.units:
             assert isinstance(unit, BaseUnit)
             if unit.unit_name == unit_name:
                 return unit
         return None
 
-    def get_unit_by_id(self, unit_id):
+    def get_unit_by_id(self, unit_id) -> 'BaseUnit':
         for unit in self.units:
             assert isinstance(unit, BaseUnit)
             if unit.unit_id == unit_id:
                 return unit
         return None
 
-    def get_units_from_category(self, category):
+    def get_units_from_category(self, category) -> typing.Generator['BaseUnit', None, None]:
         Mission.validator_group_category.validate(category, 'group category')
         for unit in self.units:
             assert isinstance(unit, BaseUnit)
@@ -1245,7 +1245,7 @@ class BaseUnit(Group):
         self._section_unit['heading'] = value
 
     @property
-    def radio_presets(self):
+    def radio_presets(self) -> typing.Generator['FlyingUnit.RadioPresets', None, None]:
         raise TypeError('unit #{}: {}'.format(self.unit_id, self.unit_name))
 
     @property
@@ -1348,6 +1348,54 @@ class FlyingUnit(BaseUnit):
                     'channels_qty': 4,
                 },
             },
+            'SpitfireLFMkIX': {
+                1: {
+                    'radio_name': 'SCR522',
+                    'min': 100,
+                    'max': 156,
+                    'channels_qty': 4,
+                },
+            },
+            'Bf-109K-4': {
+                1: {
+                    'radio_name': 'FuG 16 ZY',
+                    'min': 38,
+                    'max': 156,
+                    'channels_qty': 5,
+                },
+            },
+            'FW-190D9': {
+                1: {
+                    'radio_name': 'FuG 16',
+                    'min': 38.4,
+                    'max': 42.4,
+                    'channels_qty': 4,
+                },
+            },
+            'SA342L': {
+                1: {
+                    'radio_name': 'FM Radio',
+                    'min': 30,
+                    'max': 87.975,
+                    'channels_qty': 8,
+                },
+            },
+            'SA342M': {
+                1: {
+                    'radio_name': 'FM Radio',
+                    'min': 30,
+                    'max': 87.975,
+                    'channels_qty': 8,
+                },
+            },
+            'SA342Mistral': {
+                1: {
+                    'radio_name': 'FM Radio',
+                    'min': 30,
+                    'max': 87.975,
+                    'channels_qty': 8,
+                },
+            },
         }
 
         def __init__(self, parent_unit, radio_num):
@@ -1391,7 +1439,7 @@ class FlyingUnit(BaseUnit):
             return self._section_radio[self.radio_num]['channels']
 
         @property
-        def channels(self):
+        def channels(self) -> typing.Generator[tuple, None, None]:
             for k in self._section_channels:
                 yield (k, float(self._section_channels[k]))
 
@@ -1425,12 +1473,19 @@ class FlyingUnit(BaseUnit):
         super().__init__(mission_dict, l10n, coa_color, country_index, group_category, group_index, unit_index)
 
     @property
-    def radio_presets(self):
+    def radio_presets(self) -> typing.Generator['FlyingUnit.RadioPresets', None, None]:
         if self.skill == 'Client' and self.unit_type in FlyingUnit.RadioPresets.radio_enum.keys():
             for k in self._section_unit['Radio']:
                 yield FlyingUnit.RadioPresets(self, k)
         else:
             raise TypeError('unit #{}: {}'.format(self.unit_id, self.unit_name))
+
+    @property
+    def radios(self):
+        try:
+            return self._section_unit['Radio']
+        except KeyError:
+            raise KeyError(self.unit_type)
 
     def get_radio_by_name(self, radio_name):
         if self.has_radio_presets:
