@@ -169,6 +169,8 @@ class PushButton(QPushButton):
         QPushButton.__init__(self, text)
         # noinspection PyUnresolvedReferences
         self.clicked.connect(func)
+        self.setStyleSheet('padding-left: 15px; padding-right: 15px;'
+                           'padding-top: 3px; padding-bottom: 3px;')
 
 
 class Checkbox(QCheckBox):
