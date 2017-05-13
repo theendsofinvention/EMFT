@@ -61,7 +61,7 @@ class MainUi(QMainWindow, MainUiMixins):
 
     def add_tab(self, tab: MainUiTabChild):
         setattr(self, 'tab_{}'.format(tab.tab_title), tab)
-        self.tabs.addTab(tab, tab.tab_title)
+        self.tabs.addTab(tab)
 
     def show(self):
         self.setWindowState(self.windowState() & Qt.WindowMinimized | Qt.WindowActive)

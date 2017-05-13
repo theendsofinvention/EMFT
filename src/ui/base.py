@@ -620,9 +620,10 @@ class TabWidget(QTabWidget):
         # noinspection PyUnresolvedReferences
         self.currentChanged.connect(self._current_index_changed)
 
-    def addTab(self, tab: 'TabChild', *__args):
+    # noinspection PyMethodOverriding
+    def addTab(self, tab: 'TabChild'):
         self._tabs.append(tab)
-        super(TabWidget, self).addTab(tab, *__args)
+        super(TabWidget, self).addTab(tab, tab.tab_title)
 
     def _current_index_changed(self, tab_index):
         self._tabs[tab_index].tab_clicked()
