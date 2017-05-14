@@ -3,11 +3,12 @@ import abc
 import typing
 from abc import abstractmethod
 
-from PyQt5.QtCore import Qt, QAbstractTableModel, QModelIndex, QVariant, QSortFilterProxyModel, QAbstractItemModel
-from PyQt5.QtGui import QKeySequence, QIcon, QContextMenuEvent, QColor
+from PyQt5.QtCore import Qt, QAbstractTableModel, QModelIndex, QVariant, QSortFilterProxyModel, QAbstractItemModel, \
+    QRegExp
+from PyQt5.QtGui import QKeySequence, QIcon, QContextMenuEvent, QColor, QRegExpValidator
 from PyQt5.QtWidgets import QGroupBox, QBoxLayout, QSpacerItem, QWidget, QHBoxLayout, QVBoxLayout, QPushButton, \
     QRadioButton, QComboBox, QShortcut, QCheckBox, QLineEdit, QLabel, QPlainTextEdit, QSizePolicy, QGridLayout, \
-    QMessageBox, QTableView, QAbstractItemView, QMenu, QMenuBar, QFileDialog, QTabWidget, QDoubleSpinBox,\
+    QMessageBox, QTableView, QAbstractItemView, QMenu, QMenuBar, QFileDialog, QTabWidget, QDoubleSpinBox, \
     QStyledItemDelegate, QStyleOptionViewItem
 from utils import make_logger, Path
 
@@ -457,6 +458,29 @@ class TableModel(QAbstractTableModel):
 
 
 class TableEditableModel(TableModel):
+    class StringDelegate(QStyledItemDelegate):
+
+        def __init__(self, validation_regex: str = None, parent=None):
+            QStyledItemDelegate.__init__(self, parent)
+            self._regex = validation_regex
+
+        def displayText(self, value, locale):
+            return str(value)
+
+        def createEditor(self, parent: QWidget, style: QStyleOptionViewItem, index: QModelIndex):
+            editor = QLineEdit(parent)
+            if self._regex:
+                validator = QRegExpValidator(editor)
+                validator.setRegExp(QRegExp(self._regex))
+                editor.setValidator(validator)
+            editor.setText(str(index.data(Qt.DisplayRole)))
+            return editor
+
+        def setEditorData(self, editor: QLineEdit, index: QModelIndex):
+            editor.setText(index.data(Qt.DisplayRole))
+
+        def setModelData(self, editor: QLineEdit, model: QAbstractItemModel, index: QModelIndex):
+            model.setData(index, editor.text())
 
     class FloatDelegate(QStyledItemDelegate):
 
