@@ -23,9 +23,10 @@ class _RadioEditTab(TabChild):
     def tab_clicked(self):
         pass
 
-    def __init__(self, radio_name, radio_freq_min, radio_freq_max, radio_channels_qty, radio_aicrafts,
+    def __init__(self, preset_widget, radio_name, radio_freq_min, radio_freq_max, radio_channels_qty, radio_aicrafts,
                  widget_parent=None):
         TabChild.__init__(self, widget_parent)
+        self._preset_widget = preset_widget
         self.name = radio_name
         self.min = radio_freq_min
         self.max = radio_freq_max
@@ -73,6 +74,17 @@ class _RadioEditTab(TabChild):
             )
         )
 
+    def connect_data_changed_signal(self):
+        # noinspection PyUnresolvedReferences
+        self.model.dataChanged.connect(self._data_changed)
+
+    def disconnect_data_changed_signal(self):
+        # noinspection PyUnresolvedReferences
+        self.model.dataChanged.disconnect()
+
+    def _data_changed(self):
+        self._preset_widget.data_changed(self.name)
+
     def to_meta(self):
 
         def get_channels():
@@ -108,6 +120,12 @@ class _RadiosTabWidget(TabWidget):
 
 
 class EditPresetsWidget(TabChild):
+    def tab_leave(self):
+        if self._data_changed:
+            return self.main_ui.confirm('You have unsaved changes in your radios preset\n\n'
+                                        'Are you sure you want to leave?')
+        return True
+
     def tab_clicked(self):
         pass
 
@@ -151,6 +169,12 @@ class EditPresetsWidget(TabChild):
             )
         )
         self.__update()
+        self.save_meta.setEnabled(False)
+        self.presets_editor_tab.connect_data_changed_signal()
+
+    def data_changed(self, radio_name):
+        if not self.save_meta.isEnabled():
+            self.save_meta.setEnabled(True)
 
     def __update(self):
         self.save_meta.setEnabled(bool(self.__meta_path))
@@ -182,18 +206,22 @@ class EditPresetsWidget(TabChild):
 
     def _save_preset_file(self):
         if self.__meta_path:
+            self.presets_editor_tab.disconnect_data_changed_signal()
             meta = MetaPresets(self.__meta_path)
-            for tab in self.tab_widget.tabs:
+            for tab in self.presets_editor_tab.tab_widget.tabs:
                 radio_name, radio_channels = tab.to_meta()
                 meta[radio_name] = radio_channels
             meta.write()
+            self.save_meta.setEnabled(False)
+            self.presets_editor_tab.connect_data_changed_signal()
 
     def _load_preset_file(self):
         if self.__meta_path:
+            self.presets_editor_tab.disconnect_data_changed_signal()
             meta = MetaPresets(self.__meta_path)
             meta.read()
             for radio in meta:
-                radio_tab = self.tab_widget.get_tab_from_title(radio)
+                radio_tab = self.presets_editor_tab.tab_widget.get_tab_from_title(radio)
                 radio_tab.from_meta(meta[radio])
                 # print(radio, meta[radio])
 
