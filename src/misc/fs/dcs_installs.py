@@ -312,6 +312,7 @@ class DCSInstalls:
         if not exe.exists():
             msg = '"dcs.exe" not found in:{{}}{}'.format(install_dir.abspath())
             logger.error(msg.format(''))
+            # noinspection PyCallByClass
             I.error(msg.format('\n\n'))
             return
 
