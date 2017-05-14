@@ -46,7 +46,7 @@ class _RadioEditTab(TabChild):
             delegates=[
                 None,
                 TableEditableModel.FloatDelegate(self.min, self.max),
-                TableEditableModel.StringDelegate(r'[a-zA-Z0-9\.\;\:\-]*')
+                TableEditableModel.StringDelegate(r'[a-zA-Z0-9\.\;\:\- ]*')
             ],
             align=['c', 'c', 'l'],
             header_data=self.headers,
