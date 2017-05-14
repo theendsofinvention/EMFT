@@ -1,12 +1,11 @@
 # coding=utf-8
 import os
 import typing
-from collections import OrderedDict
 
 from utils import make_logger, Path
 
 from src.cfg import Config
-from src.radio import radios, empty_presets, MetaChannel, MetaPresets, MetaRadio
+from src.radio import radios, empty_presets, MetaPresets
 from src.ui.base import VLayout, Label, TabWidget, TabChild, TableView, TableEditableModel, HLayout, HSpacer, \
     GridLayout, LineEdit, PushButton, GroupBox, BrowseDialog
 from src.ui.main_ui_tab_widget import MainUiTabChild
@@ -103,9 +102,6 @@ class _RadioEditTab(TabChild):
             self.model.setData(self.model.index(idx, 0), str(idx + 1))
             self.model.setData(self.model.index(idx, 1), str(freq))
             self.model.setData(self.model.index(idx, 2), str(desc))
-
-
-
 
 
 class _RadiosTabWidget(TabWidget):
