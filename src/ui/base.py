@@ -384,21 +384,30 @@ class TableProxy(QSortFilterProxyModel):
 
 
 class TableModel(QAbstractTableModel):
-
     align = {
         'c': Qt.AlignCenter,
         'l': Qt.AlignLeft,
         'r': Qt.AlignRight,
+        'vc': Qt.AlignVCenter,
     }
 
-
-    def __init__(self, data: list, header_data: list, parent=None, bg: list = None, fg: list = None, align: list = None):
+    def __init__(
+            self,
+            data: list,
+            header_data: list,
+            parent=None,
+            bg: list = None,
+            fg: list = None,
+            align: list = None,
+            default_align='vc'
+    ):
         super(TableModel, self).__init__(parent=parent)
         self._data = data[:]
         self._header_data = header_data[:]
         self._bg = bg
         self._fg = fg
         self._align = align
+        self._default_align = TableModel.align[default_align]
 
     def reset_data(self, new_data: list, bg: list = None, fg: list = None, align: list = None):
         self.beginResetModel()
@@ -430,10 +439,10 @@ class TableModel(QAbstractTableModel):
     def data(self, index: QModelIndex, role=Qt.DisplayRole):
         if index.isValid():
             if role == Qt.DisplayRole:
-                    item = self._data[index.row()]
-                    if hasattr(item, '__len__'):
-                        return item[index.column()]
-                    return item
+                item = self._data[index.row()]
+                if hasattr(item, '__len__'):
+                    return item[index.column()]
+                return item
             elif self._bg and role == Qt.BackgroundColorRole and self._bg[index.row()]:
                 c = self._bg[index.row()]
                 if isinstance(c, list):
@@ -446,8 +455,11 @@ class TableModel(QAbstractTableModel):
                     return QVariant(self._get_color(c[index.column()]))
                 else:
                     return QVariant(self._get_color(c))
-            elif self._align and role == Qt.TextAlignmentRole:
-                return TableModel.align[self._align[index.column()]]
+            elif role == Qt.TextAlignmentRole:
+                if self._align:
+                    return self._default_align | TableModel.align[self._align[index.column()]]
+                else:
+                    return self._default_align
         return QVariant()
 
     def headerData(self, col, orientation=Qt.Horizontal, role=Qt.DisplayRole):
