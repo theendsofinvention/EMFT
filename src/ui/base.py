@@ -624,6 +624,17 @@ class TabWidget(QTabWidget):
         # noinspection PyUnresolvedReferences
         self.currentChanged.connect(self._current_index_changed)
 
+    @property
+    def tabs(self) -> typing.Generator['TabChild', None, None]:
+        for tab in self._tabs:
+            yield tab
+
+    def get_tab_from_title(self, tab_title: str) -> 'TabChild':
+        for tab in self.tabs:
+            if tab.tab_title == tab_title:
+                return tab
+        raise KeyError('tab "{}" not found'.format(tab_title))
+
     # noinspection PyMethodOverriding
     def addTab(self, tab: 'TabChild'):
         self._tabs.append(tab)
