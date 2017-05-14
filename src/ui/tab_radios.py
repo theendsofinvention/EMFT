@@ -132,17 +132,58 @@ class EditPresetsWidget(TabChild):
     def __init__(self, parent=None):
         TabChild.__init__(self, parent)
         self.tab_widget = _RadiosTabWidget(self)
+        self._parent_widget = parent
+
+        for radio in radios:
+            self.tab_widget.addTab(
+                _RadioEditTab(self, radio.name, radio.min, radio.max, radio.qty, radio.ac, self.tab_widget)
+            )
+
+        self.setLayout(
+            VLayout(
+                [
+                    self.tab_widget
+                ]
+            )
+        )
+        self._data_changed = False
+
+    def data_changed(self, radio_name):
+        self._data_changed = True
+        self._parent_widget.data_changed(radio_name)
+
+    def connect_data_changed_signal(self):
+        self._data_changed = False
+        for tab in self.tab_widget.tabs:
+            tab.connect_data_changed_signal()
+
+    def disconnect_data_changed_signal(self):
+        for tab in self.tab_widget.tabs:
+            tab.disconnect_data_changed_signal()
+
+
+class TabChildRadios(MainUiTabChild, TabRadiosAdapter):
+    def tab_clicked(self):
+        pass
+
+    @property
+    def tab_title(self) -> str:
+        return TAB_NAME
+
+    def __init__(self, parent=None):
+        super(TabChildRadios, self).__init__(parent)
+        self.tab_widget = TabWidget(self)
+
+        self.presets_editor_tab = EditPresetsWidget(self)
+        self.tab_widget.addTab(self.presets_editor_tab)
+
+        self.tab_widget.addTab(DummyTab(self))
 
         self.meta_path = LineEdit(Config().tab_radios_meta_path or '', self._on_meta_path_changed, read_only=True)
         self.browse_meta = PushButton('Browse', self._browse_preset_file)
         self.show_meta = PushButton('Show in explorer', self._show_preset_file)
         self.load_meta = PushButton('Reload presets file', self._load_preset_file)
         self.save_meta = PushButton('Save presets file', self._save_preset_file)
-
-        for radio in radios:
-            self.tab_widget.addTab(
-                _RadioEditTab(radio.name, radio.min, radio.max, radio.qty, radio.ac, self.tab_widget)
-            )
 
         self.setLayout(
             VLayout(
@@ -219,27 +260,5 @@ class EditPresetsWidget(TabChild):
             for radio in meta:
                 radio_tab = self.presets_editor_tab.tab_widget.get_tab_from_title(radio)
                 radio_tab.from_meta(meta[radio])
-                # print(radio, meta[radio])
-
-
-class TabChildRadios(MainUiTabChild, TabRadiosAdapter):
-    def tab_clicked(self):
-        pass
-
-    @property
-    def tab_title(self) -> str:
-        return TAB_NAME
-
-    def __init__(self, parent=None):
-        super(TabChildRadios, self).__init__(parent)
-        self.tab_widget = TabWidget(self)
-
-        self.tab_widget.addTab(EditPresetsWidget(self))
-
-        self.setLayout(
-            VLayout(
-                [
-                    self.tab_widget
-                ]
-            )
-        )
+            self.save_meta.setEnabled(False)
+            self.presets_editor_tab.connect_data_changed_signal()
