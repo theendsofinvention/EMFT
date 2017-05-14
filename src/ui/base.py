@@ -483,12 +483,11 @@ class TableEditableModel(TableModel):
             editor.interpretText()
             model.setData(index, editor.value())
 
-
     def __init__(
             self,
             data: list,
             header_data: list,
-            delegates:list,
+            delegates: list,
             parent=None,
             bg: list = None,
             fg: list = None,
