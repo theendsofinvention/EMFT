@@ -126,7 +126,7 @@ class _SingleLayout:
         else:
             init_dir = saved_games_path.abspath()
         p = BrowseDialog.get_existing_file(
-            self, 'Select MIZ file', _filter=['*.miz'], init_dir=init_dir)
+            self, 'Select MIZ file', filter_=['*.miz'], init_dir=init_dir)
         if p:
             p = Path(p)
             self.single_miz.setText(p.abspath())
