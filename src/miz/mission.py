@@ -371,7 +371,6 @@ class Coalition(BaseMissionObject):
             assert isinstance(group, Group)
             if group.group_id == group_id:
                 return group
-        return None
 
     def get_group_by_name(self, group_name) -> 'Group':
         valid_str.validate(group_name, 'get_group_by_name')
@@ -379,7 +378,6 @@ class Coalition(BaseMissionObject):
             assert isinstance(group, Group)
             if group.group_name == group_name:
                 return group
-        return None
 
     def get_unit_by_name(self, unit_name) -> 'BaseUnit':
         valid_str.validate(unit_name, 'get_unit_by_name')
@@ -387,7 +385,6 @@ class Coalition(BaseMissionObject):
             assert isinstance(unit, BaseUnit)
             if unit.unit_name == unit_name:
                 return unit
-        return None
 
     def get_unit_by_id(self, unit_id) -> 'BaseUnit':
         valid_positive_int.validate(unit_id, 'get_unit_by_id')
@@ -395,7 +392,6 @@ class Coalition(BaseMissionObject):
             assert isinstance(unit, BaseUnit)
             if unit.unit_id == unit_id:
                 return unit
-        return None
 
 
 class Trig(BaseMissionObject):
@@ -867,19 +863,17 @@ class Country(Coalition):
             if group.group_category == category:
                 yield group
 
-    def get_group_by_id(self, group_id) -> typing.Generator['Group', None, None]:
+    def get_group_by_id(self, group_id) -> 'Group':
         for group in self.groups:
             assert isinstance(group, Group)
             if group.group_id == group_id:
                 return group
-        return None
 
-    def get_group_by_name(self, group_name) -> typing.Generator['Group', None, None]:
+    def get_group_by_name(self, group_name) -> 'Group':
         for group in self.groups:
             assert isinstance(group, Group)
             if group.group_name == group_name:
                 return group
-        return None
 
     @property
     def units(self) -> typing.Generator['BaseUnit', None, None]:
@@ -893,14 +887,12 @@ class Country(Coalition):
             assert isinstance(unit, BaseUnit)
             if unit.unit_name == unit_name:
                 return unit
-        return None
 
     def get_unit_by_id(self, unit_id) -> 'BaseUnit':
         for unit in self.units:
             assert isinstance(unit, BaseUnit)
             if unit.unit_id == unit_id:
                 return unit
-        return None
 
     def get_units_from_category(self, category) -> typing.Generator['BaseUnit', None, None]:
         Mission.validator_group_category.validate(category, 'group category')
