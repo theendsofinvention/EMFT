@@ -26,6 +26,9 @@ add_constructor(_yaml_mapping, odict_construct)
 
 
 class Meta(AbstractMeta):
+    ignore_keys = [
+        'meta_version',
+    ]
 
     @property
     @abc.abstractmethod
@@ -118,7 +121,8 @@ class Meta(AbstractMeta):
 
     def __iter__(self):
         for k in self.keys():
-            yield k
+            if k not in Meta.ignore_keys:
+                yield k
 
     def __contains__(self, x):
         # noinspection PyArgumentList
