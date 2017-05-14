@@ -207,7 +207,7 @@ class TabChildRadios(MainUiTabChild, TabRadiosAdapter):
         self.save_meta.setEnabled(False)
         self.presets_editor_tab.connect_data_changed_signal()
 
-    def data_changed(self, radio_name):
+    def data_changed(self, _):
         if not self.save_meta.isEnabled():
             self.save_meta.setEnabled(True)
 
