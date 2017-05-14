@@ -19,13 +19,13 @@ empty_presets = {k: [_radios[k][1]] * _radios[k][3] for k in _radios}
 
 
 class _Radio:
-
     def __init__(self, name, min_, max_, qty, ac):
         self.name = name
         self.min = min_
         self.max = max_
         self.qty = qty
         self.ac = ac
+
 
 ARC27 = _Radio(*_radios['ARC-27'])
 ARC51 = _Radio(*_radios['ARC51'])
@@ -41,5 +41,3 @@ UHF = _Radio(*_radios['UHF'])
 VUHF = _Radio(*_radios['V/UHF'])
 
 radios = [ARC27, ARC51, ARK22, FM, FuG16, FuG16ZY, R832, R828, R863, SCR552, UHF, VUHF]
-
-

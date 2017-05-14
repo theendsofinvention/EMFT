@@ -1,12 +1,11 @@
 # coding=utf-8
 
-from .meta_property import MetaProperty, _MetaProperty
 from src.global_ import MACHINE_GUID
 from .abstract import AbstractMeta
+from .meta_property import MetaProperty, _MetaProperty
 
 
 class _MetaGUIDProperty(_MetaProperty):
-
     def __get__(self, instance, owner=None):
         """
         """
@@ -104,7 +103,6 @@ class _MetaGUIDProperty(_MetaProperty):
 
 
 class MetaGUIDProperty(MetaProperty):
-
     def __call__(self, func: callable) -> _MetaProperty:
         """
         Creates a DESCRIPTOR instance for a method of a META instance.

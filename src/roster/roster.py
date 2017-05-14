@@ -1,13 +1,13 @@
 # coding=utf-8
 
 import typing
-from .meta_roster import MetaRoster
 from collections import OrderedDict
 from collections.abc import Sequence
 
+from .meta_roster import MetaRoster
+
 
 class Roster(Sequence):
-
     class Pilot(Sequence):
 
         idx = {
@@ -104,4 +104,3 @@ class Roster(Sequence):
         for pilot in meta:
             pilot = Roster.Pilot.from_meta(meta[pilot])
             self.add_pilot_from_values(pilot)
-
