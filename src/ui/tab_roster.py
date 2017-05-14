@@ -1,23 +1,20 @@
 # coding=utf-8
 
-from utils import Path, ThreadPool, make_logger
-from operator import itemgetter
 import typing
+
+from utils import Path, ThreadPool, make_logger
 
 from src.cfg import Config
 from src.misc.fs import saved_games_path
 from src.miz import Miz, Mission, parking_spots
 from src.miz.mission import Group, FlyingUnit
+from src.roster import Roster
+from src.ui.main_ui_tab_widget import MainUiTabChild
 from .base import TableView, TableProxy, TableModel, VLayout, HLayout, BrowseDialog, PushButton, \
     Label, HSpacer, VSpacer
-from .base import QAbstractTableModel, QModelIndex, Qt, QSortFilterProxyModel
-from src.ui.main_ui_tab_widget import MainUiTabChild
 from .main_ui_interface import I
 from .tab_roster_adapter import TAB_NAME
 from .tab_roster_adapter import TabRosterAdapter
-from src.roster import Roster
-from collections.abc import Sequence
-
 
 logger = make_logger(__name__)
 
@@ -180,7 +177,6 @@ class TabChildRoster(MainUiTabChild, TabRosterAdapter):
         roster_data = {}
 
         for pilot in self.roster:
-
             roster_data[pilot.name] = pilot
 
         return roster_data
@@ -209,7 +205,6 @@ class TabChildRoster(MainUiTabChild, TabRosterAdapter):
             miz_data[orphan] = roster_data[orphan]
             miz_fg[orphan] = 'gray'
             roster_bg[orphan] = miz_bg[orphan] = (255, 0, 0, 20)
-
 
         print(sorted(miz_data.keys()))
         miz_data = list(miz_data[k] for k in sorted(miz_data.keys()))
