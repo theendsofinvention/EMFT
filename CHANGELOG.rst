@@ -47,6 +47,8 @@ Fix
 
 Other
 ~~~~~
+- Dev: fix: remove default arg. [132nd-etcher]
+- Update changelog. [132nd-etcher]
 - Create README.md. [132nd-etcher]
 
 
