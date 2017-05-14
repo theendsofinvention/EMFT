@@ -466,14 +466,14 @@ class TableEditableModel(TableModel):
             self._max = max_value
 
         def displayText(self, value, locale):
-            return '{:07.3f}'.format(value)
+            return '{:07.3f}'.format(float(value))
 
         def createEditor(self, parent: QWidget, style: QStyleOptionViewItem, index: QModelIndex):
             editor = QDoubleSpinBox(parent)
             editor.setMinimum(self._min)
             editor.setMaximum(self._max)
             editor.setDecimals(3)
-            editor.setValue(index.data(Qt.DisplayRole))
+            editor.setValue(float(index.data(Qt.DisplayRole)))
             return editor
 
         def setEditorData(self, editor: QDoubleSpinBox, index: QModelIndex):
