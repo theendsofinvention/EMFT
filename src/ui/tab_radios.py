@@ -230,7 +230,7 @@ class TabChildRadios(MainUiTabChild, TabRadiosAdapter):
 
     def _show_preset_file(self):
         if self.__meta_path:
-            os.startfile(self.__meta_path.dirname())
+            os.startfile(str(self.__meta_path.dirname()))
 
     def _browse_preset_file(self):
         init_dir = Path(Config().tab_radios_meta_path_last_dir or '.')
