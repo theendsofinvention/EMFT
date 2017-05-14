@@ -1,15 +1,14 @@
 # coding=utf-8
-import time
 import abc
+import time
 from collections import OrderedDict
 
 from ruamel.yaml import dump as ydump, load as yload, RoundTripDumper, resolver, add_constructor, add_representer
-
-from .abstract import AbstractMeta
 from utils import make_logger, Path
 
-logger = make_logger(__name__)
+from .abstract import AbstractMeta
 
+logger = make_logger(__name__)
 
 _yaml_mapping = resolver.BaseResolver.DEFAULT_MAPPING_TAG
 
