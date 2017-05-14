@@ -3,6 +3,7 @@
 
 New
 ~~~
+- Add radio presets tab. [132nd-etcher]
 - Path settings are now dependent on the current Windows GUID. [132nd-
   etcher]
 
