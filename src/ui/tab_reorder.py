@@ -251,7 +251,7 @@ class _AutoLayout:
 
     def auto_out_open(self):
         if self.auto_out_path.exists():
-            os.startfile(self.auto_out_path)
+            os.startfile(str(self.auto_out_path))
 
     def auto_out_browse(self):
         if self.auto_out_path:
@@ -310,7 +310,7 @@ class _AutoLayout:
 
     def auto_src_open(self):
         if self.auto_src_path:
-            os.startfile(self.auto_src_path.abspath())
+            os.startfile(str(self.auto_src_path.abspath()))
 
     @property
     def latest_trmt(self) -> Path or None:
