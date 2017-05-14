@@ -224,7 +224,7 @@ class TabChildRoster(MainUiTabChild, TabRosterAdapter):
         miz = BrowseDialog.get_existing_file(
             self,
             'Select MIZ file',
-            _filter=['*.miz'],
+            filter_=['*.miz'],
             init_dir=self._miz_last_dir or saved_games_path.abspath())
 
         if not miz:
