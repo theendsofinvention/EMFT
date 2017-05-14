@@ -54,8 +54,11 @@ class Config(Meta, ConfigValues, metaclass=Singleton):
         return True
 
     def upgrade_from_v3(self):
-        self._data['roster_miz_last_dir'] = dict(self._data['roster_last_dir'])
-        del self._data['roster_last_dir']
+        try:
+            self._data['roster_miz_last_dir'] = dict(self._data['roster_last_dir'])
+            del self._data['roster_last_dir']
+        except KeyError:
+            pass
         return True
 
     def meta_version_upgrade(self, from_version):
