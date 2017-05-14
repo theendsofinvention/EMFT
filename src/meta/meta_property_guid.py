@@ -2,6 +2,7 @@
 
 from src.global_ import MACHINE_GUID
 from .abstract import AbstractMeta
+# noinspection PyProtectedMember
 from .meta_property import MetaProperty, _MetaProperty
 
 
