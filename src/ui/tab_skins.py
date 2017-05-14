@@ -5,7 +5,7 @@ import re
 from utils import make_logger
 
 from src.cfg import Config
-from src.misc.fs import dcs_installs, DCSInstall, DCSSkin
+from src.misc.fs import dcs_installs, DCSInstall
 from src.ui.base import VLayout, Combo, HLayout, Label, HSpacer, TableModel, TableViewWithSingleRowMenu, \
     TableProxy, LineEdit, GroupBox, GridLayout, Menu, Checkbox, PushButton
 from src.ui.main_ui_tab_widget import MainUiTabChild
