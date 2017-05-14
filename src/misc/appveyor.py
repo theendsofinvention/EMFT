@@ -24,7 +24,7 @@ def get_latest_remote_version(branch='All') -> AVResult:
         req = requests.get(
             __url(
                 'projects',
-                '132nd-vWing',
+                '132nd-etcher',
                 '132nd-virtual-wing-training-mission-tblisi'
             ),
         )
@@ -32,7 +32,7 @@ def get_latest_remote_version(branch='All') -> AVResult:
         req = requests.get(
             __url(
                 'projects',
-                '132nd-vWing',
+                '132nd-etcher',
                 '132nd-virtual-wing-training-mission-tblisi',
                 'branch',
                 branch),
