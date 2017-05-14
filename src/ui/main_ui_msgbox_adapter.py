@@ -12,5 +12,12 @@ class MainUiMsgBoxAdapter:
         pass
 
     @abc.abstractmethod
-    def confirm(self, text: str, follow_up: callable, title: str = None, follow_up_on_no: callable = None):
+    def confirm(
+            self,
+            text: str,
+            title: str = None,
+            ico: str = None,
+            follow_up_on_yes: callable = None,
+            follow_up_on_no: callable = None
+    ):
         pass

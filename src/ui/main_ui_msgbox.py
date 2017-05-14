@@ -3,7 +3,6 @@ from PyQt5.QtGui import QIcon
 from PyQt5.QtWidgets import QMessageBox, QPushButton
 
 from src.global_ import APP_SHORT_NAME, DEFAULT_ICON
-
 from .main_ui_msgbox_adapter import MainUiMsgBoxAdapter
 
 
@@ -42,10 +41,12 @@ class MainUiMsgBox(MainUiMsgBoxAdapter):
             if msgbox.exec() == QMessageBox.Yes:
                 if follow_up_on_yes:
                     follow_up_on_yes()
+                return True
 
             else:
                 if follow_up_on_no:
                     follow_up_on_no()
+                return False
 
         else:
 
@@ -71,7 +72,7 @@ class MainUiMsgBox(MainUiMsgBoxAdapter):
         if title is None:
             title = 'Please confirm'
 
-        self._run_box(
+        return self._run_box(
             text=text,
             follow_up_on_yes=follow_up_on_yes,
             title=title,
