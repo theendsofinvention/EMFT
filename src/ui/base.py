@@ -515,7 +515,7 @@ class TableEditableModel(TableModel):
             return editor
 
         def setEditorData(self, editor: QDoubleSpinBox, index: QModelIndex):
-            editor.setValue(index.data(Qt.DisplayRole))
+            editor.setValue(float(index.data(Qt.DisplayRole)))
 
         def setModelData(self, editor: QDoubleSpinBox, model: QAbstractItemModel, index: QModelIndex):
             editor.interpretText()
