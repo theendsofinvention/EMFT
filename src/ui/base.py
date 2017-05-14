@@ -476,10 +476,10 @@ class TableEditableModel(TableModel):
             editor.setValue(index.data(Qt.DisplayRole))
             return editor
 
-        def setEditorData(self, editor: QWidget, index: QModelIndex):
+        def setEditorData(self, editor: QDoubleSpinBox, index: QModelIndex):
             editor.setValue(index.data(Qt.DisplayRole))
 
-        def setModelData(self, editor: QWidget, model: QAbstractItemModel, index: QModelIndex):
+        def setModelData(self, editor: QDoubleSpinBox, model: QAbstractItemModel, index: QModelIndex):
             editor.interpretText()
             model.setData(index, editor.value())
 
