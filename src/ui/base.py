@@ -3,6 +3,8 @@ import abc
 import typing
 from abc import abstractmethod
 
+from src.ui.main_ui_mixins_adapter import MainUiMixinsAdapter
+
 from PyQt5.QtCore import Qt, QAbstractTableModel, QModelIndex, QVariant, QSortFilterProxyModel, QAbstractItemModel, \
     QRegExp
 from PyQt5.QtGui import QKeySequence, QIcon, QContextMenuEvent, QColor, QRegExpValidator
@@ -640,7 +642,14 @@ class TabChild(QWidget):
     def __init__(self, parent):
         QWidget.__init__(self, parent, flags=Qt.Widget)
         self.setContentsMargins(20, 20, 20, 20)
-        self._main_ui = parent
+        if hasattr(parent, 'main_ui'):
+            self._main_ui = parent.main_ui
+        else:
+            self._main_ui = parent
+
+    @property
+    def main_ui(self) -> MainUiMixinsAdapter:
+        return self._main_ui
 
     @abstractmethod
     def tab_clicked(self):
