@@ -543,7 +543,7 @@ class TableEditableModel(TableModel):
 
     def data(self, index: QModelIndex, role=Qt.DisplayRole):
         if role == Qt.EditRole:
-            return super(TableEditableModel, self).data(index, Qt.DisplayRole)
+            return super(TableEditableModel, self).data(index)
         return super(TableEditableModel, self).data(index, role)
 
     def setData(self, index: QModelIndex, value, role=Qt.EditRole):
