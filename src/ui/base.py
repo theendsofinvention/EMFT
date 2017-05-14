@@ -651,6 +651,11 @@ class TabChild(QWidget):
     def main_ui(self) -> MainUiMixinsAdapter:
         return self._main_ui
 
+    # noinspection PyMethodMayBeStatic
+    def tab_leave(self) -> bool:
+        """Returns True if it's ok to leave this tab for another one"""
+        return True
+
     @abstractmethod
     def tab_clicked(self):
         pass
@@ -667,6 +672,7 @@ class TabWidget(QTabWidget):
         self._tabs = []
         # noinspection PyUnresolvedReferences
         self.currentChanged.connect(self._current_index_changed)
+        self._current_tab_index = 0
 
     @property
     def tabs(self) -> typing.Generator['TabChild', None, None]:
@@ -684,5 +690,10 @@ class TabWidget(QTabWidget):
         self._tabs.append(tab)
         super(TabWidget, self).addTab(tab, tab.tab_title)
 
-    def _current_index_changed(self, tab_index):
-        self._tabs[tab_index].tab_clicked()
+    def _current_index_changed(self, new_tab_index):
+        if not new_tab_index == self._current_tab_index:
+            if not self._tabs[self._current_tab_index].tab_leave():
+                self.setCurrentIndex(self._current_tab_index)
+            else:
+                self._tabs[new_tab_index].tab_clicked()
+                self._current_tab_index = self.currentIndex()
