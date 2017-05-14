@@ -177,8 +177,6 @@ class TabChildRadios(MainUiTabChild, TabRadiosAdapter):
         self.presets_editor_tab = EditPresetsWidget(self)
         self.tab_widget.addTab(self.presets_editor_tab)
 
-        self.tab_widget.addTab(DummyTab(self))
-
         self.meta_path = LineEdit(Config().tab_radios_meta_path or '', self._on_meta_path_changed, read_only=True)
         self.browse_meta = PushButton('Browse', self._browse_preset_file)
         self.show_meta = PushButton('Show in explorer', self._show_preset_file)
