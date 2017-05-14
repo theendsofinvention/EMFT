@@ -30,12 +30,17 @@ New
 
 Changes
 ~~~~~~~
+- Redirect calls to Appveyor and Github to the new repo. [132nd-etcher]
+
+  Following the transfer of ownership of the TRMT repo
 - Dev move ProgressAdapter to its own module. [132nd-etcher]
 - Skin filters are now case insensitive. [132nd-etcher]
 - Remove 'beta' and 'alpha' as update channels. [132nd-etcher]
 
 Fix
 ~~~
+- Fixed wrong appveyor project selected. [132nd-etcher]
+- Fixed config file upgrade from v3 to v4. [132nd-etcher]
 - Fixed opening the radio presets file in explorer. [132nd-etcher]
 - Allow for spaces in a radio channel description. [132nd-etcher]
 - Fixed opening of output path in re-order tab. [132nd-etcher]
