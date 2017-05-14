@@ -104,6 +104,10 @@ def start_ui(test=False):
     from src.ui.tab_roster import TabChildRoster
     global_.MAIN_UI.add_tab(TabChildRoster(main_ui))
 
+    logger.info('loading tab: radios')
+    from src.ui.tab_radios import TabChildRadios
+    global_.MAIN_UI.add_tab(TabChildRadios(main_ui))
+
     logger.info('loading tab: config')
     from src.ui.tab_config import TabChildConfig
     global_.MAIN_UI.add_tab(TabChildConfig(main_ui))

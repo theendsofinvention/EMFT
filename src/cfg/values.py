@@ -114,3 +114,13 @@ class ConfigValues:
     @MetaGUIDProperty(None, str)
     def dcs_custom_variant_path(self, value: str):
         return value
+
+    # noinspection PyPep8Naming
+    @MetaGUIDProperty(None, str)
+    def tab_radios_meta_path(self, value: str):
+        return value
+
+    # noinspection PyPep8Naming
+    @MetaGUIDProperty(None, str)
+    def tab_radios_meta_path_last_dir(self, value: str):
+        return value
