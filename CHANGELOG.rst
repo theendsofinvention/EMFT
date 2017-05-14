@@ -3,6 +3,8 @@
 
 New
 ~~~
+- Add warning when leaving the radio presets tab without saving. [132nd-
+  etcher]
 - Add radio presets tab. [132nd-etcher]
 - Path settings are now dependent on the current Windows GUID. [132nd-
   etcher]
@@ -34,6 +36,9 @@ Changes
 
 Fix
 ~~~
+- Fixed opening the radio presets file in explorer. [132nd-etcher]
+- Allow for spaces in a radio channel description. [132nd-etcher]
+- Fixed opening of output path in re-order tab. [132nd-etcher]
 - Fix bug in config file handling. [132nd-etcher]
 - Scan for TRMT crash fixed when no local TRMT exists. [132nd-etcher]
 - Fixed performances on skins tab update. [132nd-etcher]
