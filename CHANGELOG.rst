@@ -39,6 +39,7 @@ Changes
 
 Fix
 ~~~
+- Fixed Browse dialog adding "*.*" string after paths. [132nd-etcher]
 - Fixed wrong appveyor project selected. [132nd-etcher]
 - Fixed config file upgrade from v3 to v4. [132nd-etcher]
 - Fixed opening the radio presets file in explorer. [132nd-etcher]
