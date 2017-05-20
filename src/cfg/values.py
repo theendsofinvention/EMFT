@@ -11,50 +11,55 @@ logger = make_logger(__name__)
 class ConfigValues:
     @MetaGUIDProperty(None, str)
     def saved_games_path(self, value: str):
-        p = path.Path(value)
-        if not p.exists():
-            raise FileNotFoundError('path does not exist: {}'.format(p.abspath()))
-        elif not p.isdir():
-            raise TypeError('path is not a directory: {}'.format(p.abspath()))
-        return str(p.abspath())
+        if value:
+            p = path.Path(value)
+            if not p.exists():
+                raise FileNotFoundError('path does not exist: {}'.format(p.abspath()))
+            elif not p.isdir():
+                raise TypeError('path is not a directory: {}'.format(p.abspath()))
+            return str(p.abspath())
 
     @MetaGUIDProperty(None, str)
     def single_miz_output_folder(self, value: str):
-        p = path.Path(value)
-        if not p.exists():
-            return None
-        elif not p.isdir():
-            return None
-        return str(p.abspath())
+        if value:
+            p = path.Path(value)
+            if not p.exists():
+                return None
+            elif not p.isdir():
+                return None
+            return str(p.abspath())
 
     @MetaGUIDProperty(None, str)
     def auto_source_folder(self, value: str):
-        p = path.Path(value)
-        if not p.exists():
-            return None
-        elif not p.isdir():
-            return None
-        return str(p.abspath())
+        if value:
+            p = path.Path(value)
+            if not p.exists():
+                return None
+            elif not p.isdir():
+                return None
+            return str(p.abspath())
 
     @MetaGUIDProperty(None, str)
     def auto_output_folder(self, value: str):
-        p = path.Path(value)
-        if not p.exists():
-            return None
-        elif not p.isdir():
-            return None
-        return str(p.abspath())
+        if value:
+            p = path.Path(value)
+            if not p.exists():
+                return None
+            elif not p.isdir():
+                return None
+            return str(p.abspath())
 
     @MetaGUIDProperty(None, str)
     def single_miz_last(self, value: str):
-        p = path.Path(value)
-        if not p.exists():
-            return None
-        elif not p.isfile():
-            return None
-        elif not p.ext == '.miz':
-            return None
-        return str(p.abspath())
+        if value:
+            p = path.Path(value)
+            if not p.exists():
+                return None
+            elif not p.isfile():
+                return None
+            elif not p.ext == '.miz':
+                return None
+            return str(p.abspath())
 
     @MetaProperty(True, bool)
     def skip_options_file(self, value: bool):

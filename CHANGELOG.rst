@@ -39,6 +39,7 @@ Changes
 
 Fix
 ~~~
+- Fixed config not initializing with corrupt config file. [132nd-etcher]
 - Fixed Browse dialog adding "*.*" string after paths. [132nd-etcher]
 - Fixed wrong appveyor project selected. [132nd-etcher]
 - Fixed config file upgrade from v3 to v4. [132nd-etcher]
