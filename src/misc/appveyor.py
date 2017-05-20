@@ -43,7 +43,8 @@ def get_latest_remote_version(branch='All') -> AVResult:
     if not req.ok:
         msg = ('request failed: {0.status_code}\n'
                'Reason: {0.reason}\n'
-               'Text: {0.text}'.format(req))
+               'Text: {0.text}\n'
+               'Url: {0.url}'.format(req))
         logger.error(msg)
         SENTRY.captureMessage(msg)
         return
@@ -70,7 +71,8 @@ def get_latest_remote_version(branch='All') -> AVResult:
     if not artifacts_req.ok:
         msg = ('failed to retrieve the list of artifacts for this build: {0.status_code}\n'
                'Reason: {0.reason}\n'
-               'Text: {0.text}'.format(artifacts_req))
+               'Text: {0.text}\n'
+               'Url: {0.url}'.format(artifacts_req))
         logger.error(msg)
         SENTRY.captureMessage(msg)
         return
