@@ -1,14 +1,16 @@
 # coding=utf-8
 
+from collections import namedtuple
+
 import humanize
 import requests
-from collections import namedtuple
 from utils import make_logger
+
+from src.sentry import SENTRY
 
 logger = make_logger(__name__)
 
 base_url = r'https://ci.appveyor.com/api'
-
 
 AVResult = namedtuple('AVResult', 'version branch download_url file_size file_name')
 
@@ -24,7 +26,7 @@ def get_latest_remote_version(branch='All') -> AVResult:
         req = requests.get(
             __url(
                 'projects',
-                '132nd-etcher',
+                '132nd-etcherr',
                 '132nd-virtual-wing-training-mission-tblisi'
             ),
         )
@@ -32,16 +34,18 @@ def get_latest_remote_version(branch='All') -> AVResult:
         req = requests.get(
             __url(
                 'projects',
-                '132nd-etcher',
+                '132nd-etcherr',
                 '132nd-virtual-wing-training-mission-tblisi',
                 'branch',
                 branch),
         )
 
     if not req.ok:
-        logger.error('request failed: {0.status_code}\n'
-                     'Reason: {0.reason}\n'
-                     'Text: {0.text}'.format(req))
+        msg = ('request failed: {0.status_code}\n'
+               'Reason: {0.reason}\n'
+               'Text: {0.text}'.format(req))
+        logger.error(msg)
+        SENTRY.captureMessage(msg)
         return
 
     latest = req.json()['build']['version']
@@ -64,10 +68,11 @@ def get_latest_remote_version(branch='All') -> AVResult:
     )
 
     if not artifacts_req.ok:
-        logger.error('failed to retrieve the list of artifacts for this build')
-        logger.error('request failed: {0.status_code}\n'
-                     'Reason: {0.reason}\n'
-                     'Text: {0.text}'.format(artifacts_req))
+        msg = ('failed to retrieve the list of artifacts for this build: {0.status_code}\n'
+               'Reason: {0.reason}\n'
+               'Text: {0.text}'.format(artifacts_req))
+        logger.error(msg)
+        SENTRY.captureMessage(msg)
         return
 
     artifacts = artifacts_req.json()
