@@ -30,6 +30,8 @@ New
 
 Changes
 ~~~~~~~
+- Shows red "error" text instead of staying stuck on "Probing..."
+  [132nd-etcher]
 - Redirect calls to Appveyor and Github to the new repo. [132nd-etcher]
 
   Following the transfer of ownership of the TRMT repo
