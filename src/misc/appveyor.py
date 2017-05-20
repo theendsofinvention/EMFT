@@ -39,7 +39,9 @@ def get_latest_remote_version(branch='All') -> AVResult:
         )
 
     if not req.ok:
-        logger.error('request failed')
+        logger.error('request failed: {0.status_code}\n'
+                     'Reason: {0.reason}\n'
+                     'Text: {0.text}'.format(req))
         return
 
     latest = req.json()['build']['version']
@@ -63,6 +65,9 @@ def get_latest_remote_version(branch='All') -> AVResult:
 
     if not artifacts_req.ok:
         logger.error('failed to retrieve the list of artifacts for this build')
+        logger.error('request failed: {0.status_code}\n'
+                     'Reason: {0.reason}\n'
+                     'Text: {0.text}'.format(artifacts_req))
         return
 
     artifacts = artifacts_req.json()
