@@ -438,6 +438,9 @@ class TabChildReorder(MainUiTabChild, _SingleLayout, _AutoLayout, TabReorderAdap
                     logger.debug('no new TRMT version found')
             else:
                 self.auto_scan_label_remote.set_text_color('green')
+        else:
+            self.auto_scan_label_remote.setText('error')
+            self.auto_scan_label_remote.set_text_color('red')
 
     def __scan_local(self):
 
