@@ -11,13 +11,13 @@ from utils.custom_logging import make_logger
 from utils.custom_path import Path
 
 from src.cfg.cfg import Config
-from src.misc.fs import saved_games_path
 from src.misc import appveyor, downloader, github
+from src.misc.fs import saved_games_path
 from src.miz.miz import Miz
 from src.ui.base import GroupBox, HLayout, VLayout, PushButton, Radio, Checkbox, Label, Combo, GridLayout, VSpacer, \
     box_question, BrowseDialog
-from src.ui.main_ui_tab_widget import MainUiTabChild
 from src.ui.main_ui_interface import I
+from src.ui.main_ui_tab_widget import MainUiTabChild
 from .tab_reorder_adapter import TabReorderAdapter, TAB_NAME
 
 try:
@@ -28,33 +28,6 @@ except ImportError:
     winreg = MagicMock()
 
 logger = make_logger(__name__)
-
-A_REG = winreg.ConnectRegistry(None, winreg.HKEY_CURRENT_USER)
-
-
-def get_saved_games_path():
-    if Config().saved_games_path is None:
-        logger.debug('searching for base "Saved Games" folder')
-        try:
-            logger.debug('trying "User Shell Folders"')
-            with winreg.OpenKey(A_REG,
-                                r"SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\User Shell Folders") as aKey:
-                # noinspection SpellCheckingInspection
-                base_sg = Path(winreg.QueryValueEx(aKey, "{4C5C32FF-BB9D-43B0-B5B4-2D72E54EAAA4}")[0])
-        except FileNotFoundError:
-            logger.debug('failed, trying "Shell Folders"')
-            try:
-                with winreg.OpenKey(A_REG,
-                                    r"SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\Shell Folders") as aKey:
-                    # noinspection SpellCheckingInspection
-                    base_sg = Path(winreg.QueryValueEx(aKey, "{4C5C32FF-BB9D-43B0-B5B4-2D72E54EAAA4}")[0])
-            except FileNotFoundError:
-                logger.debug('darn it, another fail, falling back to "~"')
-                base_sg = Path('~').expanduser().abspath()
-        Config().saved_games_path = str(base_sg.abspath())
-        return base_sg
-    else:
-        return Path(Config().saved_games_path)
 
 
 class _SingleLayout:
