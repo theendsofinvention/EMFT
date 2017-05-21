@@ -41,6 +41,10 @@ Changes
 
 Fix
 ~~~
+- Re-order scan for remote branches on GH during refresh. [132nd-etcher]
+
+  closes #17
+- Re-order tab: make an initial scan at startup. [132nd-etcher]
 - Fixed config not initializing with corrupt config file. [132nd-etcher]
 - Fixed Browse dialog adding "*.*" string after paths. [132nd-etcher]
 - Fixed wrong appveyor project selected. [132nd-etcher]
