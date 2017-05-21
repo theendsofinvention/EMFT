@@ -16,3 +16,4 @@ __pycache__
 /test/test_files/*_EMFT.miz
 .cache
 *.kml
+*.json
