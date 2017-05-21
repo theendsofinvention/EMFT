@@ -442,6 +442,7 @@ class TabChildReorder(MainUiTabChild, _SingleLayout, _AutoLayout, TabReorderAdap
             self._remote = None
 
     def _scan(self):
+        self.auto_scan_combo_branch.reset_values(['All'] + github.get_available_branches())
         if self.auto_src_path:
             self.__scan_local()
             self.__scan_remote()
