@@ -28,6 +28,8 @@ environment:
       secure: +89HquiQeI4sKs1t8EZ0hEuFjD/KMPWL09tJTmKjFOuHomh3O0jWMTzif2fv3EkuH2/WNf4IrtxFa9Lyxt8mtA==
     CODECOV_TOKEN:
       secure: vmheTXBO6T+ryELK1KR2ykiu5wj4ltDRhUo576dG6CGGBCxjpi+BUoa55Amtdoy8
+    DISCORD_WH:
+      secure: 5D6E25n3HCcAehRtC/ZpFb3+fz57fdCVCwfE+z8L9g0lVA+w6+QsidzebBwoWs6/wRwjW1R5LoTXq69AfAKBWWhVzNHKQuw29+tSoGG2wZs=
 
 
 matrix:
@@ -136,6 +138,16 @@ notifications:
   - provider: Webhook
     url: $(GITTER_WH)
     method: GET
+    on_build_failure: true
+    on_build_status_changed: true
+
+  - provider: Webhook
+    url: https://skyhook.glitch.me/api/webhooks/315445785900744705/$(DISCORD_WH)/appveyor
+    headers:
+      User-Agent: myapp 1.0
+      Authorization:
+        secure: GhD+5xhLz/tkYY6AO3fcfQ==
+    on_build_success: false
     on_build_failure: true
     on_build_status_changed: true
 
