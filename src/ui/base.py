@@ -224,6 +224,15 @@ class Combo(QComboBox):
         # noinspection PyUnresolvedReferences
         self.currentTextChanged.connect(self.on_change)
 
+    def reset_values(self, choices: list):
+        current = self.currentText()
+        self.clear()
+        self.addItems(choices)
+        try:
+            self.set_index_from_text(current)
+        except ValueError:
+            logger.warning('branch "{}" has been deleted'.format(current))
+
 
 class Shortcut(QShortcut):
     def __init__(self, key_sequence: QKeySequence, parent: QWidget, func: callable):
