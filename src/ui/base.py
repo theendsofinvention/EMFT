@@ -219,6 +219,7 @@ class Combo(QComboBox):
             pass
         idx = self.findText(text, Qt.MatchExactly)
         if idx < 0:
+            self.setCurrentIndex(0)
             raise ValueError(text)
         self.setCurrentIndex(idx)
         # noinspection PyUnresolvedReferences
