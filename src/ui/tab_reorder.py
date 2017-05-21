@@ -354,6 +354,7 @@ class TabChildReorder(MainUiTabChild, _SingleLayout, _AutoLayout, TabReorderAdap
         self.radio_auto.setChecked(Config().auto_mode)
         self.check_skip_options.setChecked(Config().skip_options_file)
         self.toggle_radios()
+        self.scan()
 
     def toggle_skip_options(self, *_):
         Config().skip_options_file = self.check_skip_options.isChecked()
