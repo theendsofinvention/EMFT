@@ -402,6 +402,12 @@ class TabChildReorder(MainUiTabChild, _SingleLayout, _AutoLayout, TabReorderAdap
             self.auto_scan_label_local.setText('No TRMT local MIZ file found.')
 
         if self.remote:
+
+            if isinstance(self.remote, str):
+                self.auto_scan_label_remote.setText(self.remote)
+                self.auto_scan_label_remote.set_text_color('red')
+                return
+            
             self.auto_scan_label_remote.setText('{} ({})'.format(self.remote.version, self.remote.branch))
             logger.debug('latest remote TRMT found: {}'.format(self.remote.version))
             if self.local_version:
@@ -463,7 +469,7 @@ class TabChildReorder(MainUiTabChild, _SingleLayout, _AutoLayout, TabReorderAdap
 
     def auto_download(self):
 
-        if self.remote:
+        if self.remote and not isinstance(self.remote, str):
             local_file = Path(self.auto_src_path).joinpath(self.remote.file_name).abspath()
 
             if local_file.exists():
