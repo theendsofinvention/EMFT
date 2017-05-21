@@ -47,7 +47,7 @@ def get_latest_remote_version(branch='All') -> AVResult:
                'Url: {0.url}'.format(req))
         logger.error(msg)
         SENTRY.captureMessage(msg)
-        return
+        return req.reason
 
     latest = req.json()['build']['version']
     branch = req.json()['build']['branch']
@@ -75,7 +75,7 @@ def get_latest_remote_version(branch='All') -> AVResult:
                'Url: {0.url}'.format(artifacts_req))
         logger.error(msg)
         SENTRY.captureMessage(msg)
-        return
+        return 'Build failed or in progress'
 
     artifacts = artifacts_req.json()
 
