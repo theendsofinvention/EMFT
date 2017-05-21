@@ -3,8 +3,6 @@ import abc
 import typing
 from abc import abstractmethod
 
-from src.ui.main_ui_mixins_adapter import MainUiMixinsAdapter
-
 from PyQt5.QtCore import Qt, QAbstractTableModel, QModelIndex, QVariant, QSortFilterProxyModel, QAbstractItemModel, \
     QRegExp
 from PyQt5.QtGui import QKeySequence, QIcon, QContextMenuEvent, QColor, QRegExpValidator
@@ -13,6 +11,8 @@ from PyQt5.QtWidgets import QGroupBox, QBoxLayout, QSpacerItem, QWidget, QHBoxLa
     QMessageBox, QTableView, QAbstractItemView, QMenu, QMenuBar, QFileDialog, QTabWidget, QDoubleSpinBox, \
     QStyledItemDelegate, QStyleOptionViewItem
 from utils import make_logger, Path
+
+from src.ui.main_ui_mixins_adapter import MainUiMixinsAdapter
 
 
 class Widget(QWidget):
