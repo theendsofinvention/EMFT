@@ -15,5 +15,3 @@ __pycache__
 /.hypothesis/
 /test/test_files/*_EMFT.miz
 .cache
-*.kml
-*.json
