@@ -1,20 +1,19 @@
 # coding=utf-8
 
-import datetime
 import random
-import uuid
-from json import dumps
 
-import simplekml
-
+from src.draw.json_drawer import JSONDrawer
+from src.draw.kml_drawer import KMLDrawer
 from .shapes import Poly
 
 
+#  TODO use colour package
 def _random_color():
     r = lambda: random.randint(0, 255)
     return '50%02X%02X%02X' % (r(), r(), r())
 
 
+#  TODO use colour package
 def get_spaced_colors(n):
     max_value = 16581375  # 255**3
     interval = int(max_value / n)
@@ -22,120 +21,7 @@ def get_spaced_colors(n):
 
     return colors
 
-
-class JSON:
-
-    def __init__(self, name: str):
-        self.data = {
-            'drawings': []
-        }
-        self.name = name
-        self.time = '{0.day:02}.{0.month:02}.{0.year}-{0.hour:02}:{0.minute:02}:{0.second:02}'.format(
-            datetime.datetime.utcnow())
-
-
-    def __add_shape(self, shape):
-        self.data['drawings'].append(shape)
-
-    def add_poly(self, poly: 'Poly', color):
-
-        def add_point(point):
-            d['points'].append(
-                dict(
-                    x=point.x,
-                    y=point.y
-                )
-            )
-
-        d = {
-            'author': 'EMFT',
-            'timestamp': self.time,
-            'type': 'polygon',
-            'name': poly.name,
-            'id': '{{{}}}'.format(uuid.uuid4().__str__()),
-            'color': '#ff{}'.format(color),
-            'colorBg': '#33{}'.format(color),
-            'brushStyle': 5,
-            'lineWidth': 1,
-            'points': [
-                dict(x=p.x, y=p.y) for p in poly.points
-            ],
-            'shared': True,
-        }
-        # for point in poly.points:
-        #     add_point(point)
-
-        self.__add_shape(d)
-
-        d = {
-            'author': 'EMFT',
-            'timestamp': self.time,
-            'type': 'text',
-            'name': '',
-            'id': '{{{}}}'.format(uuid.uuid4().__str__()),
-            'color': '#ff{}'.format(color),
-            'colorBg': '#ff{}'.format(color),
-            'brushStyle': 1,
-            'lineWidth': 1,
-            'font': 'Calibri,8,-1,5,50,0,0,0,0,0',
-            'pos_x': poly.centre[0],
-            'pos_y': poly.centre[1],
-            'shared': True,
-            'text': poly.name
-        }
-
-        self.__add_shape(d)
-
-
-    def save(self, path: str):
-        with open(path, mode='w') as f:
-            f.write(dumps(self.data, indent=True, sort_keys=True))
-
-
-
-class KML(simplekml.Kml):
-
-    def __init__(self, name: str):
-        simplekml.Kml.__init__(self)
-
-        self.document.name = name
-
-    def add_poly(self, poly_:'Poly', color):
-        # print(points)
-        # for p in points:
-        #     print(tuple(p.split(',')))
-        # return
-
-        folder = self.newfolder()
-        assert isinstance(folder, simplekml.Folder)
-        folder.name = poly_.name
-
-
-        # poly = self.newpolygon(name=poly_.name)
-        poly = folder.newpolygon(name=poly_.name)
-
-        assert isinstance(poly, simplekml.Polygon)
-        poly.altitudemode = simplekml.AltitudeMode.relativetoground
-        poly.extrude = 1
-        poly.polystyle = simplekml.PolyStyle(
-            fill=1,
-            outline=1,
-            color='50{}'.format(color),
-            colormode=simplekml.ColorMode.normal
-        )
-
-        poly.outerboundaryis = list(
-            # tuple(p.split(', ')) for p in poly.points
-            (p.x, p.y, p.alt) for p in poly_.points
-        )
-
-        center = folder.newpoint()
-        assert isinstance(center, simplekml.Point)
-        center.name = poly_.name
-        center.style.iconstyle.scale = 0.8
-        print(poly_.centre)
-        center.coords = [poly_.centre]
-
+# TODO: see https://github.com/FlightControl-Master/MOOSE/blob/eab81a2bf9b793c83691c0cac2006a729f32bc6a/Moose%20Development/Moose/Core/Database.lua#L898 for points management
 
 if __name__ == '__main__':
     # print(get_spaced_colors(20)[1:])
@@ -149,11 +35,11 @@ MARNUELI_RANGE|45.061929127875, 41.300503937719, 2000|45.072442426814, 41.329999
 DUSHETI_RANGE|44.318344595122, 42.105893750229, 2000|44.412275051214, 41.995924662274, 2000|44.482186996642, 42.176983642685, 2000|44.678170499349, 42.250004771351, 2000|44.837708750804, 42.222988036908, 2000|44.842429150036, 42.072674552001, 2000|44.755030255411, 41.999174456867, 2000|44.617658400539, 41.960620101077, 2000|44.412281708262, 41.995923991532, 2000
 TKIBULI_RANGE|42.753688511376, 42.298744493742, 2000|42.898653944573, 42.542535525397, 2000|43.28031938944, 42.563819448169, 2000|43.348996968161, 42.321684703684, 2000|43.082373857091, 42.09817868135, 2000|42.8354942002, 42.151572706993, 2000|42.75430191141, 42.299303438258, 2000
 KUTAISI MOA|42.428899927627, 42.390718999854, 2000|42.241536695988, 42.01068388203, 2000|42.778942787537, 41.96793200928, 2000|42.8354942002, 42.151572706993, 2000|42.754308636663, 42.299302860604, 2000|42.428898397029, 42.390708866388, 2000'''
-    t = KML('test')
-    j = JSON('test')
+    t = KMLDrawer('test')
+    j = JSONDrawer('test')
 
     polys = l.split('\n')
-    colors = get_spaced_colors(len(polys)+6)
+    colors = get_spaced_colors(len(polys) + 6)
     for poly_str, color in zip(polys, colors[3:-3]):
         poly = Poly(poly_str)
         t.add_poly(poly, color)
