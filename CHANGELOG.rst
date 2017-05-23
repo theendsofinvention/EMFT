@@ -30,6 +30,8 @@ New
 
 Changes
 ~~~~~~~
+- Reorder tab: add explicit error message on remote probing failure.
+  [132nd-etcher]
 - Shows red "error" text instead of staying stuck on "Probing..."
   [132nd-etcher]
 - Redirect calls to Appveyor and Github to the new repo. [132nd-etcher]
