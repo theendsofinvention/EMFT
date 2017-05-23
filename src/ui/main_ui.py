@@ -9,11 +9,11 @@ from utils import make_logger, nice_exit
 # noinspection PyProtectedMember
 from src import global_
 from src.cfg import Config
-from .base import Shortcut, VLayout, Widget
+from src.ui.base import TabWidget
 from src.ui.main_ui_tab_widget import MainUiTabChild
+from .base import Shortcut, VLayout, Widget
 from .main_ui_interface import I
 from .main_ui_mixins import MainUiMixins
-from src.ui.base import TabWidget
 
 logger = make_logger(__name__)
 
