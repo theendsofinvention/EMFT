@@ -97,11 +97,13 @@ class _RadioEditTab(TabChild):
 
     def from_meta(self, channels):
 
+        self.model.beginResetModel()
         for idx, channel in enumerate(channels):
             freq, desc = channel
             self.model.setData(self.model.index(idx, 0), str(idx + 1))
             self.model.setData(self.model.index(idx, 1), str(freq))
             self.model.setData(self.model.index(idx, 2), str(desc))
+        self.model.endResetModel()
 
 
 class _RadiosTabWidget(TabWidget):
