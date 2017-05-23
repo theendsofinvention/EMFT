@@ -201,15 +201,10 @@ class Combo(QComboBox):
         self.currentTextChanged.connect(on_change)
 
     def __enter__(self):
-        try:
-            # noinspection PyUnresolvedReferences
-            self.currentTextChanged.disconnect()
-        except TypeError:
-            pass
+        self.blockSignals(True)
 
     def __exit__(self, exc_type, exc_val, exc_tb):
-        # noinspection PyUnresolvedReferences
-        self.currentTextChanged.connect(self.on_change)
+        self.blockSignals(False)
 
     def set_index_from_text(self, text):
         try:
