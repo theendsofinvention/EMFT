@@ -62,6 +62,18 @@ class MetaFile(Meta):
         if auto_read:
             self.read()
 
+    def __delitem__(self, key, _write=False):
+        super(MetaFile, self).__delitem__(key)
+
+        if _write:
+            self.write()
+
+    def __setitem__(self, key, value, _write=False):
+        super(MetaFile, self).__setitem__(key, value)
+
+        if _write:
+            self.write()
+
     def debug(self, txt: str):
         logger.debug('{}: {}'.format(self.path.abspath(), txt))
 

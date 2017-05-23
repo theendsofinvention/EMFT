@@ -9,7 +9,7 @@ class Meta(AbstractMeta):
         'meta_version',
     ]
 
-    def __init__(self, init_dict: OrderedDict):
+    def __init__(self, init_dict: OrderedDict = None):
 
         if init_dict is None:
             self._data = OrderedDict()
@@ -62,24 +62,20 @@ class Meta(AbstractMeta):
     def __delitem__(self, key, _write=False):
         del self.data[key]
 
-        if _write:
-            self.write()
-
     def __setitem__(self, key, value, _write=False):
         self.data[key] = value
-
-        if _write:
-            self.write()
 
     def __getitem__(self, key):
         return self._data.get(key, None)
 
-    def __str__(self):
-        # noinspection PyArgumentList
-        return self.data.__str__()
-
     def __repr__(self):
-        return '{}: {}'.format(self.__class__.__name__, self.data.__repr__())
+        return '{!s}({!s})'.format(
+            self.__class__.__name__,
+            ', '.join('{}={}'.format(k, str(v)) for k, v in self._data.items())
+        )
+
+    def __str__(self):
+        return self.__repr__()
 
     def get(self, key, default=None):
         return self._data.get(key, default)
