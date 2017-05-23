@@ -24,6 +24,10 @@ class Meta(AbstractMeta):
         self._values, self._keys, self._items = None, None, None
         self._init_views()
 
+    @classmethod
+    def from_dict(cls, init_dict: OrderedDict):
+        return cls(*init_dict)
+
     # noinspection PyArgumentList
     def _init_views(self):
         self._values = self._data.values()
