@@ -12,8 +12,6 @@ from PyQt5.QtWidgets import QGroupBox, QBoxLayout, QSpacerItem, QWidget, QHBoxLa
     QStyledItemDelegate, QStyleOptionViewItem
 from utils import make_logger, Path
 
-from src.ui.main_ui_mixins_adapter import MainUiMixinsAdapter
-
 SIGNAL = pyqtSignal
 
 
@@ -649,14 +647,6 @@ class TabChild(QWidget):
     def __init__(self, parent):
         QWidget.__init__(self, parent, flags=Qt.Widget)
         self.setContentsMargins(20, 20, 20, 20)
-        if hasattr(parent, 'main_ui'):
-            self._main_ui = parent.main_ui
-        else:
-            self._main_ui = parent
-
-    @property
-    def main_ui(self) -> MainUiMixinsAdapter:
-        return self._main_ui
 
     # noinspection PyMethodMayBeStatic
     def tab_leave(self) -> bool:
