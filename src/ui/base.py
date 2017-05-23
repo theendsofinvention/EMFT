@@ -4,7 +4,7 @@ import typing
 from abc import abstractmethod
 
 from PyQt5.QtCore import Qt, QAbstractTableModel, QModelIndex, QVariant, QSortFilterProxyModel, QAbstractItemModel, \
-    QRegExp
+    QRegExp, pyqtSignal
 from PyQt5.QtGui import QKeySequence, QIcon, QContextMenuEvent, QColor, QRegExpValidator
 from PyQt5.QtWidgets import QGroupBox, QBoxLayout, QSpacerItem, QWidget, QHBoxLayout, QVBoxLayout, QPushButton, \
     QRadioButton, QComboBox, QShortcut, QCheckBox, QLineEdit, QLabel, QPlainTextEdit, QSizePolicy, QGridLayout, \
@@ -13,6 +13,8 @@ from PyQt5.QtWidgets import QGroupBox, QBoxLayout, QSpacerItem, QWidget, QHBoxLa
 from utils import make_logger, Path
 
 from src.ui.main_ui_mixins_adapter import MainUiMixinsAdapter
+
+SIGNAL = pyqtSignal
 
 
 class Widget(QWidget):
