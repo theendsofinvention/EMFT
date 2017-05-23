@@ -43,6 +43,7 @@ Changes
 
 Fix
 ~~~
+- Fixed radio presets values not updating on file reload. [132nd-etcher]
 - Prevent double instantiation of EMFT. [132nd-etcher]
 
   closes #27
