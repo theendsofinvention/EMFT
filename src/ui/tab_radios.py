@@ -260,7 +260,7 @@ class TabChildRadios(MainUiTabChild, TabRadiosAdapter):
 
     def _load_preset_file(self):
         if self.__meta_path:
-            self.presets_editor_tab.disconnect_data_changed_signal()
+            self.presets_editor_tab.blockSignals(True)
             meta = MetaFilePresets(self.__meta_path)
             meta.read()
             for radio in meta:
@@ -268,3 +268,4 @@ class TabChildRadios(MainUiTabChild, TabRadiosAdapter):
                 radio_tab.from_meta(meta[radio])
             self.save_meta.setEnabled(False)
             self.presets_editor_tab.connect_data_changed_signal()
+            self.presets_editor_tab.blockSignals(False)
