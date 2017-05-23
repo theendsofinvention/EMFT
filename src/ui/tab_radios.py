@@ -5,7 +5,7 @@ import typing
 from utils import make_logger, Path
 
 from src.cfg import Config
-from src.radio import radios, empty_presets, MetaPresets
+from src.radio import radios, empty_presets, MetaFilePresets
 from src.ui.base import VLayout, Label, TabWidget, TabChild, TableView, TableEditableModel, HLayout, HSpacer, \
     GridLayout, LineEdit, PushButton, GroupBox, BrowseDialog
 from src.ui.main_ui_tab_widget import MainUiTabChild
@@ -242,7 +242,7 @@ class TabChildRadios(MainUiTabChild, TabRadiosAdapter):
     def _save_preset_file(self):
         if self.__meta_path:
             self.presets_editor_tab.disconnect_data_changed_signal()
-            meta = MetaPresets(self.__meta_path)
+            meta = MetaFilePresets(self.__meta_path)
             for tab in self.presets_editor_tab.tab_widget.tabs:
                 radio_name, radio_channels = tab.to_meta()
                 meta[radio_name] = radio_channels
@@ -253,7 +253,7 @@ class TabChildRadios(MainUiTabChild, TabRadiosAdapter):
     def _load_preset_file(self):
         if self.__meta_path:
             self.presets_editor_tab.disconnect_data_changed_signal()
-            meta = MetaPresets(self.__meta_path)
+            meta = MetaFilePresets(self.__meta_path)
             meta.read()
             for radio in meta:
                 radio_tab = self.presets_editor_tab.tab_widget.get_tab_from_title(radio)
