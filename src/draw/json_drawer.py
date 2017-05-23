@@ -1,5 +1,6 @@
 # coding=utf-8
 import datetime
+import colour
 import uuid
 from json import dumps
 from .shapes import Poly, Point
@@ -20,15 +21,31 @@ class JSONDrawer(AbstractDrawer):
     def __add_shape(self, shape):
         self.data['drawings'].append(shape)
 
-    def add_poly(self, poly: 'Poly', color):
+    def add_point(self, point: 'Point', color: colour.Color):
+        # print(color)
 
-        def add_point(point):
-            d['points'].append(
-                dict(
-                    x=point.x,
-                    y=point.y
-                )
-            )
+        d = {
+            'author': 'EMFT',
+            'timestamp': self.time,
+            'type': 'text',
+            'name': '',
+            'id': '{{{}}}'.format(uuid.uuid4().__str__()),
+            # 'color': '#ff{}'.format(color.get_hex_l()[1:]),
+            # 'colorBg': '#ff{}'.format(color.get_hex_l()[1:]),
+            'color': '#ffffffff',
+            'colorBg': '#ffffffff',
+            'brushStyle': 1,
+            'lineWidth': 1,
+            'font': 'Calibri,8,-1,5,50,0,0,0,0,0',
+            'pos_x': point.x,
+            'pos_y': point.y,
+            'shared': True,
+            'text': point.name
+        }
+
+        self.__add_shape(d)
+
+    def add_poly(self, poly: 'Poly', color: colour.Color):
 
         d = {
             'author': 'EMFT',
@@ -45,8 +62,6 @@ class JSONDrawer(AbstractDrawer):
             ],
             'shared': True,
         }
-        # for point in poly.points:
-        #     add_point(point)
 
         self.__add_shape(d)
 

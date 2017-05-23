@@ -7,20 +7,32 @@ class Shape:
 
 class Point:
 
-    def __init__(self, x, y, alt):
+    def __init__(self, y, x, alt=0, name=None):
         self.x = float(x)
         self.y = float(y)
         self.alt = float(alt)
+        self.name = name
+
+
+class Circle(Shape):
+
+    def __init__(self, shape_data):
+        print(shape_data)
+        self.name = shape_data['name']
+        Shape.__init__(self, self.name)
+
+        self.center = shape_data
 
 
 class Poly(Shape):
 
-    def __init__(self, poly_string: str):
-        self.name, *points = poly_string.split('|')
+    def __init__(self, shape_data):
+        self.name = shape_data['name']
+
         Shape.__init__(self, self.name)
         self.__center = None
         # print(list(x.split(',') for x in points))
-        self.points = list(Point(*p.split(',')) for p in points)
+        self.points = list(Point(*p) for p in shape_data['points'])
 
     @property
     def centre(self):
