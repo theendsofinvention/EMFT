@@ -1,5 +1,7 @@
 # coding=utf-8
 
+from collections import OrderedDict
+
 _radios = {
     'ARC-27': ('ARC-27', 225, 399.9, 18, {'F-86F Sabre'}),
     'ARC51': ('ARC51', 225, 399.97, 20, {'UH-1H'}),
@@ -41,3 +43,7 @@ UHF = _Radio(*_radios['UHF'])
 VUHF = _Radio(*_radios['V/UHF'])
 
 radios = [ARC27, ARC51, ARK22, FM, FuG16, FuG16ZY, R832, R828, R863, SCR552, UHF, VUHF]
+
+from .values.radio import Radio
+
+radios = [Radio(*_radios[k]) for k in sorted(_radios.keys())]

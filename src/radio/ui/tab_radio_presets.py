@@ -21,6 +21,13 @@ class EditPresetsWidget(TabChild):
 
     data_changed = SIGNAL()
 
+    def tab_leave(self):
+        if self.data_has_changed:
+            from src.global_ import MAIN_UI
+            return MAIN_UI.confirm('You have unsaved changes in your radios preset\n\n'
+                                   'Are you sure you want to leave?')
+        return True
+
     def tab_clicked(self):
         pass
 
@@ -34,7 +41,7 @@ class EditPresetsWidget(TabChild):
         self._parent_widget = parent
 
         for radio in radios:
-            sub_tab = RadioEditTab(self, radio.name, radio.min, radio.max, radio.qty, radio.ac, self.tab_widget)
+            sub_tab = RadioEditTab(radio, self.tab_widget)
             sub_tab.data_changed.connect(self.on_data_changed)
             self.tab_widget.addTab(sub_tab)
 
@@ -45,6 +52,9 @@ class EditPresetsWidget(TabChild):
                 ]
             )
         )
+        self.data_has_changed = False
 
     def on_data_changed(self):
+        self.data_has_changed = True
+        # noinspection PyUnresolvedReferences
         self.data_changed.emit()

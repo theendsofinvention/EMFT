@@ -1,6 +1,7 @@
 # coding=utf-8
-from src.radio import empty_presets
+from src.radio import empty_presets, Radio
 from src.ui.base import TabChild, TableView, TableEditableModel, VLayout, GridLayout, Label, SIGNAL
+from src.ui.main_ui_interface import I
 
 
 class RadioEditTab(TabChild):
@@ -9,20 +10,14 @@ class RadioEditTab(TabChild):
 
     @property
     def tab_title(self) -> str:
-        return self.name
+        return self.radio.name
 
     def tab_clicked(self):
         pass
 
-    def __init__(self, preset_widget, radio_name, radio_freq_min, radio_freq_max, radio_channels_qty, radio_aicrafts,
-                 widget_parent=None):
+    def __init__(self, radio: Radio, widget_parent=None):
         TabChild.__init__(self, widget_parent)
-        self._preset_widget = preset_widget
-        self.name = radio_name
-        self.min = radio_freq_min
-        self.max = radio_freq_max
-        self.qty = radio_channels_qty
-        self.ac = radio_aicrafts
+        self.radio = radio
 
         self.headers = ['Channel', 'Frequency', 'Description']
 
@@ -30,14 +25,14 @@ class RadioEditTab(TabChild):
         self.model = TableEditableModel(
             data=list(
                 list(x) for x in zip(
-                    range(1, int(self.qty) + 1),
-                    empty_presets[self.name],
-                    [''] * self.qty
+                    range(1, int(self.radio.channel_qty) + 1),
+                    [self.radio.min_freq] * self.radio.channel_qty,
+                    [''] * self.radio.channel_qty
                 )
             ),
             delegates=[
                 None,
-                TableEditableModel.FloatDelegate(self.min, self.max),
+                TableEditableModel.FloatDelegate(self.radio.min_freq, self.radio.max_freq),
                 TableEditableModel.StringDelegate(r'[a-zA-Z0-9\.\;\:\- ]*')
             ],
             align=['c', 'c', 'l'],
@@ -53,9 +48,9 @@ class RadioEditTab(TabChild):
                         [
                             [
 
-                                Label('Aircrafts with this radio: {}'.format(', '.join(ac for ac in self.ac))),
-                                (Label('Minimum value: {}'.format(self.min)), dict(align='c')),
-                                (Label('Maximum value: {}'.format(self.max)), dict(align='r')),
+                                Label('Aircrafts with this radio: {}'.format(', '.join(ac for ac in self.radio.aircrafts))),
+                                (Label('Minimum value: {}'.format(self.radio.min_freq)), dict(align='c')),
+                                (Label('Maximum value: {}'.format(self.radio.max_freq)), dict(align='r')),
                             ]
                         ],
                         auto_right=False
@@ -65,18 +60,24 @@ class RadioEditTab(TabChild):
             )
         )
         # noinspection PyUnresolvedReferences
-        self.model.dataChanged.connect(lambda: self.data_changed.emit())
+        self.model.dataChanged.connect(self._on_data_change)
+        self.data_has_changed = False
+
+    def _on_data_change(self):
+        self.data_has_changed = True
+        # noinspection PyUnresolvedReferences
+        self.data_changed.emit()
 
     def to_meta(self):
 
         def get_channels():
-            for c in range(self.qty):
+            for c in range(self.radio.channel_qty):
                 freq = float(self.model.data(self.model.index(c, 1)))
                 freq = '{:07.3f}'.format(freq)
                 desc = str(self.model.data(self.model.index(c, 2)))
                 yield freq, desc
 
-        return self.name, list(channel for channel in get_channels())
+        return self.radio.name, list(channel for channel in get_channels())
 
     def from_meta(self, channels):
 

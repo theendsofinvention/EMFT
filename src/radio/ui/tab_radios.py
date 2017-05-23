@@ -17,8 +17,9 @@ logger = make_logger(__name__)
 class TabChildRadios(MainUiTabChild, TabRadiosAdapter):
     def tab_leave(self):
         if self.data_has_changed:
-            return self.main_ui.confirm('You have unsaved changes in your radios preset\n\n'
-                                        'Are you sure you want to leave?')
+            from src.global_ import MAIN_UI
+            return MAIN_UI.confirm('You have unsaved changes in your radios preset\n\n'
+                                   'Are you sure you want to leave?')
         return True
 
     def tab_clicked(self):
@@ -98,6 +99,13 @@ class TabChildRadios(MainUiTabChild, TabRadiosAdapter):
             self.meta_path.setText(p.abspath())
             Config().tab_radios_meta_path_last_dir = str(p.dirname())
 
+    def _reset_data_change(self):
+        self.save_meta.setEnabled(False)
+        self.data_has_changed = False
+        self.presets_editor_tab.data_has_changed = False
+        for tab in self.presets_editor_tab.tab_widget.tabs:
+            tab.data_has_changed = False
+
     def _save_preset_file(self):
         if self.__meta_path:
             self.presets_editor_tab.blockSignals(True)
@@ -106,8 +114,7 @@ class TabChildRadios(MainUiTabChild, TabRadiosAdapter):
                 radio_name, radio_channels = tab.to_meta()
                 meta[radio_name] = radio_channels
             meta.write()
-            self.save_meta.setEnabled(False)
-            self.data_has_changed = False
+            self._reset_data_change()
             self.presets_editor_tab.blockSignals(False)
 
     def _load_preset_file(self):
@@ -118,6 +125,5 @@ class TabChildRadios(MainUiTabChild, TabRadiosAdapter):
             for radio in meta:
                 radio_tab = self.presets_editor_tab.tab_widget.get_tab_from_title(radio)
                 radio_tab.from_meta(meta[radio])
-            self.save_meta.setEnabled(False)
-            self.data_has_changed = False
+            self._reset_data_change()
             self.presets_editor_tab.blockSignals(False)
