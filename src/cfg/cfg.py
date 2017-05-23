@@ -7,19 +7,19 @@ from utils.singleton import Singleton
 
 # noinspection PyProtectedMember
 from src import global_
-from src.meta import Meta
+from src.meta import MetaFile
 from .values import ConfigValues
 
 logger = make_logger(__name__)
 
 
-class Config(Meta, ConfigValues, metaclass=Singleton):
+class Config(MetaFile, ConfigValues, metaclass=Singleton):
     def __init__(self, config_file_path=None):
 
         if config_file_path is None:
             config_file_path = global_.PATH_CONFIG_FILE
 
-        Meta.__init__(self, path=config_file_path)
+        MetaFile.__init__(self, path=config_file_path)
         ConfigValues.__init__(self)
 
     @property

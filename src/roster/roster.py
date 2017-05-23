@@ -4,7 +4,7 @@ import typing
 from collections import OrderedDict
 from collections.abc import Sequence
 
-from .meta_roster import MetaRoster
+from .meta_roster import MetaFileRoster
 
 
 class Roster(Sequence):
@@ -89,7 +89,7 @@ class Roster(Sequence):
 
     def to_file(self, file_path):
 
-        meta = MetaRoster(file_path)
+        meta = MetaFileRoster(file_path)
 
         for pilot in self:
             meta[pilot.name] = pilot.to_meta()
@@ -98,7 +98,7 @@ class Roster(Sequence):
 
     def from_file(self, file_path):
 
-        meta = MetaRoster(file_path)
+        meta = MetaFileRoster(file_path)
         meta.read()
 
         for pilot in meta:

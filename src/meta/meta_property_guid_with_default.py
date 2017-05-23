@@ -3,7 +3,7 @@
 from src.global_ import MACHINE_GUID
 from .abstract import AbstractMeta
 # noinspection PyProtectedMember
-from .meta_property import MetaProperty, _MetaProperty
+from .meta_property_with_default import MetaPropertyWithDefault, _MetaProperty
 
 
 class _MetaGUIDProperty(_MetaProperty):
@@ -103,7 +103,7 @@ class _MetaGUIDProperty(_MetaProperty):
             pass
 
 
-class MetaGUIDProperty(MetaProperty):
+class MetaGUIDPropertyWithDefault(MetaPropertyWithDefault):
     def __call__(self, func: callable) -> _MetaProperty:
         """
         Creates a DESCRIPTOR instance for a method of a META instance.

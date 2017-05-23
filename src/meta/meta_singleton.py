@@ -2,7 +2,7 @@
 
 import abc
 from utils.custom_path import Path
-from .meta import Meta
+from .meta_file import MetaFile
 
 
 class _MetaSingleton(abc.ABCMeta):
@@ -27,7 +27,7 @@ class _MetaSingleton(abc.ABCMeta):
         return _MetaSingleton._instances[abs_path]
 
 
-class MetaSingleton(Meta, metaclass=_MetaSingleton):
+class MetaSingleton(MetaFile, metaclass=_MetaSingleton):
     @property
     @abc.abstractmethod
     def meta_header(self):
@@ -43,4 +43,4 @@ class MetaSingleton(Meta, metaclass=_MetaSingleton):
         """"""
 
     def __init__(self, path: Path or str, init_dict: dict = None, auto_read=True):
-        Meta.__init__(self, path, init_dict, auto_read)
+        MetaFile.__init__(self, path, init_dict, auto_read)

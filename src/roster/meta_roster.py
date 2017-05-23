@@ -1,10 +1,10 @@
 # coding=utf-8
 
-from src.meta import Meta
+from src.meta import MetaFile
 from utils import Path
 
 
-class MetaRoster(Meta):
+class MetaFileRoster(MetaFile):
 
     @property
     def meta_version(self):
@@ -19,4 +19,4 @@ class MetaRoster(Meta):
 
     def __init__(self, path):
         path = Path(path)
-        Meta.__init__(self, path)
+        MetaFile.__init__(self, path)
