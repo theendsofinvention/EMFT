@@ -43,6 +43,9 @@ Changes
 
 Fix
 ~~~
+- Prevent double instantiation of EMFT. [132nd-etcher]
+
+  closes #27
 - Re-order scan for remote branches on GH during refresh. [132nd-etcher]
 
   closes #17
