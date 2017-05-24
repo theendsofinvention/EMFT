@@ -59,9 +59,9 @@ class TabChildReorder(MainUiTabChild, TabReorderAdapter):
         self.manual_browse_for_output_folder_btn = PushButton('Browse', self.manual_browse_for_output_folder)
         self.manual_open_output_folder_btn = PushButton('Open', self.manual_open_output_folder)
 
-        self.manual_reorder_btn = PushButton('Reorder MIZ file', self.manual_reorder)
-        self.manual_reorder_btn.setMinimumHeight(40)
-        self.manual_reorder_btn.setMinimumWidth(400)
+        # self.manual_reorder_btn = PushButton('Reorder MIZ file', self.manual_reorder)
+        # self.manual_reorder_btn.setMinimumHeight(40)
+        # self.manual_reorder_btn.setMinimumWidth(400)
 
         self.manual_layout = VLayout([
             GridLayout(
@@ -73,7 +73,7 @@ class TabChildReorder(MainUiTabChild, TabReorderAdapter):
                      self.manual_open_output_folder_btn],
                 ],
             ),
-            self.manual_reorder_btn,
+            # self.manual_reorder_btn,
         ])
 
         self.manual_group.setLayout(self.manual_layout)
@@ -112,10 +112,6 @@ class TabChildReorder(MainUiTabChild, TabReorderAdapter):
         ])
         scan_layout.addStretch()
 
-        self.auto_reorder_btn = PushButton('Reorder MIZ file', self.auto_reorder)
-        self.auto_reorder_btn.setMinimumHeight(40)
-        self.auto_reorder_btn.setMinimumWidth(400)
-
         self.auto_layout = VLayout([
 
             auto_help,
@@ -142,7 +138,7 @@ class TabChildReorder(MainUiTabChild, TabReorderAdapter):
                     ],
                 ]
             ),
-            self.auto_reorder_btn
+            # self.auto_reorder_btn
         ])
 
         self.auto_group.setLayout(self.auto_layout)
@@ -187,6 +183,12 @@ class TabChildReorder(MainUiTabChild, TabReorderAdapter):
                     self.radio_single, self.manual_group,
 
                     self.radio_auto, self.auto_group,
+
+                    PushButton(
+                        text='Reorder MIZ file',
+                        func=self.reorder_miz,
+                        parent=self,
+                        min_height=40),
 
                     VSpacer()
                 ]
@@ -247,15 +249,6 @@ class TabChildReorder(MainUiTabChild, TabReorderAdapter):
             p = Path(p)
             self.manual_output_folder_lineedit.setText(p.abspath())
             Config().single_miz_output_folder = p.abspath()
-
-    def manual_reorder(self):
-        if self.manual_miz_path and self.manual_output_folder_path:
-            self.reorder_miz(self.manual_miz_path, self.manual_output_folder_path, self.skip_options_file)
-
-    def auto_reorder(self):
-        if self.remote and self.auto_out_path:
-            local_file = self._look_for_local_file(self.remote.version)
-            self.reorder_miz(local_file, self.auto_out_path, self.skip_options_file)
 
     def auto_out_open(self):
         if self.auto_out_path.exists():
@@ -321,23 +314,30 @@ class TabChildReorder(MainUiTabChild, TabReorderAdapter):
                 'Please check the log, and eventually send it to me along with the MIZ file '
                 'if you think this is a bug.'.format(miz_file))
 
-    def reorder_miz(self, miz_file, output_dir, skip_options_file):
+    def reorder_miz(self):
+        if self.radio_auto.isEnabled():
+            if self.remote and self.auto_out_path:
+                local_file = self._look_for_local_file(self.remote.version)
+                self._reorder_miz(local_file, self.auto_out_path, self.skip_options_file)
+        else:
+            if self.manual_miz_path and self.manual_output_folder_path:
+                self._reorder_miz(self.manual_miz_path, self.manual_output_folder_path, self.skip_options_file)
+
+    def _reorder_miz(self, miz_file, output_dir, skip_options_file):
         if miz_file:
-            print(miz_file)
+            self.main_ui.pool.queue_task(
+                Miz.reorder,
+                [
+                    miz_file,
+                    output_dir,
+                    skip_options_file,
+                ],
+                _err_callback=self._on_reorder_error,
+                _err_args=[miz_file],
+            )
         else:
             MAIN_UI.msg('Local file not found for version: {}\n\n'
                         'Download it first!'.format(self.remote.version))
-        return  # FIXME
-        self.main_ui.pool.queue_task(
-            Miz.reorder,
-            [
-                miz_file,
-                output_dir,
-                skip_options_file,
-            ],
-            _err_callback=self._on_reorder_error,
-            _err_args=[miz_file],
-        )
 
     @property
     def selected_branch(self):
@@ -348,10 +348,6 @@ class TabChildReorder(MainUiTabChild, TabReorderAdapter):
         self.scan()
 
     def tab_reorder_update_view_after_remote_scan(self):
-        # if self.local_version:
-        #     self.auto_scan_label_local.setText(self.local_version)
-        # else:
-        #     self.auto_scan_label_local.setText('No TRMT local MIZ file found.')
 
         if self.remote:
 
