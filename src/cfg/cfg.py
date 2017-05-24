@@ -28,7 +28,7 @@ class Config(MetaFile, ConfigValues, metaclass=Singleton):
 
     @property
     def meta_version(self):
-        return 4
+        return 5
 
     def upgrade_from_v1(self):
         if self.update_channel in ['alpha', 'beta']:
@@ -57,6 +57,14 @@ class Config(MetaFile, ConfigValues, metaclass=Singleton):
         try:
             self._data['roster_miz_last_dir'] = dict(self._data['roster_last_dir'])
             del self._data['roster_last_dir']
+        except KeyError:
+            pass
+        return True
+
+    def upgrade_from_v4(self):
+        try:
+            self._data['reorder_selected_auto_branch'] = self._data['selected_TRMT_branch']
+            del self._data['selected_TRMT_branch']
         except KeyError:
             pass
         return True
