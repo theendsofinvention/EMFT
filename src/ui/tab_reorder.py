@@ -2,11 +2,8 @@
 
 import abc
 import os
-import webbrowser
-from distutils.version import LooseVersion
 
 from PyQt5.QtWidgets import QLineEdit, QLabel
-from natsort import natsorted
 from utils.custom_logging import make_logger
 from utils.custom_path import Path
 
@@ -19,6 +16,7 @@ from src.ui.base import GroupBox, HLayout, VLayout, PushButton, Radio, Checkbox,
 from src.ui.main_ui_interface import I
 from src.ui.main_ui_tab_widget import MainUiTabChild
 from .tab_reorder_adapter import TabReorderAdapter, TAB_NAME
+from src.global_ import MAIN_UI
 
 try:
     import winreg
@@ -141,16 +139,14 @@ class _AutoLayout:
         self.auto_group = GroupBox()
         auto_help = QLabel('Looks for the latest TRMT MIZ (must be named "TRMT_*.miz") in the source folder.')
 
-        self._latest_trmt_path = None
-
         self.auto_src_le = QLineEdit()
         if Config().auto_source_folder:
             self.auto_src_le.setText(Config().auto_source_folder)
         self.auto_src_le.setEnabled(False)
         self.auto_src_browse_btn = PushButton('Browse', self.auto_src_browse)
         self.auto_src_open_btn = PushButton('Open', self.auto_src_open)
-        self.auto_scan_label_local = QLabel('')
-        self.auto_scan_label_remote = Label('')
+        # self.auto_scan_label_local = QLabel('')
+        self.auto_scan_label_result = Label('')
         self.auto_scan_combo_branch = Combo(self._branch_changed, ['All'] + github.get_available_branches())
         try:
             self.auto_scan_combo_branch.set_index_from_text(Config().selected_TRMT_branch)
@@ -166,12 +162,13 @@ class _AutoLayout:
         self.auto_out_open_btn = PushButton('Open', self.auto_out_open)
 
         scan_layout = HLayout([
-            QLabel('Latest local version of the TRMT:'),
-            (self.auto_scan_label_local, dict(stretch=1)),
-            QLabel('Latest remote version of the TRMT:'),
+            QLabel('Branch filter:'),
             self.auto_scan_combo_branch,
-            (self.auto_scan_label_remote, dict(stretch=1)),
+            self.auto_scan_label_result,
+            # QLabel('Latest version:'),
+            # (self.auto_scan_label_local, dict(stretch=1)),
         ])
+        scan_layout.addStretch()
 
         self.auto_reorder_btn = PushButton('Reorder MIZ file', self.auto_reorder)
         self.auto_reorder_btn.setMinimumHeight(40)
@@ -209,17 +206,22 @@ class _AutoLayout:
         self.auto_group.setLayout(self.auto_layout)
 
         if Config().auto_output_folder:
-            self.auto_out_le.setText(Config().auto_output_folder)
+            p = Path(Config().auto_output_folder)
+            if p.exists() and p.isdir():
+                self.auto_out_le.setText(Config().auto_output_folder)
         if Config().auto_source_folder:
-            self.auto_src_le.setText(Config().auto_source_folder)
+            p = Path(Config().auto_source_folder)
+            if p.exists() and p.isdir():
+                self.auto_src_le.setText(Config().auto_source_folder)
 
     @abc.abstractmethod
     def _branch_changed(self):
         """"""
 
     def auto_reorder(self):
-        if self.latest_trmt and self.auto_out_path:
-            self.reorder_miz(self.latest_trmt, self.auto_out_path, self.skip_options_file)
+        if self.remote and self.auto_out_path:
+            local_file = self._look_for_local_file(self.remote.version)
+            self.reorder_miz(local_file, self.auto_out_path, self.skip_options_file)
 
     def auto_out_open(self):
         if self.auto_out_path.exists():
@@ -279,10 +281,6 @@ class _AutoLayout:
         if self.auto_src_path:
             os.startfile(str(self.auto_src_path.abspath()))
 
-    @property
-    def latest_trmt(self) -> Path or None:
-        return self._latest_trmt_path
-
     @abc.abstractmethod
     def reorder_miz(self, miz_file, output_dir, skip_options_file):
         """"""
@@ -307,7 +305,6 @@ class TabChildReorder(MainUiTabChild, _SingleLayout, _AutoLayout, TabReorderAdap
         _AutoLayout.__init__(self)
 
         self._remote = None
-        self.local_version = None
 
         help_text = QLabel('By design, LUA tables are unordered, which makes tracking changes extremely difficult.\n\n'
                            'This lets you reorder them alphabetically before you push them in a SCM.\n\n'
@@ -370,6 +367,12 @@ class TabChildReorder(MainUiTabChild, _SingleLayout, _AutoLayout, TabReorderAdap
                 'if you think this is a bug.'.format(miz_file))
 
     def reorder_miz(self, miz_file, output_dir, skip_options_file):
+        if miz_file:
+            print(miz_file)
+        else:
+            MAIN_UI.msg('Local file not found for version: {}\n\n'
+                        'Download it first!'.format(self.remote.version))
+        return  # FIXME
         self.main_ui.pool.queue_task(
             Miz.reorder,
             [
@@ -390,46 +393,47 @@ class TabChildReorder(MainUiTabChild, _SingleLayout, _AutoLayout, TabReorderAdap
         self.scan()
 
     def tab_reorder_update_view_after_remote_scan(self):
-        if self.local_version:
-            self.auto_scan_label_local.setText(self.local_version)
-        else:
-            self.auto_scan_label_local.setText('No TRMT local MIZ file found.')
+        # if self.local_version:
+        #     self.auto_scan_label_local.setText(self.local_version)
+        # else:
+        #     self.auto_scan_label_local.setText('No TRMT local MIZ file found.')
 
         if self.remote:
 
             if isinstance(self.remote, str):
-                self.auto_scan_label_remote.setText(self.remote)
-                self.auto_scan_label_remote.set_text_color('red')
-                return
-            
-            self.auto_scan_label_remote.setText('{} ({})'.format(self.remote.version, self.remote.branch))
-            logger.debug('latest remote TRMT found: {}'.format(self.remote.version))
-            if self.local_version:
-                if LooseVersion(self.local_version) < LooseVersion(self.remote.version):
-                    self.auto_scan_label_remote.set_text_color('green')
-                    logger.debug('remote TRMT is newer than local')
-                else:
-                    logger.debug('no new TRMT version found')
-            else:
-                self.auto_scan_label_remote.set_text_color('green')
-        else:
-            self.auto_scan_label_remote.setText('error')
-            self.auto_scan_label_remote.set_text_color('red')
+                # The scan returned an error message
+                msg, color = self.remote, 'red'
 
-    def __scan_local(self):
+            else:
+            
+                # self.auto_scan_label_result.setText('{} ({})'.format(self.remote.version, self.remote.branch))
+                logger.debug('latest remote version found: {}'.format(self.remote.version))
+                local_trmt_path = self._look_for_local_file(self.remote.version)
+                if local_trmt_path:
+                    msg, color = '{}: you already have the latest version'.format(self.remote.version), 'green'
+                    logger.debug(msg)
+                    self.auto_scan_label_result.setText(msg)
+                else:
+                    msg, color = '{}: new version found'.format(self.remote.version), 'orange'
+                    logger.debug(msg)
+        else:
+            msg, color = 'error while probing remote, see log', 'red'
+
+        self.auto_scan_label_result.setText(msg)
+        self.auto_scan_label_result.set_text_color(color)
+
+
+
+    def _look_for_local_file(self, version):
 
         if self.auto_src_path:
-            try:
-                logger.debug('looking for latest local TRMT version')
-                self._latest_trmt_path = natsorted(
-                    [Path(f).abspath() for f in Path(self.auto_src_path).listdir('TRMT_*.miz')]).pop()
-            except IndexError:
-                self._latest_trmt_path = None
-                self.local_version = None
-                logger.debug('no local TRMT found')
+            p = Path(self.auto_src_path).joinpath('TRMT_{}.miz'.format(version))
+            if p.exists():
+                logger.debug('local TRMT found: {}'.format(p.abspath()))
+                return p.abspath()
             else:
-                self.local_version = Path(self._latest_trmt_path).namebase.replace('TRMT_', '')
-                logger.debug('latest local TRMT found: {}'.format(self.local_version))
+                logger.warning('no local TRMT found')
+                return None
 
     def __scan_remote(self):
 
@@ -449,7 +453,7 @@ class TabChildReorder(MainUiTabChild, _SingleLayout, _AutoLayout, TabReorderAdap
             ['master', 'develop'] + sorted(remote_branches)
         )
         if self.auto_src_path:
-            self.__scan_local()
+            # self.__scan_local()
             self.__scan_remote()
 
     @staticmethod
@@ -457,9 +461,9 @@ class TabChildReorder(MainUiTabChild, _SingleLayout, _AutoLayout, TabReorderAdap
         I.tab_reorder_update_view_after_remote_scan()
 
     def scan(self, *_):
-        self.auto_scan_label_remote.set_text_color('black')
-        self.auto_scan_label_remote.setText('Probing...')
-        self.auto_scan_label_local.setText('Probing...')
+        self.auto_scan_label_result.set_text_color('black')
+        self.auto_scan_label_result.setText('Probing...')
+        # self.auto_scan_label_local.setText('Probing...')
         self.main_ui.pool.queue_task(task=self._scan, _task_callback=self._scan_callback)
 
     @property
