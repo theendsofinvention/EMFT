@@ -30,6 +30,7 @@ New
 
 Changes
 ~~~~~~~
+- Changed layout margins. [132nd-etcher]
 - Using single re-order button for both manual and auto mode. [132nd-
   etcher]
 - Tab_reorder: branches are now sorted alphabetically, with "master" and
