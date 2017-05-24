@@ -102,34 +102,33 @@ class TabChildReorder(MainUiTabChild, TabReorderAdapter):
             add_stretch=True
         )
 
-        self.auto_layout = VLayout([
-
-            auto_help,
-
-            GridLayout(
-                [
+        self.auto_layout = VLayout(
+            [
+                auto_help,
+                GridLayout(
                     [
-                        (Label('Source folder'), dict(align='r')),
-                        self.auto_src_le,
-                        PushButton('Browse', self.auto_src_browse, self),
-                        PushButton('Open', self.auto_src_open, self),
-                    ],
-                    [
-                        (Label('Output folder'), dict(align='r')),
-                        self.auto_out_le,
-                        PushButton('Browse', self.auto_out_browse, self),
-                        PushButton('Open', self.auto_out_open, self),
-                    ],
-                    [
-                        None,
-                        scan_layout,
-                        PushButton('Refresh', self.scan, self),
-                        PushButton('Download', self.auto_download, self)
-                    ],
-                ]
-            ),
-            # self.auto_reorder_btn
-        ])
+                        [
+                            Label('Source folder'),
+                            self.auto_src_le,
+                            PushButton('Browse', self.auto_src_browse, self),
+                            PushButton('Open', self.auto_src_open, self),
+                        ],
+                        [
+                            Label('Output folder'),
+                            self.auto_out_le,
+                            PushButton('Browse', self.auto_out_browse, self),
+                            PushButton('Open', self.auto_out_open, self),
+                        ],
+                        [
+                            None,
+                            scan_layout,
+                            PushButton('Refresh', self.scan, self),
+                            PushButton('Download', self.auto_download, self)
+                        ],
+                    ]
+                ),
+            ]
+        )
 
         self.auto_group.setLayout(self.auto_layout)
 
@@ -165,22 +164,31 @@ class TabChildReorder(MainUiTabChild, TabReorderAdapter):
 
                     GroupBox(
                         'Options',
-                        VLayout([self.check_skip_options, ])
+                        VLayout(
+                            [
+                                self.check_skip_options,
+                            ],
+                        )
                     ),
 
-                    40,
-
-                    self.radio_single, self.manual_group,
-
-                    self.radio_auto, self.auto_group,
+                    GroupBox(
+                        'MIZ file reordering',
+                        VLayout(
+                            [
+                                self.radio_single,
+                                self.manual_group,
+                                self.radio_auto,
+                                self.auto_group,
+                            ],
+                        ),
+                    ),
 
                     PushButton(
                         text='Reorder MIZ file',
                         func=self.reorder_miz,
                         parent=self,
-                        min_height=40),
-
-                    VSpacer()
+                        min_height=40,
+                    ),
                 ]
             )
         )
