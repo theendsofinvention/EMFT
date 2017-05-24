@@ -157,7 +157,7 @@ class HLayout(QHBoxLayout, _WithChildren):
 
 
 class VLayout(QVBoxLayout, _WithChildren):
-    def __init__(self, children: list, add_stretch=False):
+    def __init__(self, children: list, add_stretch=False, set_stretch: list = None):
         """
         Creates a vertical layout.
         Children can be either a single item, or a tuple including a configuration dictionary.
@@ -173,6 +173,13 @@ class VLayout(QVBoxLayout, _WithChildren):
 
         if add_stretch:
             self.addStretch()
+
+        if set_stretch:
+            logger.critical('stretch {}'.format(set_stretch))
+            for s in set_stretch:
+                logger.critical('setting stretch {}'.format(s))
+                self.setStretch(*s)
+
 
 class Frame(QFrame):
     def __init__(self, layout, parent=None):
