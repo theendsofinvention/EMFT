@@ -168,8 +168,8 @@ class VLayout(QVBoxLayout, _WithChildren):
 
 
 class PushButton(QPushButton):
-    def __init__(self, text, func: callable):
-        QPushButton.__init__(self, text)
+    def __init__(self, text, func: callable, parent=None):
+        QPushButton.__init__(self, text, parent)
         # noinspection PyUnresolvedReferences
         self.clicked.connect(func)
         self.setStyleSheet('padding-left: 15px; padding-right: 15px;'
