@@ -83,7 +83,8 @@ class TabChildReorder(MainUiTabChild, TabReorderAdapter):
             self.auto_src_le.setText(Config().auto_source_folder)
 
         self.auto_scan_label_result = Label('')
-        self.auto_scan_combo_branch = Combo(self._on_branch_changed, ['All'] + github.get_available_branches())
+        self.auto_scan_combo_branch = Combo(self._on_branch_changed, list())
+
         try:
             self.auto_scan_combo_branch.set_index_from_text(Config().selected_TRMT_branch)
         except ValueError:
