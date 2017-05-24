@@ -28,10 +28,18 @@ except ImportError:
 logger = make_logger(__name__)
 
 
-class _SingleLayout:
-    def __init__(self):
+class TabChildReorder(MainUiTabChild, TabReorderAdapter):
+    def tab_clicked(self):
+        self.scan()
 
-        self.single_group = GroupBox()
+    @property
+    def tab_title(self):
+        return TAB_NAME
+
+    def __init__(self, parent=None):
+        MainUiTabChild.__init__(self, parent=parent)
+
+        self.manual_group = GroupBox()
 
         self.single_miz_lineedit = LineEdit('', read_only=True)
 
@@ -68,73 +76,7 @@ class _SingleLayout:
             self.manual_reorder_btn,
         ])
 
-        self.single_group.setLayout(self.manual_layout)
-
-    @property
-    def manual_miz_path(self) -> Path or None:
-        t = self.single_miz_lineedit.text()
-        if len(t) > 3:
-            p = Path(t)
-            if p.exists() and p.isfile() and p.ext == '.miz':
-                return p
-        return None
-
-    @property
-    def manual_output_folder_path(self) -> Path or None:
-        t = self.manual_output_folder_lineedit.text()
-        if len(t) > 3:
-            return Path(t)
-        return None
-
-    def manual_open_miz(self):
-        if self.manual_miz_path.exists():
-            os.startfile(self.manual_miz_path.dirname())
-
-    def manual_browse_for_miz(self):
-        if Config().single_miz_last:
-            init_dir = Path(Config().single_miz_last).dirname()
-        else:
-            init_dir = saved_games_path.abspath()
-        p = BrowseDialog.get_existing_file(
-            self, 'Select MIZ file', filter_=['*.miz'], init_dir=init_dir)
-        if p:
-            p = Path(p)
-            self.single_miz_lineedit.setText(p.abspath())
-            Config().single_miz_last = p.abspath()
-
-    def manual_open_output_folder(self):
-        if self.manual_output_folder_path.exists():
-            os.startfile(self.manual_output_folder_path)
-
-    def manual_browse_for_output_folder(self):
-        if self.manual_output_folder_path:
-            init_dir = self.manual_output_folder_path.dirname()
-        elif self.manual_miz_path:
-            init_dir = self.manual_miz_path.dirname()
-        else:
-            init_dir = Path('.')
-        p = BrowseDialog.get_directory(self, 'Select output directory', init_dir=init_dir.abspath())
-        if p:
-            p = Path(p)
-            self.manual_output_folder_lineedit.setText(p.abspath())
-            Config().single_miz_output_folder = p.abspath()
-
-    def manual_reorder(self):
-        if self.manual_miz_path and self.manual_output_folder_path:
-            self.reorder_miz(self.manual_miz_path, self.manual_output_folder_path, self.skip_options_file)
-
-    @abc.abstractmethod
-    def reorder_miz(self, miz_file, output_dir, skip_options_file):
-        """"""
-
-    @property
-    @abc.abstractmethod
-    def skip_options_file(self) -> bool:
-        """"""
-
-
-class _AutoLayout:
-    def __init__(self):
+        self.manual_group.setLayout(self.manual_layout)
 
         self.auto_group = GroupBox()
         auto_help = QLabel('Looks for the latest TRMT MIZ (must be named "TRMT_*.miz") in the source folder.')
@@ -147,7 +89,7 @@ class _AutoLayout:
         self.auto_src_open_btn = PushButton('Open', self.auto_src_open)
         # self.auto_scan_label_local = QLabel('')
         self.auto_scan_label_result = Label('')
-        self.auto_scan_combo_branch = Combo(self._branch_changed, ['All'] + github.get_available_branches())
+        self.auto_scan_combo_branch = Combo(self._on_branch_changed, ['All'] + github.get_available_branches())
         try:
             self.auto_scan_combo_branch.set_index_from_text(Config().selected_TRMT_branch)
         except ValueError:
@@ -214,9 +156,101 @@ class _AutoLayout:
             if p.exists() and p.isdir():
                 self.auto_src_le.setText(Config().auto_source_folder)
 
-    @abc.abstractmethod
-    def _branch_changed(self):
-        """"""
+        self._remote = None
+
+        help_text = QLabel('By design, LUA tables are unordered, which makes tracking changes extremely difficult.\n\n'
+                           'This lets you reorder them alphabetically before you push them in a SCM.\n\n'
+                           'It is recommended to set the "Output folder" to your local SCM repository.')
+
+        self.check_skip_options = Checkbox(
+            'Skip "options" file: the "options" file at the root of the MIZ is player-specific, and is of very relative'
+            ' import for the MIZ file itself. To avoid having irrelevant changes in the SCM, it can be safely skipped'
+            ' during reordering.',
+            self.toggle_skip_options
+        )
+
+        self.radio_single = Radio('Manual', self.toggle_radios)
+        self.radio_auto = Radio('Automatic', self.toggle_radios)
+
+        self.setLayout(
+            VLayout(
+                [
+                    help_text,
+
+                    GroupBox(
+                        'Options',
+                        VLayout([self.check_skip_options, ])
+                    ),
+
+                    40,
+
+                    self.radio_single, self.manual_group,
+
+                    self.radio_auto, self.auto_group,
+
+                    VSpacer()
+                ]
+            )
+        )
+
+        self.radio_single.setChecked(not Config().auto_mode)
+        self.radio_auto.setChecked(Config().auto_mode)
+        self.check_skip_options.setChecked(Config().skip_options_file)
+        self.toggle_radios()
+        self.scan()
+
+    @property
+    def manual_miz_path(self) -> Path or None:
+        t = self.single_miz_lineedit.text()
+        if len(t) > 3:
+            p = Path(t)
+            if p.exists() and p.isfile() and p.ext == '.miz':
+                return p
+        return None
+
+    @property
+    def manual_output_folder_path(self) -> Path or None:
+        t = self.manual_output_folder_lineedit.text()
+        if len(t) > 3:
+            return Path(t)
+        return None
+
+    def manual_open_miz(self):
+        if self.manual_miz_path.exists():
+            os.startfile(self.manual_miz_path.dirname())
+
+    def manual_browse_for_miz(self):
+        if Config().single_miz_last:
+            init_dir = Path(Config().single_miz_last).dirname()
+        else:
+            init_dir = saved_games_path.abspath()
+        p = BrowseDialog.get_existing_file(
+            self, 'Select MIZ file', filter_=['*.miz'], init_dir=init_dir)
+        if p:
+            p = Path(p)
+            self.single_miz_lineedit.setText(p.abspath())
+            Config().single_miz_last = p.abspath()
+
+    def manual_open_output_folder(self):
+        if self.manual_output_folder_path.exists():
+            os.startfile(self.manual_output_folder_path)
+
+    def manual_browse_for_output_folder(self):
+        if self.manual_output_folder_path:
+            init_dir = self.manual_output_folder_path.dirname()
+        elif self.manual_miz_path:
+            init_dir = self.manual_miz_path.dirname()
+        else:
+            init_dir = Path('.')
+        p = BrowseDialog.get_directory(self, 'Select output directory', init_dir=init_dir.abspath())
+        if p:
+            p = Path(p)
+            self.manual_output_folder_lineedit.setText(p.abspath())
+            Config().single_miz_output_folder = p.abspath()
+
+    def manual_reorder(self):
+        if self.manual_miz_path and self.manual_output_folder_path:
+            self.reorder_miz(self.manual_miz_path, self.manual_output_folder_path, self.skip_options_file)
 
     def auto_reorder(self):
         if self.remote and self.auto_out_path:
@@ -246,19 +280,6 @@ class _AutoLayout:
         return None
 
     @property
-    @abc.abstractmethod
-    def selected_branch(self):
-        """"""
-
-    @abc.abstractmethod
-    def scan(self):
-        """"""
-
-    @abc.abstractmethod
-    def auto_download(self):
-        """"""
-
-    @property
     def auto_src_path(self) -> Path or None:
         t = self.auto_src_le.text()
         if len(t) > 3:
@@ -281,77 +302,11 @@ class _AutoLayout:
         if self.auto_src_path:
             os.startfile(str(self.auto_src_path.abspath()))
 
-    @abc.abstractmethod
-    def reorder_miz(self, miz_file, output_dir, skip_options_file):
-        """"""
-
-    @property
-    @abc.abstractmethod
-    def skip_options_file(self) -> bool:
-        """"""
-
-
-class TabChildReorder(MainUiTabChild, _SingleLayout, _AutoLayout, TabReorderAdapter):
-    def tab_clicked(self):
-        self.scan()
-
-    @property
-    def tab_title(self):
-        return TAB_NAME
-
-    def __init__(self, parent=None):
-        MainUiTabChild.__init__(self, parent=parent)
-        _SingleLayout.__init__(self)
-        _AutoLayout.__init__(self)
-
-        self._remote = None
-
-        help_text = QLabel('By design, LUA tables are unordered, which makes tracking changes extremely difficult.\n\n'
-                           'This lets you reorder them alphabetically before you push them in a SCM.\n\n'
-                           'It is recommended to set the "Output folder" to your local SCM repository.')
-
-        self.check_skip_options = Checkbox(
-            'Skip "options" file: the "options" file at the root of the MIZ is player-specific, and is of very relative'
-            ' import for the MIZ file itself. To avoid having irrelevant changes in the SCM, it can be safely skipped'
-            ' during reordering.',
-            self.toggle_skip_options
-        )
-
-        self.radio_single = Radio('Specific MIZ file', self.toggle_radios)
-        self.radio_auto = Radio('Latest TRMT', self.toggle_radios)
-
-        self.setLayout(
-            VLayout(
-                [
-                    help_text,
-
-                    GroupBox(
-                        'Options',
-                        VLayout([self.check_skip_options, ])
-                    ),
-
-                    40,
-
-                    self.radio_single, self.single_group,
-
-                    self.radio_auto, self.auto_group,
-
-                    VSpacer()
-                ]
-            )
-        )
-
-        self.radio_single.setChecked(not Config().auto_mode)
-        self.radio_auto.setChecked(Config().auto_mode)
-        self.check_skip_options.setChecked(Config().skip_options_file)
-        self.toggle_radios()
-        self.scan()
-
     def toggle_skip_options(self, *_):
         Config().skip_options_file = self.check_skip_options.isChecked()
 
     def toggle_radios(self, *_):
-        self.single_group.setEnabled(self.radio_single.isChecked())
+        self.manual_group.setEnabled(self.radio_single.isChecked())
         self.auto_group.setEnabled(self.radio_auto.isChecked())
         Config().auto_mode = self.radio_auto.isChecked()
 
@@ -388,7 +343,7 @@ class TabChildReorder(MainUiTabChild, _SingleLayout, _AutoLayout, TabReorderAdap
     def selected_branch(self):
         return self.auto_scan_combo_branch.currentText()
 
-    def _branch_changed(self):
+    def _on_branch_changed(self):
         Config().selected_TRMT_branch = self.selected_branch
         self.scan()
 
