@@ -1,22 +1,21 @@
 # coding=utf-8
 
-import abc
 import os
 
-from PyQt5.QtWidgets import QLineEdit, QLabel
+from PyQt5.QtWidgets import QLabel
 from utils.custom_logging import make_logger
 from utils.custom_path import Path
 
 from src.cfg.cfg import Config
+from src.global_ import MAIN_UI
 from src.misc import appveyor, downloader, github
 from src.misc.fs import saved_games_path
 from src.miz.miz import Miz
-from src.ui.base import GroupBox, HLayout, VLayout, PushButton, Radio, Checkbox, Label, Combo, GridLayout, VSpacer, \
-    box_question, BrowseDialog, LineEdit
+from src.ui.base import GroupBox, HLayout, VLayout, PushButton, Radio, Checkbox, Label, Combo, GridLayout, box_question, \
+    BrowseDialog, LineEdit
 from src.ui.main_ui_interface import I
 from src.ui.main_ui_tab_widget import MainUiTabChild
 from .tab_reorder_adapter import TabReorderAdapter, TAB_NAME
-from src.global_ import MAIN_UI
 
 try:
     import winreg
@@ -30,7 +29,7 @@ logger = make_logger(__name__)
 
 class TabChildReorder(MainUiTabChild, TabReorderAdapter):
     def tab_clicked(self):
-        self.scan()
+        self.scan_artifacts()
 
     @property
     def tab_title(self):
@@ -43,109 +42,16 @@ class TabChildReorder(MainUiTabChild, TabReorderAdapter):
 
         self.single_miz_lineedit = LineEdit('', read_only=True)
 
-        if Config().single_miz_last:
-            p = Path(Config().single_miz_last)
-            if p.exists() and p.isfile() and p.ext == '.miz':
-                self.single_miz_lineedit.setText(str(p.abspath()))
-
         self.manual_output_folder_lineedit = LineEdit('', read_only=True)
-        if Config().single_miz_output_folder:
-            p = Path(Config().single_miz_output_folder)
-            self.manual_output_folder_lineedit.setText(str(p.abspath()))
-
-        self.manual_layout = VLayout([
-            GridLayout(
-                [
-                    [
-                        Label('Source MIZ'),
-                        self.single_miz_lineedit,
-                        PushButton('Browse', self.manual_browse_for_miz, self),
-                        PushButton('Open', self.manual_open_miz, self),
-                    ],
-                    [
-                        Label('Output folder'),
-                        self.manual_output_folder_lineedit,
-                        PushButton('Browse', self.manual_browse_for_output_folder, self),
-                        PushButton('Open', self.manual_open_output_folder, self),
-                    ],
-                ],
-            ),
-            # self.manual_reorder_btn,
-        ])
-
-        self.manual_group.setLayout(self.manual_layout)
-
-        self.auto_group = GroupBox()
-        auto_help = QLabel('Looks for the latest TRMT MIZ (must be named "TRMT_*.miz") in the source folder.')
 
         self.auto_src_le = LineEdit('', read_only=True)
-        if Config().auto_source_folder:
-            self.auto_src_le.setText(Config().auto_source_folder)
 
         self.auto_scan_label_result = Label('')
         self.auto_scan_combo_branch = Combo(self._on_branch_changed, list())
 
-        try:
-            self.auto_scan_combo_branch.set_index_from_text(Config().selected_TRMT_branch)
-        except ValueError:
-            pass
-
-        self.auto_out_le = QLineEdit()
-        self.auto_out_le.setEnabled(False)
-
-        scan_layout = HLayout(
-            [
-                QLabel('Branch filter:'),
-                self.auto_scan_combo_branch,
-                self.auto_scan_label_result,
-            ],
-            add_stretch=True
-        )
-
-        self.auto_layout = VLayout(
-            [
-                auto_help,
-                GridLayout(
-                    [
-                        [
-                            Label('Source folder'),
-                            self.auto_src_le,
-                            PushButton('Browse', self.auto_src_browse, self),
-                            PushButton('Open', self.auto_src_open, self),
-                        ],
-                        [
-                            Label('Output folder'),
-                            self.auto_out_le,
-                            PushButton('Browse', self.auto_out_browse, self),
-                            PushButton('Open', self.auto_out_open, self),
-                        ],
-                        [
-                            None,
-                            scan_layout,
-                            PushButton('Refresh', self.scan, self),
-                            PushButton('Download', self.auto_download, self)
-                        ],
-                    ]
-                ),
-            ]
-        )
-
-        self.auto_group.setLayout(self.auto_layout)
-
-        if Config().auto_output_folder:
-            p = Path(Config().auto_output_folder)
-            if p.exists() and p.isdir():
-                self.auto_out_le.setText(Config().auto_output_folder)
-        if Config().auto_source_folder:
-            p = Path(Config().auto_source_folder)
-            if p.exists() and p.isdir():
-                self.auto_src_le.setText(Config().auto_source_folder)
+        self.auto_out_le = LineEdit('', read_only=True)
 
         self._remote = None
-
-        help_text = QLabel('By design, LUA tables are unordered, which makes tracking changes extremely difficult.\n\n'
-                           'This lets you reorder them alphabetically before you push them in a SCM.\n\n'
-                           'It is recommended to set the "Output folder" to your local SCM repository.')
 
         self.check_skip_options = Checkbox(
             'Skip "options" file: the "options" file at the root of the MIZ is player-specific, and is of very relative'
@@ -154,14 +60,17 @@ class TabChildReorder(MainUiTabChild, TabReorderAdapter):
             self.toggle_skip_options
         )
 
-        self.radio_single = Radio('Manual mode', self.toggle_radios)
-        self.radio_auto = Radio('Automatic mode', self.toggle_radios)
+        self.radio_single = Radio('Manual mode', self.on_radio_toggle)
+        self.radio_auto = Radio('Automatic mode', self.on_radio_toggle)
 
         self.setLayout(
             VLayout(
                 [
-                    help_text,
-
+                    QLabel(
+                        'By design, LUA tables are unordered, which makes tracking changes extremely difficult.\n\n'
+                        'This lets you reorder them alphabetically before you push them in a SCM.\n\n'
+                        'It is recommended to set the "Output folder" to your local SCM repository.'
+                    ), 20,
                     GroupBox(
                         'Options',
                         VLayout(
@@ -169,35 +78,107 @@ class TabChildReorder(MainUiTabChild, TabReorderAdapter):
                                 self.check_skip_options,
                             ],
                         )
-                    ),
-
+                    ), 20,
                     GroupBox(
                         'MIZ file reordering',
                         VLayout(
                             [
                                 self.radio_single,
-                                self.manual_group,
+                                VLayout(
+                                    [
+                                        GridLayout(
+                                            [
+                                                [
+                                                    Label('Source MIZ'),
+                                                    self.single_miz_lineedit,
+                                                    PushButton('Browse', self.manual_browse_for_miz, self),
+                                                    PushButton('Open', self.manual_open_miz, self),
+                                                ],
+                                                [
+                                                    Label('Output folder'),
+                                                    self.manual_output_folder_lineedit,
+                                                    PushButton('Browse', self.manual_browse_for_output_folder, self),
+                                                    PushButton('Open', self.manual_open_output_folder, self),
+                                                ],
+                                            ],
+                                        ),
+                                    ],
+                                ),
+                                100,
                                 self.radio_auto,
-                                self.auto_group,
+                                VLayout(
+                                    [
+                                        GridLayout(
+                                            [
+                                                [
+                                                    Label('Source folder'),
+                                                    self.auto_src_le,
+                                                    PushButton('Browse', self.auto_src_browse, self),
+                                                    PushButton('Open', self.auto_src_open, self),
+                                                ],
+                                                [
+                                                    Label('Output folder'),
+                                                    self.auto_out_le,
+                                                    PushButton('Browse', self.auto_out_browse, self),
+                                                    PushButton('Open', self.auto_out_open, self),
+                                                ],
+                                                [
+                                                    QLabel('Branch filter'),
+                                                    HLayout(
+                                                        [
+                                                            self.auto_scan_combo_branch,
+                                                            self.auto_scan_label_result,
+                                                        ],
+                                                    ),
+                                                    PushButton('Refresh', self.scan_artifacts, self),
+                                                    PushButton('Download', self.auto_download, self)
+                                                ],
+                                            ]
+                                        ),
+                                    ]
+                                )
                             ],
                         ),
-                    ),
-
+                    ), 20,
                     PushButton(
                         text='Reorder MIZ file',
                         func=self.reorder_miz,
                         parent=self,
                         min_height=40,
                     ),
-                ]
+                ],
+                set_stretch=[(4, 2)]
             )
         )
+        self._initialize_config_values()
+        self.scan_branches()
+        self.scan_artifacts()
 
+    def _initialize_config_values(self):
         self.radio_single.setChecked(not Config().auto_mode)
         self.radio_auto.setChecked(Config().auto_mode)
         self.check_skip_options.setChecked(Config().skip_options_file)
-        self.toggle_radios()
-        self.scan()
+        if Config().auto_source_folder:
+            self.auto_src_le.setText(Config().auto_source_folder)
+
+        if Config().single_miz_last:
+            p = Path(Config().single_miz_last)
+            if p.exists() and p.isfile() and p.ext == '.miz':
+                self.single_miz_lineedit.setText(str(p.abspath()))
+
+        if Config().single_miz_output_folder:
+            p = Path(Config().single_miz_output_folder)
+            self.manual_output_folder_lineedit.setText(str(p.abspath()))
+
+        if Config().auto_output_folder:
+            p = Path(Config().auto_output_folder)
+            if p.exists() and p.isdir():
+                self.auto_out_le.setText(Config().auto_output_folder)
+
+        if Config().auto_source_folder:
+            p = Path(Config().auto_source_folder)
+            if p.exists() and p.isdir():
+                self.auto_src_le.setText(Config().auto_source_folder)
 
     @property
     def manual_miz_path(self) -> Path or None:
@@ -232,7 +213,7 @@ class TabChildReorder(MainUiTabChild, TabReorderAdapter):
             Config().single_miz_last = p.abspath()
 
     def manual_open_output_folder(self):
-        if self.manual_output_folder_path.exists():
+        if self.manual_output_folder_path and self.manual_output_folder_path.exists():
             os.startfile(self.manual_output_folder_path)
 
     def manual_browse_for_output_folder(self):
@@ -287,7 +268,7 @@ class TabChildReorder(MainUiTabChild, TabReorderAdapter):
             p = Path(p)
             self.auto_src_le.setText(p.abspath())
             Config().auto_source_folder = p.abspath()
-            self.scan()
+            self.scan_artifacts()
 
     def auto_src_open(self):
         if self.auto_src_path:
@@ -296,9 +277,7 @@ class TabChildReorder(MainUiTabChild, TabReorderAdapter):
     def toggle_skip_options(self, *_):
         Config().skip_options_file = self.check_skip_options.isChecked()
 
-    def toggle_radios(self, *_):
-        self.manual_group.setEnabled(self.radio_single.isChecked())
-        self.auto_group.setEnabled(self.radio_auto.isChecked())
+    def on_radio_toggle(self, *_):
         Config().auto_mode = self.radio_auto.isChecked()
 
     @property
@@ -313,7 +292,7 @@ class TabChildReorder(MainUiTabChild, TabReorderAdapter):
                 'if you think this is a bug.'.format(miz_file))
 
     def reorder_miz(self):
-        if self.radio_auto.isEnabled():
+        if self.radio_auto.isChecked():
             if self.remote and self.auto_out_path:
                 local_file = self._look_for_local_file(self.remote.version)
                 self._reorder_miz(local_file, self.auto_out_path, self.skip_options_file)
@@ -342,10 +321,19 @@ class TabChildReorder(MainUiTabChild, TabReorderAdapter):
         return self.auto_scan_combo_branch.currentText()
 
     def _on_branch_changed(self):
-        Config().selected_TRMT_branch = self.selected_branch
-        self.scan()
+        Config().reorder_selected_auto_branch = self.selected_branch
+        self.scan_artifacts()
 
-    def tab_reorder_update_view_after_remote_scan(self):
+    def tab_reorder_update_view_after_branches_scan(self, *_):
+
+        try:
+            self.auto_scan_combo_branch.set_index_from_text(Config().reorder_selected_auto_branch)
+        except ValueError:
+            MAIN_UI.msg('Selected branch has been deleted from the remote:\n\n{}'.format(
+                Config().reorder_selected_auto_branch))
+            self.auto_scan_combo_branch.setCurrentIndex(0)
+
+    def tab_reorder_update_view_after_artifact_scan(self, *_):
 
         if self.remote:
 
@@ -354,7 +342,7 @@ class TabChildReorder(MainUiTabChild, TabReorderAdapter):
                 msg, color = self.remote, 'red'
 
             else:
-            
+
                 # self.auto_scan_label_result.setText('{} ({})'.format(self.remote.version, self.remote.branch))
                 logger.debug('latest remote version found: {}'.format(self.remote.version))
                 local_trmt_path = self._look_for_local_file(self.remote.version)
@@ -371,8 +359,6 @@ class TabChildReorder(MainUiTabChild, TabReorderAdapter):
         self.auto_scan_label_result.setText(msg)
         self.auto_scan_label_result.set_text_color(color)
 
-
-
     def _look_for_local_file(self, version):
 
         if self.auto_src_path:
@@ -381,39 +367,39 @@ class TabChildReorder(MainUiTabChild, TabReorderAdapter):
                 logger.debug('local TRMT found: {}'.format(p.abspath()))
                 return p.abspath()
             else:
-                logger.warning('no local TRMT found')
+                logger.warning('no local MIZ file found with version: {}'.format(self.remote.version))
                 return None
 
-    def __scan_remote(self):
-
-        # noinspection PyBroadException
-        try:
-            logger.debug('looking for latest remote TRMT version')
-            self._remote = appveyor.get_latest_remote_version(self.selected_branch)
-        except:
-            logger.debug('no remote TRMT found')
-            self._remote = None
-
-    def _scan(self):
+    def _scan_branches(self):
         remote_branches = github.get_available_branches()
         remote_branches.remove('master')
         remote_branches.remove('develop')
         self.auto_scan_combo_branch.reset_values(
-            ['master', 'develop'] + sorted(remote_branches)
+            ['All', 'master', 'develop'] + sorted(remote_branches)
         )
+
+    def scan_branches(self, *_):
+        self.main_ui.pool.queue_task(
+            task=self._scan_branches,
+            _task_callback=I.tab_reorder_update_view_after_branches_scan
+        )
+
+    def _scan_artifacts(self):
         if self.auto_src_path:
-            # self.__scan_local()
-            self.__scan_remote()
+            # noinspection PyBroadException
+            try:
+                logger.debug('looking for latest remote TRMT version')
+                self._remote = appveyor.get_latest_remote_version(self.selected_branch)
+            except:
+                logger.debug('no remote TRMT found')
+                self._remote = None
 
-    @staticmethod
-    def _scan_callback(*_):
-        I.tab_reorder_update_view_after_remote_scan()
-
-    def scan(self, *_):
+    def scan_artifacts(self, *_):
         self.auto_scan_label_result.set_text_color('black')
         self.auto_scan_label_result.setText('Probing...')
-        # self.auto_scan_label_local.setText('Probing...')
-        self.main_ui.pool.queue_task(task=self._scan, _task_callback=self._scan_callback)
+        self.main_ui.pool.queue_task(
+            task=self._scan_artifacts,
+            _task_callback=I.tab_reorder_update_view_after_artifact_scan)
 
     @property
     def remote(self) -> appveyor.AVResult:
@@ -441,5 +427,5 @@ class TabChildReorder(MainUiTabChild, TabReorderAdapter):
                     local_file=local_file,
                     file_size=self.remote.file_size
                 ),
-                _task_callback=self.scan
+                _task_callback=self.scan_artifacts
             )
