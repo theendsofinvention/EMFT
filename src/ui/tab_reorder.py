@@ -434,13 +434,17 @@ class TabChildReorder(MainUiTabChild, TabReorderAdapter):
                 if not box_question(self, 'Local file already exists; do you want to overwrite?'):
                     return
 
+            MAIN_UI.progress_start(
+                'Downloading {}'.format(self.remote.download_url.split('/').pop()),
+                length=100,
+                label=self.remote.file_name
+            )
+
             self.main_ui.pool.queue_task(
                 downloader.download,
                 kwargs=dict(
                     url=self.remote.download_url,
                     local_file=local_file,
-                    progress_title='Downloading {}'.format(self.remote.download_url.split('/').pop()),
-                    progress_text=self.remote.file_name,
                     file_size=self.remote.file_size
                 ),
                 _task_callback=self.scan
