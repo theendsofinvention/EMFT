@@ -30,6 +30,8 @@ New
 
 Changes
 ~~~~~~~
+- Tab_reorder: branches are now sorted alphabetically, with "master" and
+  "develop" always on top. [132nd-etcher]
 - Reorder tab: add explicit error message on remote probing failure.
   [132nd-etcher]
 - Shows red "error" text instead of staying stuck on "Probing..."
@@ -43,7 +45,9 @@ Changes
 
 Fix
 ~~~
-- Fixed radio presets values not updating on file reload. [132nd-etcher]
+- Fixed laggy progress dialog when downloading a MIZ file. [132nd-
+  etcher]
+- Fixed MIZ files being decoded twice during re-ordering. [132nd-etcher]
 - Prevent double instantiation of EMFT. [132nd-etcher]
 
   closes #27
