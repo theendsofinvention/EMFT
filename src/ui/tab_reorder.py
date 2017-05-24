@@ -253,11 +253,6 @@ class _AutoLayout:
     def scan(self):
         """"""
 
-    @staticmethod
-    def get_av_token():
-        # noinspection SpellCheckingInspection
-        webbrowser.open_new_tab(r'https://ci.appveyor.com/api-token')
-
     @abc.abstractmethod
     def auto_download(self):
         """"""
