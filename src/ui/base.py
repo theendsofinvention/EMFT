@@ -261,10 +261,11 @@ class Combo(QComboBox):
         current = self.currentText()
         self.clear()
         self.addItems(choices)
-        try:
-            self.set_index_from_text(current)
-        except ValueError:
-            logger.warning('branch "{}" has been deleted'.format(current))
+        if current:
+            try:
+                self.set_index_from_text(current)
+            except ValueError:
+                logger.warning('value "{}" has been deleted'.format(current))
         self.blockSignals(False)
 
 
