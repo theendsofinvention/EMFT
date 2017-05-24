@@ -138,8 +138,6 @@ class Miz:
                     assert isinstance(sub, dircmp)
                     mirror_dir(sub.left, sub.right)
 
-            m.unzip(overwrite=True)
-            m._decode()
             m._encode()
 
             if skip_options_file:
