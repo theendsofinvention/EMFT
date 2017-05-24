@@ -81,7 +81,7 @@ def get_latest_remote_version(branch='All') -> AVResult:
 
     if not artifacts:
         return 'Build failed or in progress'
-    
+
     assert len(artifacts) == 1, artifacts
 
     trmt = artifacts[0]
