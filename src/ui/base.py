@@ -168,12 +168,14 @@ class VLayout(QVBoxLayout, _WithChildren):
 
 
 class PushButton(QPushButton):
-    def __init__(self, text, func: callable, parent=None):
+    def __init__(self, text, func: callable, parent=None, min_height=None):
         QPushButton.__init__(self, text, parent)
         # noinspection PyUnresolvedReferences
         self.clicked.connect(func)
         self.setStyleSheet('padding-left: 15px; padding-right: 15px;'
                            'padding-top: 3px; padding-bottom: 3px;')
+        if min_height:
+            self.setMinimumHeight(min_height)
 
 
 class Checkbox(QCheckBox):
