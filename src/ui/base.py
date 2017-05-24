@@ -9,7 +9,7 @@ from PyQt5.QtGui import QKeySequence, QIcon, QContextMenuEvent, QColor, QRegExpV
 from PyQt5.QtWidgets import QGroupBox, QBoxLayout, QSpacerItem, QWidget, QHBoxLayout, QVBoxLayout, QPushButton, \
     QRadioButton, QComboBox, QShortcut, QCheckBox, QLineEdit, QLabel, QPlainTextEdit, QSizePolicy, QGridLayout, \
     QMessageBox, QTableView, QAbstractItemView, QMenu, QMenuBar, QFileDialog, QTabWidget, QDoubleSpinBox, \
-    QStyledItemDelegate, QStyleOptionViewItem
+    QStyledItemDelegate, QStyleOptionViewItem, QFrame
 from utils import make_logger, Path
 
 SIGNAL = pyqtSignal
@@ -173,6 +173,30 @@ class VLayout(QVBoxLayout, _WithChildren):
 
         if add_stretch:
             self.addStretch()
+
+class Frame(QFrame):
+    def __init__(self, layout, parent=None):
+        # noinspection PyArgumentList
+        QFrame.__init__(self, parent=parent, flags=Qt.Widget)
+        self.setLayout(layout)
+
+
+class VFrame(Frame):
+    def __init__(self, children: list, add_stretch=False, parent=None):
+        layout = VLayout(children, add_stretch)
+        Frame.__init__(self, layout, parent)
+
+
+class HFrame(Frame):
+    def __init__(self, children: list, add_stretch=False, parent=None):
+        layout = HLayout(children, add_stretch)
+        Frame.__init__(self, layout, parent)
+
+
+class GridFrame(Frame):
+    def __init__(self, children: list, stretch: list = None, auto_right=True, parent=None):
+        layout = GridLayout(children, stretch, auto_right)
+        Frame.__init__(self, layout, parent)
 
 
 class PushButton(QPushButton):
