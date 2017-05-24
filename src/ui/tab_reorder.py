@@ -48,29 +48,26 @@ class TabChildReorder(MainUiTabChild, TabReorderAdapter):
             if p.exists() and p.isfile() and p.ext == '.miz':
                 self.single_miz_lineedit.setText(str(p.abspath()))
 
-        self.manual_browse_for_miz_btn = PushButton('Browse', self.manual_browse_for_miz)
-        self.manual_open_miz_btn = PushButton('Open', self.manual_open_miz)
-
         self.manual_output_folder_lineedit = LineEdit('', read_only=True)
         if Config().single_miz_output_folder:
             p = Path(Config().single_miz_output_folder)
             self.manual_output_folder_lineedit.setText(str(p.abspath()))
 
-        self.manual_browse_for_output_folder_btn = PushButton('Browse', self.manual_browse_for_output_folder)
-        self.manual_open_output_folder_btn = PushButton('Open', self.manual_open_output_folder)
-
-        # self.manual_reorder_btn = PushButton('Reorder MIZ file', self.manual_reorder)
-        # self.manual_reorder_btn.setMinimumHeight(40)
-        # self.manual_reorder_btn.setMinimumWidth(400)
-
         self.manual_layout = VLayout([
             GridLayout(
                 [
-                    [(Label('Source MIZ'), dict(align='r')), self.single_miz_lineedit, self.manual_browse_for_miz_btn,
-                     self.manual_open_miz_btn],
-                    [(Label('Output folder'), dict(align='r')), self.manual_output_folder_lineedit,
-                     self.manual_browse_for_output_folder_btn,
-                     self.manual_open_output_folder_btn],
+                    [
+                        Label('Source MIZ'),
+                        self.single_miz_lineedit,
+                        PushButton('Browse', self.manual_browse_for_miz, self),
+                        PushButton('Open', self.manual_open_miz, self),
+                    ],
+                    [
+                        Label('Output folder'),
+                        self.manual_output_folder_lineedit,
+                        PushButton('Browse', self.manual_browse_for_output_folder, self),
+                        PushButton('Open', self.manual_open_output_folder, self),
+                    ],
                 ],
             ),
             # self.manual_reorder_btn,
@@ -81,13 +78,10 @@ class TabChildReorder(MainUiTabChild, TabReorderAdapter):
         self.auto_group = GroupBox()
         auto_help = QLabel('Looks for the latest TRMT MIZ (must be named "TRMT_*.miz") in the source folder.')
 
-        self.auto_src_le = QLineEdit()
+        self.auto_src_le = LineEdit('', read_only=True)
         if Config().auto_source_folder:
             self.auto_src_le.setText(Config().auto_source_folder)
-        self.auto_src_le.setEnabled(False)
-        self.auto_src_browse_btn = PushButton('Browse', self.auto_src_browse)
-        self.auto_src_open_btn = PushButton('Open', self.auto_src_open)
-        # self.auto_scan_label_local = QLabel('')
+
         self.auto_scan_label_result = Label('')
         self.auto_scan_combo_branch = Combo(self._on_branch_changed, ['All'] + github.get_available_branches())
         try:
@@ -95,22 +89,17 @@ class TabChildReorder(MainUiTabChild, TabReorderAdapter):
         except ValueError:
             pass
 
-        self.auto_scan_btn = PushButton('Refresh', self.scan)
-        self.auto_scan_download_btn = PushButton('Download', self.auto_download)
-
         self.auto_out_le = QLineEdit()
         self.auto_out_le.setEnabled(False)
-        self.auto_out_browse_btn = PushButton('Browse', self.auto_out_browse)
-        self.auto_out_open_btn = PushButton('Open', self.auto_out_open)
 
-        scan_layout = HLayout([
-            QLabel('Branch filter:'),
-            self.auto_scan_combo_branch,
-            self.auto_scan_label_result,
-            # QLabel('Latest version:'),
-            # (self.auto_scan_label_local, dict(stretch=1)),
-        ])
-        scan_layout.addStretch()
+        scan_layout = HLayout(
+            [
+                QLabel('Branch filter:'),
+                self.auto_scan_combo_branch,
+                self.auto_scan_label_result,
+            ],
+            add_stretch=True
+        )
 
         self.auto_layout = VLayout([
 
@@ -121,20 +110,20 @@ class TabChildReorder(MainUiTabChild, TabReorderAdapter):
                     [
                         (Label('Source folder'), dict(align='r')),
                         self.auto_src_le,
-                        self.auto_src_browse_btn,
-                        self.auto_src_open_btn,
+                        PushButton('Browse', self.auto_src_browse, self),
+                        PushButton('Open', self.auto_src_open, self),
                     ],
                     [
                         (Label('Output folder'), dict(align='r')),
                         self.auto_out_le,
-                        self.auto_out_browse_btn,
-                        self.auto_out_open_btn,
+                        PushButton('Browse', self.auto_out_browse, self),
+                        PushButton('Open', self.auto_out_open, self),
                     ],
                     [
                         None,
                         scan_layout,
-                        self.auto_scan_btn,
-                        self.auto_scan_download_btn
+                        PushButton('Refresh', self.scan, self),
+                        PushButton('Download', self.auto_download, self)
                     ],
                 ]
             ),
