@@ -139,7 +139,7 @@ class GridLayout(QGridLayout):
 
 
 class HLayout(QHBoxLayout, _WithChildren):
-    def __init__(self, children: list):
+    def __init__(self, children: list, add_stretch=False):
         """
         Creates a horizontal layout.
         Children can be either a single item, or a tuple including a configuration dictionary.
@@ -148,12 +148,16 @@ class HLayout(QHBoxLayout, _WithChildren):
         :param children: list of children
         """
         super(HLayout, self).__init__()
+
         self.setContentsMargins(*DEFAULT_MARGINS)
         self.add_children(children)
 
+        if add_stretch:
+            self.addStretch()
+
 
 class VLayout(QVBoxLayout, _WithChildren):
-    def __init__(self, children: list):
+    def __init__(self, children: list, add_stretch=False):
         """
         Creates a vertical layout.
         Children can be either a single item, or a tuple including a configuration dictionary.
@@ -163,8 +167,12 @@ class VLayout(QVBoxLayout, _WithChildren):
         :param children: list of children
         """
         super(VLayout, self).__init__()
+
         self.setContentsMargins(*DEFAULT_MARGINS)
         self.add_children(children)
+
+        if add_stretch:
+            self.addStretch()
 
 
 class PushButton(QPushButton):
