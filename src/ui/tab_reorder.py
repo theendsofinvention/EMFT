@@ -154,8 +154,8 @@ class TabChildReorder(MainUiTabChild, TabReorderAdapter):
             self.toggle_skip_options
         )
 
-        self.radio_single = Radio('Manual', self.toggle_radios)
-        self.radio_auto = Radio('Automatic', self.toggle_radios)
+        self.radio_single = Radio('Manual mode', self.toggle_radios)
+        self.radio_auto = Radio('Automatic mode', self.toggle_radios)
 
         self.setLayout(
             VLayout(
