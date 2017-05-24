@@ -15,7 +15,7 @@ from src.misc import appveyor, downloader, github
 from src.misc.fs import saved_games_path
 from src.miz.miz import Miz
 from src.ui.base import GroupBox, HLayout, VLayout, PushButton, Radio, Checkbox, Label, Combo, GridLayout, VSpacer, \
-    box_question, BrowseDialog
+    box_question, BrowseDialog, LineEdit
 from src.ui.main_ui_interface import I
 from src.ui.main_ui_tab_widget import MainUiTabChild
 from .tab_reorder_adapter import TabReorderAdapter, TAB_NAME
@@ -35,21 +35,20 @@ class _SingleLayout:
 
         self.single_group = GroupBox()
 
-        self.single_miz = QLineEdit()
-        self.single_miz.setDisabled(True)
+        self.single_miz_lineedit = LineEdit('', read_only=True)
+
         if Config().single_miz_last:
             p = Path(Config().single_miz_last)
             if p.exists() and p.isfile() and p.ext == '.miz':
-                self.single_miz.setText(str(p.abspath()))
+                self.single_miz_lineedit.setText(str(p.abspath()))
 
         self.single_miz_browse = PushButton('Browse', self.browse_for_single_miz)
         self.single_miz_open = PushButton('Open', self.open_single_miz)
 
-        self.single_miz_output_folder = QLineEdit()
-        self.single_miz_output_folder.setDisabled(True)
+        self.manual_output_folder_lineedit = LineEdit('', read_only=True)
         if Config().single_miz_output_folder:
             p = Path(Config().single_miz_output_folder)
-            self.single_miz_output_folder.setText(str(p.abspath()))
+            self.single_miz_output_folder_lineedit.setText(str(p.abspath()))
 
         self.single_miz_output_folder_browse = PushButton('Browse', self.browse_for_single_miz_output_folder)
         self.single_miz_output_folder_open = PushButton('Open', self.open_single_miz_output_folder)
@@ -61,9 +60,9 @@ class _SingleLayout:
         self.single_layout = VLayout([
             GridLayout(
                 [
-                    [(Label('Source MIZ'), dict(align='r')), self.single_miz, self.single_miz_browse,
+                    [(Label('Source MIZ'), dict(align='r')), self.single_miz_lineedit, self.single_miz_browse,
                      self.single_miz_open],
-                    [(Label('Output folder'), dict(align='r')), self.single_miz_output_folder,
+                    [(Label('Output folder'), dict(align='r')), self.single_miz_output_folder_lineedit,
                      self.single_miz_output_folder_browse,
                      self.single_miz_output_folder_open],
                 ],
@@ -75,7 +74,7 @@ class _SingleLayout:
 
     @property
     def single_miz_path(self) -> Path or None:
-        t = self.single_miz.text()
+        t = self.single_miz_lineedit.text()
         if len(t) > 3:
             p = Path(t)
             if p.exists() and p.isfile() and p.ext == '.miz':
@@ -84,7 +83,7 @@ class _SingleLayout:
 
     @property
     def single_miz_output_folder_path(self) -> Path or None:
-        t = self.single_miz_output_folder.text()
+        t = self.single_miz_output_folder_lineedit.text()
         if len(t) > 3:
             return Path(t)
         return None
@@ -102,7 +101,7 @@ class _SingleLayout:
             self, 'Select MIZ file', filter_=['*.miz'], init_dir=init_dir)
         if p:
             p = Path(p)
-            self.single_miz.setText(p.abspath())
+            self.single_miz_lineedit.setText(p.abspath())
             Config().single_miz_last = p.abspath()
 
     def open_single_miz_output_folder(self):
@@ -119,7 +118,7 @@ class _SingleLayout:
         p = BrowseDialog.get_directory(self, 'Select output directory', init_dir=init_dir.abspath())
         if p:
             p = Path(p)
-            self.single_miz_output_folder.setText(p.abspath())
+            self.single_miz_output_folder_lineedit.setText(p.abspath())
             Config().single_miz_output_folder = p.abspath()
 
     def single_reorder(self):
