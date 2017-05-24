@@ -30,6 +30,8 @@ New
 
 Changes
 ~~~~~~~
+- Using single re-order button for both manual and auto mode. [132nd-
+  etcher]
 - Tab_reorder: branches are now sorted alphabetically, with "master" and
   "develop" always on top. [132nd-etcher]
 - Reorder tab: add explicit error message on remote probing failure.
@@ -45,6 +47,7 @@ Changes
 
 Fix
 ~~~
+- Fix lag due to scanning of remote branch. [132nd-etcher]
 - Fixed laggy progress dialog when downloading a MIZ file. [132nd-
   etcher]
 - Fixed MIZ files being decoded twice during re-ordering. [132nd-etcher]
