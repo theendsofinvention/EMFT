@@ -85,7 +85,7 @@ class ConfigValues:
 
     # noinspection PyPep8Naming
     @MetaPropertyWithDefault('All', str)
-    def selected_TRMT_branch(self, value: str):
+    def reorder_selected_auto_branch(self, value: str):
         return value
 
     # noinspection PyPep8Naming
