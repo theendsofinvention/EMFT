@@ -20,10 +20,10 @@ class Widget(QWidget):
         QWidget.__init__(self, parent=parent, flags=Qt.Widget)
 
 
-LEFT_MARGIN = 10
-RIGHT_MARGIN = 10
-TOP_MARGIN = 15
-BOTTOM_MARGIN = 10
+LEFT_MARGIN = 0
+RIGHT_MARGIN = 0
+TOP_MARGIN = 0
+BOTTOM_MARGIN = 0
 
 DEFAULT_MARGINS = (LEFT_MARGIN, TOP_MARGIN, RIGHT_MARGIN, BOTTOM_MARGIN)
 
@@ -53,7 +53,7 @@ class GroupBox(QGroupBox):
             self.setTitle(title)
         if layout:
             self.setLayout(layout)
-        self.setContentsMargins(*DEFAULT_MARGINS)
+        self.setContentsMargins(10, 15, 10, 10)
 
 
 class _WithChildren:
