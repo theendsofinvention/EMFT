@@ -42,38 +42,38 @@ class _SingleLayout:
             if p.exists() and p.isfile() and p.ext == '.miz':
                 self.single_miz_lineedit.setText(str(p.abspath()))
 
-        self.single_miz_browse = PushButton('Browse', self.browse_for_single_miz)
-        self.single_miz_open = PushButton('Open', self.open_single_miz)
+        self.manual_browse_for_miz_btn = PushButton('Browse', self.manual_browse_for_miz)
+        self.manual_open_miz_btn = PushButton('Open', self.manual_open_miz)
 
         self.manual_output_folder_lineedit = LineEdit('', read_only=True)
         if Config().single_miz_output_folder:
             p = Path(Config().single_miz_output_folder)
-            self.single_miz_output_folder_lineedit.setText(str(p.abspath()))
+            self.manual_output_folder_lineedit.setText(str(p.abspath()))
 
-        self.single_miz_output_folder_browse = PushButton('Browse', self.browse_for_single_miz_output_folder)
-        self.single_miz_output_folder_open = PushButton('Open', self.open_single_miz_output_folder)
+        self.manual_browse_for_output_folder_btn = PushButton('Browse', self.manual_browse_for_output_folder)
+        self.manual_open_output_folder_btn = PushButton('Open', self.manual_open_output_folder)
 
-        self.single_miz_reorder_btn = PushButton('Reorder MIZ file', self.single_reorder)
-        self.single_miz_reorder_btn.setMinimumHeight(40)
-        self.single_miz_reorder_btn.setMinimumWidth(400)
+        self.manual_reorder_btn = PushButton('Reorder MIZ file', self.manual_reorder)
+        self.manual_reorder_btn.setMinimumHeight(40)
+        self.manual_reorder_btn.setMinimumWidth(400)
 
-        self.single_layout = VLayout([
+        self.manual_layout = VLayout([
             GridLayout(
                 [
-                    [(Label('Source MIZ'), dict(align='r')), self.single_miz_lineedit, self.single_miz_browse,
-                     self.single_miz_open],
-                    [(Label('Output folder'), dict(align='r')), self.single_miz_output_folder_lineedit,
-                     self.single_miz_output_folder_browse,
-                     self.single_miz_output_folder_open],
+                    [(Label('Source MIZ'), dict(align='r')), self.single_miz_lineedit, self.manual_browse_for_miz_btn,
+                     self.manual_open_miz_btn],
+                    [(Label('Output folder'), dict(align='r')), self.manual_output_folder_lineedit,
+                     self.manual_browse_for_output_folder_btn,
+                     self.manual_open_output_folder_btn],
                 ],
             ),
-            self.single_miz_reorder_btn,
+            self.manual_reorder_btn,
         ])
 
-        self.single_group.setLayout(self.single_layout)
+        self.single_group.setLayout(self.manual_layout)
 
     @property
-    def single_miz_path(self) -> Path or None:
+    def manual_miz_path(self) -> Path or None:
         t = self.single_miz_lineedit.text()
         if len(t) > 3:
             p = Path(t)
@@ -82,17 +82,17 @@ class _SingleLayout:
         return None
 
     @property
-    def single_miz_output_folder_path(self) -> Path or None:
-        t = self.single_miz_output_folder_lineedit.text()
+    def manual_output_folder_path(self) -> Path or None:
+        t = self.manual_output_folder_lineedit.text()
         if len(t) > 3:
             return Path(t)
         return None
 
-    def open_single_miz(self):
-        if self.single_miz_path.exists():
-            os.startfile(self.single_miz_path.dirname())
+    def manual_open_miz(self):
+        if self.manual_miz_path.exists():
+            os.startfile(self.manual_miz_path.dirname())
 
-    def browse_for_single_miz(self):
+    def manual_browse_for_miz(self):
         if Config().single_miz_last:
             init_dir = Path(Config().single_miz_last).dirname()
         else:
@@ -104,26 +104,26 @@ class _SingleLayout:
             self.single_miz_lineedit.setText(p.abspath())
             Config().single_miz_last = p.abspath()
 
-    def open_single_miz_output_folder(self):
-        if self.single_miz_output_folder_path.exists():
-            os.startfile(self.single_miz_output_folder_path)
+    def manual_open_output_folder(self):
+        if self.manual_output_folder_path.exists():
+            os.startfile(self.manual_output_folder_path)
 
-    def browse_for_single_miz_output_folder(self):
-        if self.single_miz_output_folder_path:
-            init_dir = self.single_miz_output_folder_path.dirname()
-        elif self.single_miz_path:
-            init_dir = self.single_miz_path.dirname()
+    def manual_browse_for_output_folder(self):
+        if self.manual_output_folder_path:
+            init_dir = self.manual_output_folder_path.dirname()
+        elif self.manual_miz_path:
+            init_dir = self.manual_miz_path.dirname()
         else:
             init_dir = Path('.')
         p = BrowseDialog.get_directory(self, 'Select output directory', init_dir=init_dir.abspath())
         if p:
             p = Path(p)
-            self.single_miz_output_folder_lineedit.setText(p.abspath())
+            self.manual_output_folder_lineedit.setText(p.abspath())
             Config().single_miz_output_folder = p.abspath()
 
-    def single_reorder(self):
-        if self.single_miz_path and self.single_miz_output_folder_path:
-            self.reorder_miz(self.single_miz_path, self.single_miz_output_folder_path, self.skip_options_file)
+    def manual_reorder(self):
+        if self.manual_miz_path and self.manual_output_folder_path:
+            self.reorder_miz(self.manual_miz_path, self.manual_output_folder_path, self.skip_options_file)
 
     @abc.abstractmethod
     def reorder_miz(self, miz_file, output_dir, skip_options_file):
