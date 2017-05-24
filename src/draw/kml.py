@@ -26,6 +26,17 @@ def get_spaced_colors(n):
 
 if __name__ == '__main__':
     from utils import Path
+    p = Path(r'c:\users\bob\desktop\export.coord')
+    from src.draw.services.coord_file_parser import CoordFileParser
+
+    shapes = CoordFileParser(skip_points_regex_str_list=['.*(NE|SE|SW|NW)']).parse_file_into_shapes(p)
+    for x in sorted(shapes, key=lambda x: x.name):
+        print(x)
+    exit(0)
+
+
+
+
     import json
 
     # color = colour.Color('red')
@@ -39,7 +50,7 @@ if __name__ == '__main__':
     polys = []
     points = []
 
-    p = Path(r'c:\users\bob\desktop\export.coord')
+
     for l in p.lines():
         if l:
             d = json.loads(l.strip())

@@ -3,7 +3,7 @@ import colour
 import simplekml
 
 from .abstract_drawer import AbstractDrawer
-from .shapes import Poly, Point
+from .shapes import Poly, Point, Circle
 
 
 class KMLDrawer(simplekml.Kml, AbstractDrawer):
@@ -19,6 +19,9 @@ class KMLDrawer(simplekml.Kml, AbstractDrawer):
         self.points_folder = self.newfolder()
         assert isinstance(self.points_folder, simplekml.Folder)
         self.points_folder.name = 'Points'
+
+    def add_circle(self, circle:Circle, color: colour.Color):
+        pass
 
     def add_point(self, shape: Point, color: colour.Color):
 
