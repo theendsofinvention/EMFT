@@ -109,6 +109,11 @@ class Miz:
 
     @staticmethod
     def reorder(miz_file_path, target_dir, skip_options_file):
+
+        logger.info('re-ordering miz file: {}'.format(miz_file_path))
+        logger.debug('destination folder: {}'.format(target_dir))
+        logger.debug('{}option file'.format('skipping' if skip_options_file else 'including'))
+
         with Miz(miz_file_path) as m:
 
             def mirror_dir(src, dst):
