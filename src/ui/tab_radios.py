@@ -234,7 +234,13 @@ class TabChildRadios(MainUiTabChild, TabRadiosAdapter):
         init_dir = Path(Config().tab_radios_meta_path_last_dir or '.')
         if not init_dir.exists():
             init_dir = '.'
-        p = BrowseDialog.save_file(self, 'Select a preset file', filter_=['.radio_presets'], init_dir=init_dir)
+        p = BrowseDialog.save_file(
+            self,
+            'Select a preset file',
+            filter_=['*.radio_presets'],
+            init_dir=init_dir,
+            default_suffix='.radio_presets'
+        )
         if p:
             self.meta_path.setText(p.abspath())
             Config().tab_radios_meta_path_last_dir = str(p.dirname())

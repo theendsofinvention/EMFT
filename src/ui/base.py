@@ -648,7 +648,7 @@ class BrowseDialog(QFileDialog):
     @staticmethod
     def make(parent, title: str, filter_: typing.List[str] = None, init_dir: str = '.'):
         if filter_ is None:
-            filter_ = ['*.*']
+            filter_ = ['*']
         dialog = BrowseDialog(parent, title)
         dialog.setOption(QFileDialog.DontResolveSymlinks)
         dialog.setOption(QFileDialog.DontUseCustomDirectoryIcons)
@@ -679,12 +679,18 @@ class BrowseDialog(QFileDialog):
         return dialog.parse_multiple_results()
 
     @staticmethod
-    def save_file(parent, title: str, filter_: typing.List[str] = None, init_dir: str = '.') -> Path or None:
+    def save_file(
+            parent,
+            title: str,
+            filter_: typing.List[str] = None,
+            init_dir: str = '.',
+            default_suffix=None
+    ) -> Path or None:
         dialog = BrowseDialog.make(parent, title, filter_, init_dir)
         dialog.setFileMode(QFileDialog.AnyFile)
         dialog.setAcceptMode(QFileDialog.AcceptSave)
-        if filter_:
-            dialog.setDefaultSuffix(filter_[0])
+        if default_suffix:
+            dialog.setDefaultSuffix(default_suffix)
         return dialog.parse_single_result()
 
     @staticmethod
