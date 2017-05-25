@@ -97,13 +97,13 @@ after_test:
   - 'git tag %GitVersion_SemVer% & exit 0'
   - 'git push origin %GitVersion_SemVer% & exit 0'
   - "%PYTHON%/Scripts/pip.exe install git+https://github.com/132nd-etcher/ocular.py.git"
-  - "%PYTHON%/Scripts/ocular.exe --access-token %SCRUTINIZER_TOKEN%"
+  - "%PYTHON%/Scripts/ocular.exe --access-token %SCRUTINIZER_TOKEN% & exit 0"
   - "%PYTHON%/Scripts/pip.exe install codacy-coverage"
-  - "%PYTHON%/Scripts/python-codacy-coverage.exe -r coverage.xml"
+  - "%PYTHON%/Scripts/python-codacy-coverage.exe -r coverage.xml & exit 0"
 #  - "%PYTHON%/Scripts/pip.exe install coveralls"
 #  - "%PYTHON%/Scripts/coveralls.exe"
   - "%PYTHON%/Scripts/pip.exe install codecov"
-  - "%PYTHON%/Scripts/codecov.exe"
+  - "%PYTHON%/Scripts/codecov.exe & exit 0"
 
 
 artifacts:
