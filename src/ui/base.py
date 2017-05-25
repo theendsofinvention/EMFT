@@ -175,9 +175,7 @@ class VLayout(QVBoxLayout, _WithChildren):
             self.addStretch()
 
         if set_stretch:
-            logger.critical('stretch {}'.format(set_stretch))
             for s in set_stretch:
-                logger.critical('setting stretch {}'.format(s))
                 self.setStretch(*s)
 
 
