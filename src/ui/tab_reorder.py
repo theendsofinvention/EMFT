@@ -334,7 +334,7 @@ class TabChildReorder(MainUiTabChild, TabReorderAdapter):
                 logger.debug('latest remote version found: {}'.format(self.remote.version))
                 local_trmt_path = self._look_for_local_file(self.remote.version)
                 if local_trmt_path:
-                    msg, color = '{}: you already have the latest version'.format(self.remote.version), 'green'
+                    msg, color = '{}: you have the latest version'.format(self.remote.version), 'green'
                     logger.debug(msg)
                     self.auto_scan_label_result.setText(msg)
                 else:
