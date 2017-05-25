@@ -91,7 +91,10 @@ after_build:
   - cmd: move dist\emft.exe emft.exe
 
 test_script:
-  - cmd: emft.exe --test
+  - cmd: start emft.exe --test
+  - cmd: timeout /t 15
+  - cmd: tasklist /FI "IMAGENAME eq emft.exe" 2>NUL | find /I /N "emft.exe">NUL
+  - cmd: IF "%ERRORLEVEL%"=="0" exit 1
 
 after_test:
   - 'git tag %GitVersion_SemVer% & exit 0'
