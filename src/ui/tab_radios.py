@@ -243,7 +243,7 @@ class TabChildRadios(MainUiTabChild, TabRadiosAdapter):
         )
         if p:
             self.meta_path.setText(p.abspath())
-            Config().tab_radios_meta_path_last_dir = str(p.dirname())
+            Config().tab_radios_meta_path_last_dir = str(Path(p.dirname()))
 
     def _save_preset_file(self):
         if self.__meta_path:

@@ -233,7 +233,7 @@ class TabChildRoster(MainUiTabChild, TabRosterAdapter):
         self._miz_path = miz
 
         self._miz_last_dir = str(miz.dirname())
-        Config().roster_miz_last_dir = self._miz_last_dir
+        Config().roster_miz_last_dir = str(Path(self._miz_last_dir))
         self.miz_label.setText(miz.abspath())
 
         def decode_miz():
