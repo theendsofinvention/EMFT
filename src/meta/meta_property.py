@@ -100,7 +100,7 @@ class MetaProperty:
     def __init__(self, _type: object):
         """
         Initialize properties of the descriptor.
-        
+
         :param _type:
         """
         self.type = _type
