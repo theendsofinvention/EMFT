@@ -38,7 +38,7 @@ def check_cert():
     from utils.custom_path import Path
     cacert = Path(certifi.where())
     # noinspection SpellCheckingInspection
-    if not cacert.crc32() == 'D069EE01':
+    if not cacert.crc32() == '8EBF6C38':
         raise ImportError('cacert.pem file is corrupted: {}'.format(cacert.crc32()))
     logger.debug('setting up local cacert file to: {}'.format(str(cacert)))
     os.environ['REQUESTS_CA_BUNDLE'] = str(cacert)
