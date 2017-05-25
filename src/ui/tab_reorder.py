@@ -81,62 +81,49 @@ class TabChildReorder(MainUiTabChild, TabReorderAdapter):
                     ), 20,
                     GroupBox(
                         'MIZ file reordering',
-                        VLayout(
+                        GridLayout(
                             [
-                                self.radio_single,
-                                VLayout(
-                                    [
-                                        GridLayout(
-                                            [
-                                                [
-                                                    Label('Source MIZ'),
-                                                    self.single_miz_lineedit,
-                                                    PushButton('Browse', self.manual_browse_for_miz, self),
-                                                    PushButton('Open', self.manual_open_miz, self),
-                                                ],
-                                                [
-                                                    Label('Output folder'),
-                                                    self.manual_output_folder_lineedit,
-                                                    PushButton('Browse', self.manual_browse_for_output_folder, self),
-                                                    PushButton('Open', self.manual_open_output_folder, self),
-                                                ],
-                                            ],
-                                        ),
-                                    ],
-                                ),
-                                100,
-                                self.radio_auto,
-                                VLayout(
-                                    [
-                                        GridLayout(
-                                            [
-                                                [
-                                                    Label('Source folder'),
-                                                    self.auto_src_le,
-                                                    PushButton('Browse', self.auto_src_browse, self),
-                                                    PushButton('Open', self.auto_src_open, self),
-                                                ],
-                                                [
-                                                    Label('Output folder'),
-                                                    self.auto_out_le,
-                                                    PushButton('Browse', self.auto_out_browse, self),
-                                                    PushButton('Open', self.auto_out_open, self),
-                                                ],
-                                                [
-                                                    QLabel('Branch filter'),
-                                                    HLayout(
-                                                        [
-                                                            self.auto_scan_combo_branch,
-                                                            self.auto_scan_label_result,
-                                                        ],
-                                                    ),
-                                                    PushButton('Refresh', self.scan_artifacts, self),
-                                                    PushButton('Download', self.auto_download, self)
-                                                ],
-                                            ]
-                                        ),
-                                    ]
-                                )
+                                [
+                                    (self.radio_single, dict(span=(1, -1))),
+                                ],
+                                [
+                                    Label('Source MIZ'),
+                                    self.single_miz_lineedit,
+                                    PushButton('Browse', self.manual_browse_for_miz, self),
+                                    PushButton('Open', self.manual_open_miz, self),
+                                ],
+                                [
+                                    Label('Output folder'),
+                                    self.manual_output_folder_lineedit,
+                                    PushButton('Browse', self.manual_browse_for_output_folder, self),
+                                    PushButton('Open', self.manual_open_output_folder, self),
+                                ],
+                                [
+                                    (self.radio_auto, dict(span=(1, -1))),
+                                ],
+                                [
+                                    Label('Source folder'),
+                                    self.auto_src_le,
+                                    PushButton('Browse', self.auto_src_browse, self),
+                                    PushButton('Open', self.auto_src_open, self),
+                                ],
+                                [
+                                    Label('Output folder'),
+                                    self.auto_out_le,
+                                    PushButton('Browse', self.auto_out_browse, self),
+                                    PushButton('Open', self.auto_out_open, self),
+                                ],
+                                [
+                                    QLabel('Branch filter'),
+                                    HLayout(
+                                        [
+                                            self.auto_scan_combo_branch,
+                                            self.auto_scan_label_result,
+                                        ],
+                                    ),
+                                    PushButton('Refresh', self.scan_artifacts, self),
+                                    PushButton('Download', self.auto_download, self)
+                                ],
                             ],
                         ),
                     ), 20,
