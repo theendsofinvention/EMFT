@@ -161,12 +161,36 @@ def build_requirements(env):
                                         r'git+https://github.com/132nd-etcher/pyinstaller.git#egg=PyInstaller')
     requirements = re.sub(r'SLTP==\d+.\d+.\d+.*\n', r'', requirements)
     requirements = re.sub(r'utils==\d+.\d+.\d+.*\n', r'', requirements)
-    Path('requirements.txt').write_text(requirements)
-    own_requirements = [
-        'git+https://github.com/132nd-etcher/sltp.git#egg=sltp',
-        'git+https://github.com/132nd-etcher/utils.git#egg=utils'
-    ]
-    Path('own_requirements.txt').write_text('\n'.join(own_requirements))
+        r'',
+        requirements,
+    )
+
+    with open('requirements.in', 'w') as req, open('dev-requirements.in', 'w') as dev:
+        for line in requirements.split('\n'):
+            package, _ = line.split('==')
+            if package in dev_packages:
+                dev.write(package)
+                dev.write('\n')
+            else:
+                req.write(package)
+                req.write('\n')
+
+    for x in ['dev-', '']:
+        subprocess.Popen(
+            [
+                os.path.join(env, 'scripts/pip-compile.exe'),
+                '--output-file',
+                '{}requirements.txt'.format(x),
+                '{}requirements.in'.format(x),
+            ],
+            stdout=subprocess.PIPE
+        ).stdout.read().decode('utf8')
+
+
+def install_local_dependencies():
+    import pip
+    pip.main(['install', '-U', '--upgrade-strategy', 'only-if-needed', 'git+file://f:/dev/utils@develop'])
+    pip.main(['install', '-U', '--upgrade-strategy', 'only-if-needed', 'git+file://f:/dev/sltp@develop'])
 
 
 def generate_changelog(env):
@@ -182,9 +206,14 @@ def generate_changelog(env):
 @click.command()
 @click.argument('env', type=click.Path(exists=True, file_okay=False, dir_okay=True, readable=True))
 @click.option('-p', '--pre', is_flag=True, help='Pre build only')
+@click.option('-l', '--local-develop',
+              is_flag=True, help='Only install local repositories from develop branch')
 @click.option('-r', '--req', is_flag=True, help='Req build only')
 @click.option('-c', '--cha', is_flag=True, help='Changelog build only')
-def main(env, pre, req, cha):
+def main(env, pre, req, cha, local_develop):
+    if local_develop:
+        install_local_dependencies()
+        return
     if cha:
         generate_changelog(env)
         return
