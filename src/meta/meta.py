@@ -1,7 +1,7 @@
 # coding=utf-8
 from collections import OrderedDict
 
-from ruamel.yaml import safe_dump as ydump, safe_load as yload, RoundTripDumper
+from ruamel.yaml import dump as ydump, safe_load as yload, RoundTripDumper
 
 from .abstract import AbstractMeta
 
