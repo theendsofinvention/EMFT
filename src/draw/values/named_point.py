@@ -1,14 +1,10 @@
 # coding=utf-8
 
-from .point import Point, MetaProperty
+from src.draw.values import Point
+from src.draw.abstract import WritableShape
 
 
-class NamedPoint(Point):
+class NamedPoint(Point, WritableShape):
 
-    def __init__(self, name: str, lat: float, long: float, alt: float = 0):
-        Point.__init__(self, lat, long, alt)
-        self.name = name
-
-    @MetaProperty(str)
-    def name(self, value):
-        return value
+    def __init__(self, **kwargs):
+        Point.__init__(self, **kwargs)

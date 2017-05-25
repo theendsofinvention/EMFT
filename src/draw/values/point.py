@@ -1,14 +1,12 @@
 # coding=utf-8
 
+from collections import OrderedDict
 from src.meta import Meta, MetaProperty
 
 
 class Point(Meta):
-    def __init__(self, lat: float, long: float, alt: float = 0):
-        Meta.__init__(self)
-        self.lat = lat
-        self.long = long
-        self.alt = alt
+    def __init__(self, **kwargs):
+        Meta.__init__(self, init_dict=OrderedDict(kwargs))
 
     @staticmethod
     def __convert_int(value):

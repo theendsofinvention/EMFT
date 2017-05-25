@@ -28,10 +28,17 @@ if __name__ == '__main__':
     from utils import Path
     p = Path(r'c:\users\bob\desktop\export.coord')
     from src.draw.services.coord_file_parser import CoordFileParser
+    from src.draw.values import Polygon, ShapePool
+    from src.draw.finders import ShapeFinder
 
     shapes = CoordFileParser(skip_points_regex_str_list=['.*(NE|SE|SW|NW)']).parse_file_into_shapes(p)
-    for x in sorted(shapes, key=lambda x: x.name):
-        print(x)
+    shape_pool = ShapePool(init_data=set(shapes))
+    for shape in ShapeFinder.get_polygons(shape_pool):
+        print(shape)
+    # for x in sorted(shape_pool, key=lambda shape: shape.name):
+    #     print(x)
+    #     if isinstance(x, Polygon):
+    #         print(x.color)
     exit(0)
 
 

@@ -4,7 +4,7 @@ import typing
 import json
 import re
 from utils import Path
-from src.draw.values import Param, NamedPoint, Polygon, Point
+from src.draw.values import NamedPoint, Polygon, Point
 from .polygon_name_parser import PolygonNameParser
 
 
@@ -16,21 +16,18 @@ class CoordFileParser:
         self.skip_points = [re.compile(pattern) for pattern in skip_points_regex_str_list]
         self.polygon_name_parser = PolygonNameParser()
 
-    def parse_shape_POLY(self, shape_dictionary):
+    def parse_shape_POLY(self, shape_dictionary: dict):
         shape_dictionary['points'] = [
             Point(**kwargs) for kwargs in shape_dictionary['points']
         ]
 
-        shape_dictionary['name'], shape_dictionary['params']= self.polygon_name_parser.polygon_name_to_params(
-            shape_dictionary['name']
-        )
+        shape_dictionary.update(self.polygon_name_parser.polygon_name_to_params(shape_dictionary['name']))
 
 
 
         return Polygon(**shape_dictionary)
 
     def parse_shape_POINT(self, shape_dictionary):
-        return None
         point_name = shape_dictionary['name']
         for regex_object in self.skip_points:
             if regex_object.match(point_name):
@@ -57,4 +54,4 @@ class CoordFileParser:
 
         shapes.remove(None)
 
-        return shapes
+        return sorted(shapes, key=lambda x: x.name)

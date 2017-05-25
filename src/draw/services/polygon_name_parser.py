@@ -4,8 +4,6 @@ import typing
 
 import colour
 
-from src.draw.values import Param
-
 valid_params = dict(
     color=('color', 'c', 'colour', 'col'),
     radius=('radius', 'rad', 'r'),
@@ -19,7 +17,8 @@ class PolygonNameParser:
     def __init__(self):
         pass
 
-    def parse_tag_color(self, value_str):
+    @staticmethod
+    def parse_tag_color(value_str):
         try:
             return colour.Color(value_str)
         except ValueError:
@@ -31,18 +30,13 @@ class PolygonNameParser:
                 ).format(value_str, ', '.join(sorted(k for k in colour.COLOR_NAME_TO_RGB)))
             )
 
-    def parse_tag_radius(self, value_str):
+    @staticmethod
+    def parse_tag_radius(value_str):
         return value_str
 
-    def parse_tag_group(self, value_str):
+    @staticmethod
+    def parse_tag_group(value_str):
         return value_str
-
-    def polygon_name_to_params(self, poly_name) -> typing.Tuple[str, typing.Set[Param]]:
-        name, *params_str = poly_name.split('@')
-        params = [Param('name', name)]
-        for x in params_str:
-            params.append(self.parse_param_str(x))
-        return name, params
 
     def parse_param_str(self, param_str):
 
@@ -71,11 +65,19 @@ class PolygonNameParser:
                 )
             )
 
-        tag = 'parse_tag_{}'.format(qualifier)
+        tag_parser = 'parse_tag_{}'.format(qualifier)
 
-        if not hasattr(self, tag):
+        if not hasattr(self, tag_parser):
             raise AttributeError('unknown parameter: {}'.format(qualifier))
 
-        value = getattr(self, tag)(value)
+        value = getattr(self, tag_parser)(value)
 
         return qualifier, value
+
+    def polygon_name_to_params(self, poly_name) -> dict:
+        name, *params_str = poly_name.split('@')
+        params = dict(name=name)
+        for x in params_str:
+            qualifier, value = self.parse_param_str(x)
+            params[qualifier] = value
+        return params
