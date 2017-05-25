@@ -1,8 +1,7 @@
 # coding=utf-8
-import typing
 from operator import attrgetter
-from src.draw.values import Polygon, Point, NamedPoint, ShapePool
-from src.draw.abstract import WritableShape
+
+from ..values import Polygon, ShapePool, WritableShape
 
 
 class ShapeFinder:

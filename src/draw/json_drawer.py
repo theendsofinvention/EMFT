@@ -3,7 +3,7 @@ import datetime
 import colour
 import uuid
 from json import dumps
-from .shapes import Poly, Point
+from .old_shapes import Poly, Point
 from .abstract_drawer import AbstractDrawer
 
 

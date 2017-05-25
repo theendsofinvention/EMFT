@@ -3,7 +3,7 @@ import colour
 import simplekml
 
 from .abstract_drawer import AbstractDrawer
-from .shapes import Poly, Point, Circle
+from .old_shapes import Poly, Point, Circle
 
 
 class KMLDrawer(simplekml.Kml, AbstractDrawer):

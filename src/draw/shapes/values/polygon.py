@@ -1,12 +1,13 @@
 # coding=utf-8
 
 import typing
+from collections import OrderedDict
+
 import colour
 
+from .point import Point
+from .writable_shape import WritableShape
 from src.meta import Meta, MetaPropertyWithDefault, MetaProperty
-from collections import OrderedDict
-from src.draw.values import Point
-from src.draw.abstract import WritableShape
 
 
 class Polygon(Meta, WritableShape):

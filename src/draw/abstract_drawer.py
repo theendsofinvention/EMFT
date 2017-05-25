@@ -3,7 +3,7 @@
 import abc
 import re
 import colour
-from .shapes import Poly, Point, Circle
+from .old_shapes import Poly, Point, Circle
 
 
 class AbstractDrawer:

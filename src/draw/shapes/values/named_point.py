@@ -1,7 +1,7 @@
 # coding=utf-8
 
-from src.draw.values import Point
-from src.draw.abstract import WritableShape
+from .point import Point
+from .writable_shape import WritableShape
 
 
 class NamedPoint(Point, WritableShape):

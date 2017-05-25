@@ -1,9 +1,9 @@
 # coding=utf-8
 
 import simplekml
-import polycircles
+
 from src.draw import abstract
-from src.draw.values import Polygon, Point, NamedPoint
+from src.draw.shapes.values import Polygon
 
 
 class KMLWriter(simplekml.Kml, abstract.ShapeWriter):

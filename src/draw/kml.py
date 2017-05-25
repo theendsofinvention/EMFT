@@ -1,11 +1,10 @@
 # coding=utf-8
 
 import random
-import colour
 
 from src.draw.json_drawer import JSONDrawer
 from src.draw.kml_drawer import KMLDrawer
-from src.draw.shapes import Poly
+from src.draw.old_shapes import Poly
 
 
 #  TODO use colour package
@@ -28,8 +27,8 @@ if __name__ == '__main__':
     from utils import Path
     p = Path(r'c:\users\bob\desktop\export.coord')
     from src.draw.services.coord_file_parser import CoordFileParser
-    from src.draw.values import Polygon, ShapePool
-    from src.draw.finders import ShapeFinder
+    from src.draw.shapes.values import ShapePool
+    from src.draw.shapes.finders import ShapeFinder
 
     shapes = CoordFileParser(skip_points_regex_str_list=['.*(NE|SE|SW|NW)']).parse_file_into_shapes(p)
     shape_pool = ShapePool(init_data=set(shapes))

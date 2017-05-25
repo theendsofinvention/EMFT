@@ -1,11 +1,13 @@
 # coding=utf-8
 
-import typing
 import json
 import re
+import typing
+
 from utils import Path
-from src.draw.values import NamedPoint, Polygon, Point
-from .polygon_name_parser import PolygonNameParser
+
+from src.draw.shapes.services.polygon_name_parser import PolygonNameParser
+from src.draw.shapes.values import NamedPoint, Polygon, Point
 
 
 class CoordFileParser:
