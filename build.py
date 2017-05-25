@@ -18,6 +18,8 @@ from utils.custom_path import Path
 logger = make_logger(__name__)
 logger.setLevel(DEBUG)
 
+requirements = None
+
 
 # noinspection PyPep8Naming
 class __LogPipe(threading.Thread):
@@ -150,47 +152,79 @@ def build(env):
     logger.info('all done')
 
 
-def build_requirements(env):
-    requirements = subprocess.Popen(
-        [os.path.join(env, 'scripts/pip.exe'), 'freeze'],
-        stdout=subprocess.PIPE
-    ).stdout.read().decode('utf8')
-    requirements = requirements.rstrip()
-    requirements = requirements.replace('\r\n', '\n')
-    requirements = requirements.replace(r'PyInstaller==3.3.dev0+gb78bfe5',
-                                        r'git+https://github.com/132nd-etcher/pyinstaller.git#egg=PyInstaller')
-    requirements = re.sub(r'SLTP==\d+.\d+.\d+.*\n', r'', requirements)
-    requirements = re.sub(r'utils==\d+.\d+.\d+.*\n', r'', requirements)
-        r'',
-        requirements,
-    )
-
-    with open('requirements.in', 'w') as req, open('dev-requirements.in', 'w') as dev:
-        for line in requirements.split('\n'):
-            package, _ = line.split('==')
-            if package in dev_packages:
-                dev.write(package)
-                dev.write('\n')
-            else:
-                req.write(package)
-                req.write('\n')
-
-    for x in ['dev-', '']:
-        subprocess.Popen(
-            [
-                os.path.join(env, 'scripts/pip-compile.exe'),
-                '--output-file',
-                '{}requirements.txt'.format(x),
-                '{}requirements.in'.format(x),
-            ],
+def get_installed_packages(env):
+    global requirements
+    if requirements is None:
+        requirements = subprocess.Popen(
+            [os.path.join(env, 'scripts/pip.exe'), 'freeze'],
             stdout=subprocess.PIPE
         ).stdout.read().decode('utf8')
+        requirements = requirements.rstrip()
+        requirements = requirements.replace('\r\n', '\n')
+        # requirements = requirements.replace(r'PyInstaller==3.3.dev0+gb78bfe5',
+        #                                     r'git+https://github.com/132nd-etcher/pyinstaller.git#egg=PyInstaller')
+        requirements = re.sub(r'SLTP==\d+.\d+.\d+.*\n?', r'', requirements)
+        requirements = re.sub(r'utils==\d+.\d+.\d+.*\n?', r'', requirements)
+        requirements.strip()
+    return requirements
 
 
-def install_local_dependencies():
-    import pip
-    pip.main(['install', '-U', '--upgrade-strategy', 'only-if-needed', 'git+file://f:/dev/utils@develop'])
-    pip.main(['install', '-U', '--upgrade-strategy', 'only-if-needed', 'git+file://f:/dev/sltp@develop'])
+def _write_requirements_in():
+    Path('requirements.in').write_lines(x.split('==')[0] for x in requirements.split('\n'))
+
+
+def _write_own_requirements():
+    own_requirements = [
+        'git+https://github.com/132nd-etcher/sltp.git#egg=sltp',
+        'git+https://github.com/132nd-etcher/utils.git#egg=utils'
+    ]
+    Path('own-requirements.txt').write_text('\n'.join(own_requirements))
+
+
+def _compile_requirements(env, upgrade=False):
+
+    args = [os.path.join(env, 'scripts/pip-compile.exe')]
+
+    if upgrade:
+        args.append('--upgrade')
+
+    logger.debug('\n' +subprocess.Popen(
+        args,
+        stdout=subprocess.PIPE
+    ).stdout.read().decode('utf8'))
+
+    req_file = Path('requirements.txt')
+    req_file.write_lines([x for x in req_file.lines() if not x.startswith('#')])
+
+
+def sync_requirements(env):
+    logger.debug('\n'+subprocess.Popen(
+        [os.path.join(env, 'scripts/pip-sync.exe')],
+        stdout=subprocess.PIPE
+    ).stdout.read().decode('utf8'))
+
+
+def install_own_requirements(env):
+    logger.debug('\n' +subprocess.Popen(
+        [os.path.join(env, 'scripts/pip.exe'), 'install', '-r', 'own-requirements.txt'],
+        stdout=subprocess.PIPE
+    ).stdout.read().decode('utf8'))
+
+
+def build_requirements(env):
+    get_installed_packages(env)
+    _write_own_requirements()
+    _write_requirements_in()
+    _compile_requirements(env)
+
+
+def update_requirements(env):
+    get_installed_packages(env)
+    _write_own_requirements()
+    _write_requirements_in()
+    _compile_requirements(env, upgrade=True)
+    sync_requirements(env)
+    install_own_requirements(env)
 
 
 def generate_changelog(env):
@@ -203,6 +237,12 @@ def generate_changelog(env):
         f.write(changelog)
 
 
+def install_local_dependencies(env):
+    import pip
+    pip.main(['install', '-U', '--upgrade-strategy', 'only-if-needed', 'git+file://f:/dev/utils@develop'])
+    pip.main(['install', '-U', '--upgrade-strategy', 'only-if-needed', 'git+file://f:/dev/sltp@develop'])
+
+
 @click.command()
 @click.argument('env', type=click.Path(exists=True, file_okay=False, dir_okay=True, readable=True))
 @click.option('-p', '--pre', is_flag=True, help='Pre build only')
@@ -210,9 +250,18 @@ def generate_changelog(env):
               is_flag=True, help='Only install local repositories from develop branch')
 @click.option('-r', '--req', is_flag=True, help='Req build only')
 @click.option('-c', '--cha', is_flag=True, help='Changelog build only')
-def main(env, pre, req, cha, local_develop):
+@click.option('-u', '--update-req', is_flag=True, help='Update all requirements')
+@click.option('-s', '--sync_req', is_flag=True, help='Sync requirements')
+def main(env, pre, req, cha, local_develop, update_req, sync_req):
+    if sync_req:
+        sync_requirements(env)
+        install_own_requirements(env)
+        return
+    if update_req:
+        update_requirements(env)
+        return
     if local_develop:
-        install_local_dependencies()
+        install_local_dependencies(env)
         return
     if cha:
         generate_changelog(env)
