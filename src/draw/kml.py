@@ -32,8 +32,12 @@ if __name__ == '__main__':
 
     shapes = CoordFileParser(skip_points_regex_str_list=['.*(NE|SE|SW|NW)']).parse_file_into_shapes(p)
     shape_pool = ShapePool(init_data=set(shapes))
-    for shape in ShapeFinder.get_polygons(shape_pool):
-        print(shape)
+    # for shape in ShapeFinder.get_polygons(shape_pool):
+    #     print(shape)
+    # for group in ShapeFinder.get_available_groups(shape_pool):
+    #     print(group)
+    for shape in ShapeFinder.get_polygons_belonging_to_group(shape_pool, 'TMA'):
+        print(shape.color)
     # for x in sorted(shape_pool, key=lambda shape: shape.name):
     #     print(x)
     #     if isinstance(x, Polygon):
