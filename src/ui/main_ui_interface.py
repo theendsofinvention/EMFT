@@ -4,10 +4,10 @@
 import threading
 
 from src import global_
+from src.reorder.ui.tab_reorder_adapter import TabReorderAdapter
 from .main_ui_mixins_adapter import MainUiMixinsAdapter
 from .tab_config_adapter import TabConfigAdapter
 from .tab_log_adapter import TabLogAdapter
-from .tab_reorder_adapter import TabReorderAdapter
 from .tab_roster_adapter import TabRosterAdapter
 from .tab_skins_adapter import TabSkinsAdapter
 
