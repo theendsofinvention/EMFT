@@ -37,7 +37,8 @@ def get_latest_remote_version(branch='All') -> AVResult:
                 '132nd-etcher',
                 '132nd-virtual-wing-training-mission-tblisi',
                 'branch',
-                branch),
+                branch,
+            ),
         )
 
     if not req.ok:
