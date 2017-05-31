@@ -7,7 +7,7 @@ from utils.custom_path import Path
 
 from src.cfg.cfg import Config
 from src.global_ import MAIN_UI
-from src.misc import appveyor, downloader, github
+from src.misc import appveyor, downloader, github_old
 from src.misc.fs import saved_games_path
 from src.miz.miz import Miz
 from src.ui.base import GroupBox, HLayout, VLayout, PushButton, Radio, Checkbox, Label, Combo, GridLayout, box_question, \
@@ -365,7 +365,7 @@ class TabChildReorder(MainUiTabChild, TabReorderAdapter):
         self.main_ui.pool.queue_task(self._initial_scan)
 
     def _scan_branches(self):
-        remote_branches = github.get_available_branches()
+        remote_branches = github_old.get_available_branches()
         remote_branches.remove('master')
         remote_branches.remove('develop')
         self.auto_scan_combo_branch.reset_values(
