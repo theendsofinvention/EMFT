@@ -142,11 +142,28 @@ class TabChildReorder(MainUiTabChild, TabReorderAdapter):
         self.initial_scan()
 
     def _initialize_config_values(self):
+        """Retrieves values from config files to initialize the UI"""
+
+        def check_folder(folder: str, target: LineEdit):
+            """
+            Verify that a folder exists, and set the value tot he corresponding GUI control
+            :param folder: folder as a string
+            :param target: LineEdit to update if the value is correct
+            """
+            p = Path(folder)
+            if not p.exists():
+                logger.error(f'path does not exist: {p.abspath()}')
+            elif not p.isdir():
+                logger.error(f'not a directory: {p.abspath()}')
+            else:
+                target.setText(str(p.abspath()))
+
         self.radio_single.setChecked(not Config().auto_mode)
         self.radio_auto.setChecked(Config().auto_mode)
         self.check_skip_options.setChecked(Config().skip_options_file)
+
         if Config().auto_source_folder:
-            self.auto_src_le.setText(Config().auto_source_folder)
+            check_folder(Config().auto_source_folder, self.auto_src_le)
 
         if Config().single_miz_last:
             p = Path(Config().single_miz_last)
@@ -154,37 +171,28 @@ class TabChildReorder(MainUiTabChild, TabReorderAdapter):
                 self.single_miz_lineedit.setText(str(p.abspath()))
 
         if Config().single_miz_output_folder:
-            p = Path(Config().single_miz_output_folder)
-            self.manual_output_folder_lineedit.setText(str(p.abspath()))
+            check_folder(Config().single_miz_output_folder, self.manual_output_folder_lineedit)
 
         if Config().auto_output_folder:
-            p = Path(Config().auto_output_folder)
-            if p.exists() and p.isdir():
-                self.auto_out_le.setText(Config().auto_output_folder)
+            check_folder(Config().auto_output_folder, self.auto_out_le)
 
         if Config().auto_source_folder:
-            p = Path(Config().auto_source_folder)
-            if p.exists() and p.isdir():
-                self.auto_src_le.setText(Config().auto_source_folder)
+            check_folder(Config().auto_source_folder, self.auto_src_le)
 
     @property
-    def manual_miz_path(self) -> Path or None:
+    def manual_miz_path(self) -> Path:
         t = self.single_miz_lineedit.text()
         if len(t) > 3:
-            p = Path(t)
-            if p.exists() and p.isfile() and p.ext == '.miz':
-                return p
-        return None
+            return Path(t)
 
     @property
-    def manual_output_folder_path(self) -> Path or None:
+    def manual_output_folder_path(self) -> Path:
         t = self.manual_output_folder_lineedit.text()
         if len(t) > 3:
             return Path(t)
-        return None
 
     def manual_open_miz(self):
-        if self.manual_miz_path.exists():
+        if self.manual_miz_path and self.manual_miz_path.exists():
             os.startfile(self.manual_miz_path.dirname())
 
     def manual_browse_for_miz(self):
@@ -268,24 +276,62 @@ class TabChildReorder(MainUiTabChild, TabReorderAdapter):
         Config().auto_mode = self.radio_auto.isChecked()
 
     @property
-    def skip_options_file(self) -> bool:
+    def skip_options_file_is_checked(self) -> bool:
         return self.check_skip_options.isChecked()
 
     @staticmethod
     def _on_reorder_error(miz_file):
         # noinspection PyCallByClass
-        I.error('Could not unzip the following file:\n\n{}\n\n'
+        I.error(f'Could not unzip the following file:\n\n{miz_file}\n\n'
                 'Please check the log, and eventually send it to me along with the MIZ file '
-                'if you think this is a bug.'.format(miz_file))
+                'if you think this is a bug.')
+
+    def _reorder_auto(self):
+
+        error = None
+
+        if not self.remote:
+            error = 'no remote file found'
+
+        local_file = self._look_for_local_file(self.remote.version)
+
+        if local_file is None:
+          error = f'no local file found for version: {self.remote.version}'
+        elif not local_file.isfile():
+            error = f'not a file: {local_file.abspath()}'
+        elif not self.auto_out_path:
+            error = 'no output folder selected'
+
+        if error:
+            logger.error(error)
+            MAIN_UI.msg(error.capitalize())
+            return
+
+        self._reorder_miz(local_file, self.auto_out_path, self.skip_options_file_is_checked)
+
+    def _reorder_manual(self):
+        error = None
+        if not self.manual_miz_path:
+            error = 'no MIZ file selected'
+        elif not self.manual_output_folder_path:
+            error = 'no output folder selected'
+        elif not self.manual_miz_path.exists():
+            error = f'file not found: {self.manual_miz_path.abspath()}'
+        elif not self.manual_miz_path.isfile():
+            error = f'not a file: {self.manual_miz_path.abspath()}'
+
+        if error:
+            logger.error(error)
+            MAIN_UI.msg(error.capitalize())
+            return
+
+        self._reorder_miz(self.manual_miz_path, self.manual_output_folder_path, self.skip_options_file_is_checked)
 
     def reorder_miz(self):
         if self.radio_auto.isChecked():
-            if self.remote and self.auto_out_path:
-                local_file = self._look_for_local_file(self.remote.version)
-                self._reorder_miz(local_file, self.auto_out_path, self.skip_options_file)
+            self._reorder_auto()
         else:
-            if self.manual_miz_path and self.manual_output_folder_path:
-                self._reorder_miz(self.manual_miz_path, self.manual_output_folder_path, self.skip_options_file)
+            self._reorder_manual()
 
     def _reorder_miz(self, miz_file, output_dir, skip_options_file):
         if miz_file:
@@ -346,16 +392,15 @@ class TabChildReorder(MainUiTabChild, TabReorderAdapter):
         self.auto_scan_label_result.setText(msg)
         self.auto_scan_label_result.set_text_color(color)
 
-    def _look_for_local_file(self, version):
-
+    def _look_for_local_file(self, version) -> Path:
+        logger.debug('probing local file system')
         if self.auto_src_path:
             p = Path(self.auto_src_path).joinpath('TRMT_{}.miz'.format(version))
             if p.exists():
-                logger.debug('local TRMT found: {}'.format(p.abspath()))
-                return p.abspath()
+                logger.debug(f'local TRMT found: {p.abspath()}')
+                return p
             else:
                 logger.warning('no local MIZ file found with version: {}'.format(self.remote.version))
-                return None
 
     def _initial_scan(self):
         self.tab_reorder_update_view_after_artifact_scan(self._scan_branches())
@@ -365,7 +410,9 @@ class TabChildReorder(MainUiTabChild, TabReorderAdapter):
         self.main_ui.pool.queue_task(self._initial_scan)
 
     def _scan_branches(self):
+        logger.debug('probing GH for remote branches list')
         remote_branches = github_old.get_available_branches()
+        logger.debug(f'remote branches found: {remote_branches}')
         remote_branches.remove('master')
         remote_branches.remove('develop')
         self.auto_scan_combo_branch.reset_values(
@@ -373,19 +420,23 @@ class TabChildReorder(MainUiTabChild, TabReorderAdapter):
         )
 
     def scan_branches(self, *_):
+        """Queues a refresh of the remote branches found on Github"""
         self.main_ui.pool.queue_task(
             task=self._scan_branches,
             _task_callback=I.tab_reorder_update_view_after_branches_scan
         )
 
     def _scan_artifacts(self):
-        if self.auto_src_path:
+        logger.debug('scanning for artifacts')
+        if not self.selected_branch:
+            logger.error('no branch selected')
+            self._remote = None
+        else:
             # noinspection PyBroadException
             try:
-                logger.debug('looking for latest remote TRMT version')
                 self._remote = appveyor.get_latest_remote_version(self.selected_branch)
             except:
-                logger.debug('no remote TRMT found')
+                logger.exception('error while scanning for artifacts')
                 self._remote = None
 
     def scan_artifacts(self, *_):
