@@ -10,7 +10,6 @@ from .tab_log_adapter import TabLogAdapter
 from .tab_reorder_adapter import TabReorderAdapter
 from .tab_roster_adapter import TabRosterAdapter
 from .tab_skins_adapter import TabSkinsAdapter
-import threading
 
 
 class MainUiMethod:
