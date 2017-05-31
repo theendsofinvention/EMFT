@@ -9,7 +9,7 @@ from PyQt5.QtGui import QKeySequence, QIcon, QContextMenuEvent, QColor, QRegExpV
 from PyQt5.QtWidgets import QGroupBox, QBoxLayout, QSpacerItem, QWidget, QHBoxLayout, QVBoxLayout, QPushButton, \
     QRadioButton, QComboBox, QShortcut, QCheckBox, QLineEdit, QLabel, QPlainTextEdit, QSizePolicy, QGridLayout, \
     QMessageBox, QTableView, QAbstractItemView, QMenu, QMenuBar, QFileDialog, QTabWidget, QDoubleSpinBox, \
-    QStyledItemDelegate, QStyleOptionViewItem, QFrame
+    QStyledItemDelegate, QStyleOptionViewItem, QFrame, QDialog
 from utils import make_logger, Path
 
 SIGNAL = pyqtSignal
@@ -28,6 +28,12 @@ BOTTOM_MARGIN = 0
 DEFAULT_MARGINS = (LEFT_MARGIN, TOP_MARGIN, RIGHT_MARGIN, BOTTOM_MARGIN)
 
 logger = make_logger(__name__)
+
+
+class Dialog(QDialog):
+
+    def __init__(self, parent=None):
+        QDialog.__init__(parent=parent, flags=Qt.Widget)
 
 
 class Expandable:
