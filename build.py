@@ -11,9 +11,20 @@ from json import loads
 import certifi
 import click
 
-from src import global_
-from utils.custom_logging import DEBUG, make_logger
-from utils.custom_path import Path
+try:
+    from src import global_
+    from utils.custom_logging import DEBUG, make_logger
+    from utils.custom_path import Path
+except ImportError or ModuleNotFoundError:
+    import sys
+
+    subprocess.check_call(
+        [os.path.join(sys.argv[1], 'scripts/pip.exe'), 'install', '-r', 'own-requirements.txt'],
+        stdout=subprocess.PIPE
+    )
+    from src import global_
+    from utils.custom_logging import DEBUG, make_logger
+    from utils.custom_path import Path
 
 logger = make_logger(__name__)
 logger.setLevel(DEBUG)
