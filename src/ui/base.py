@@ -281,13 +281,22 @@ class Shortcut(QShortcut):
 
 
 class LineEdit(QLineEdit, Expandable):
-    def __init__(self, text, on_text_changed: callable = None, read_only=False, clear_btn_enabled=False):
+    def __init__(
+            self,
+            text,
+            on_text_changed: callable = None,
+            read_only: bool = False,
+            clear_btn_enabled: bool = False,
+            validation_regex: str = None,
+    ):
         QLineEdit.__init__(self, text)
         if on_text_changed:
             # noinspection PyUnresolvedReferences
             self.textChanged.connect(on_text_changed)
         self.setReadOnly(read_only)
         self.setClearButtonEnabled(clear_btn_enabled)
+        if validation_regex:
+            self.setValidator(QRegExpValidator(validation_regex, self))
 
 
 class Label(QLabel):
