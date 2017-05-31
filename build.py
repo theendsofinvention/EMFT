@@ -193,13 +193,12 @@ def _write_own_requirements():
 
 
 def _compile_requirements(env, upgrade=False):
-
     args = [os.path.join(env, 'scripts/pip-compile.exe')]
 
     if upgrade:
         args.append('--upgrade')
 
-    logger.debug('\n' +subprocess.Popen(
+    logger.debug('\n' + subprocess.Popen(
         args,
         stdout=subprocess.PIPE
     ).stdout.read().decode('utf8'))
@@ -209,14 +208,14 @@ def _compile_requirements(env, upgrade=False):
 
 
 def sync_requirements(env):
-    logger.debug('\n'+subprocess.Popen(
+    logger.debug('\n' + subprocess.Popen(
         [os.path.join(env, 'scripts/pip-sync.exe')],
         stdout=subprocess.PIPE
     ).stdout.read().decode('utf8'))
 
 
 def install_own_requirements(env):
-    logger.debug('\n' +subprocess.Popen(
+    logger.debug('\n' + subprocess.Popen(
         [os.path.join(env, 'scripts/pip.exe'), 'install', '-r', 'own-requirements.txt'],
         stdout=subprocess.PIPE
     ).stdout.read().decode('utf8'))
