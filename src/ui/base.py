@@ -33,7 +33,9 @@ logger = make_logger(__name__)
 class Dialog(QDialog):
 
     def __init__(self, parent=None):
-        QDialog.__init__(parent=parent, flags=Qt.Widget)
+        from src.ui import qt_resource
+        QDialog.__init__(self, parent=parent, flags=Qt.Dialog)
+        self.setWindowIcon(QIcon(':/ico/app.ico'))
 
 
 class Expandable:
