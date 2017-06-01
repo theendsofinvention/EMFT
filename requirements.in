@@ -1,5 +1,6 @@
 apipkg
 appdirs
+better-exceptions
 certifi
 click
 colorama

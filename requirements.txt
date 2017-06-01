@@ -1,5 +1,6 @@
 apipkg==1.4
 appdirs==1.4.3
+better-exceptions==0.1.8
 certifi==2017.4.17
 click==6.7
 colorama==0.3.9
