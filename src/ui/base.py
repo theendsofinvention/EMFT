@@ -619,6 +619,10 @@ def box_info(parent, title: str, text: str):
     QMessageBox.information(parent, title, text)
 
 
+def box_warning(parent, title: str, text: str):
+    QMessageBox.warning(parent, title, text)
+
+
 def box_question(parent, text: str, title: str = 'Please confirm'):
     # noinspection PyArgumentList
     reply = QMessageBox.question(parent, title, text)
