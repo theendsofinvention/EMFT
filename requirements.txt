@@ -24,7 +24,7 @@ polycircles==0.3.7
 py==1.4.33
 pyinstaller==3.2.1
 pyparsing==2.2.0
-pypiwin32==219
+pypiwin32==220
 pyqt5==5.8.2
 pytest-cache==1.0
 pytest-catchlog==1.2.2
