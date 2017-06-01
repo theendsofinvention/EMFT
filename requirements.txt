@@ -34,7 +34,7 @@ pytest-pep8==1.0.6
 pytest-pycharm==0.4.0
 pytest-qt==2.1.0
 pytest-runner==2.11.1
-pytest==3.1.0
+pytest==3.1.1
 raven==6.0.0
 requests==2.14.2
 ruamel.yaml==0.14.12
