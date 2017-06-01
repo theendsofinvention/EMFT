@@ -15,6 +15,8 @@ from src.ui.base import GroupBox, HLayout, VLayout, PushButton, Radio, Checkbox,
 from src.ui.main_ui_interface import I
 from src.ui.main_ui_tab_widget import MainUiTabChild
 from .tab_reorder_adapter import TabReorderAdapter, TAB_NAME
+from ..finder.find_local_profile import FindLocalProfile
+from .dialog_profile_editor import DialogProfileEditor
 
 try:
     import winreg
@@ -62,6 +64,10 @@ class TabChildReorder(MainUiTabChild, TabReorderAdapter):
         self.radio_single = Radio('Manual mode', self.on_radio_toggle)
         self.radio_auto = Radio('Automatic mode', self.on_radio_toggle)
 
+        self.profile_combo = Combo(self._on_profile_change, FindLocalProfile.get_all_profiles_names())
+        self.profile_new_btn = PushButton('New', self._on_new_profile, self)
+        self.profile_edit_btn = PushButton('Edit', self._on_edit_profile, self)
+
         self.setLayout(
             VLayout(
                 [
@@ -101,15 +107,19 @@ class TabChildReorder(MainUiTabChild, TabReorderAdapter):
                                     (self.radio_auto, dict(span=(1, -1))),
                                 ],
                                 [
+                                    Label('Profile'),
+                                    self.profile_combo,
+                                    self.profile_new_btn,
+                                    self.profile_edit_btn,
+                                ],
+                                [
                                     Label('Source folder'),
                                     self.auto_src_le,
-                                    PushButton('Browse', self.auto_src_browse, self),
                                     PushButton('Open', self.auto_src_open, self),
                                 ],
                                 [
                                     Label('Output folder'),
                                     self.auto_out_le,
-                                    PushButton('Browse', self.auto_out_browse, self),
                                     PushButton('Open', self.auto_out_open, self),
                                 ],
                                 [
@@ -141,6 +151,28 @@ class TabChildReorder(MainUiTabChild, TabReorderAdapter):
         # self.scan_artifacts()
         self.initial_scan()
 
+    def _on_new_profile(self):
+        dialog = DialogProfileEditor()
+        dialog.exec()
+
+    def _on_edit_profile(self):
+        dialog = DialogProfileEditor.from_profile(self.profile_combo.currentText())
+        dialog.exec()
+        self._load_values_from_profile()
+
+    def _on_profile_change(self, selected_profile_name):
+        Config().reorder_last_profile_name = selected_profile_name
+        self._load_values_from_profile()
+
+    def _load_values_from_profile(self):
+        profile_name = Config().reorder_last_profile_name
+        if profile_name:
+            assert isinstance(profile_name, str)
+            profile = FindLocalProfile.find_profile_by_name(profile_name)
+            self.auto_src_le.setText(profile.src_folder)
+            self.auto_out_le.setText(profile.output_folder)
+
+
     def _initialize_config_values(self):
         """Retrieves values from config files to initialize the UI"""
 
@@ -158,12 +190,13 @@ class TabChildReorder(MainUiTabChild, TabReorderAdapter):
             else:
                 target.setText(str(p.abspath()))
 
+        if Config().reorder_last_profile_name:
+            self.profile_combo.set_index_from_text(Config().reorder_last_profile_name)
+            self._load_values_from_profile()
+
         self.radio_single.setChecked(not Config().auto_mode)
         self.radio_auto.setChecked(Config().auto_mode)
         self.check_skip_options.setChecked(Config().skip_options_file)
-
-        if Config().auto_source_folder:
-            check_folder(Config().auto_source_folder, self.auto_src_le)
 
         if Config().single_miz_last:
             p = Path(Config().single_miz_last)
@@ -172,12 +205,6 @@ class TabChildReorder(MainUiTabChild, TabReorderAdapter):
 
         if Config().single_miz_output_folder:
             check_folder(Config().single_miz_output_folder, self.manual_output_folder_lineedit)
-
-        if Config().auto_output_folder:
-            check_folder(Config().auto_output_folder, self.auto_out_le)
-
-        if Config().auto_source_folder:
-            check_folder(Config().auto_source_folder, self.auto_src_le)
 
     @property
     def manual_miz_path(self) -> Path:
@@ -228,17 +255,6 @@ class TabChildReorder(MainUiTabChild, TabReorderAdapter):
         if self.auto_out_path.exists():
             os.startfile(str(self.auto_out_path))
 
-    def auto_out_browse(self):
-        if self.auto_out_path:
-            init_dir = self.auto_out_path.dirname()
-        else:
-            init_dir = Path('.')
-        p = BrowseDialog.get_directory(self, 'Select output directory', init_dir=init_dir.abspath())
-        if p:
-            p = Path(p)
-            self.auto_out_le.setText(p.abspath())
-            Config().auto_output_folder = p.abspath()
-
     @property
     def auto_out_path(self) -> Path or None:
         t = self.auto_out_le.text()
@@ -252,18 +268,6 @@ class TabChildReorder(MainUiTabChild, TabReorderAdapter):
         if len(t) > 3:
             return Path(t)
         return None
-
-    def auto_src_browse(self):
-        if self.auto_src_path:
-            init_dir = self.auto_src_path.dirname()
-        else:
-            init_dir = saved_games_path
-        p = BrowseDialog.get_directory(self, 'Select source directory', init_dir=init_dir.abspath())
-        if p:
-            p = Path(p)
-            self.auto_src_le.setText(p.abspath())
-            Config().auto_source_folder = p.abspath()
-            self.scan_artifacts()
 
     def auto_src_open(self):
         if self.auto_src_path:

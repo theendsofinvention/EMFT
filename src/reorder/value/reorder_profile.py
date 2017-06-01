@@ -1,4 +1,8 @@
-from src.meta import MetaFile, MetaProperty
+from src.meta import MetaFile, MetaProperty, MetaGUIDProperty
+from utils import Path, make_logger
+from collections.abc import Set
+
+logger = make_logger(__name__)
 
 
 class ReorderProfile(MetaFile):
@@ -14,7 +18,7 @@ class ReorderProfile(MetaFile):
         return 'REORDER_PROFILE'
 
     def __init__(self, profile_name: str):
-        MetaFile.__init__(self, path=f'{profile_name}.profile')
+        MetaFile.__init__(self, path=f'./{profile_name}.profile')
         if self.path.exists():
             self.read()
         self._name = profile_name
@@ -33,4 +37,12 @@ class ReorderProfile(MetaFile):
 
     @MetaProperty(str)
     def av_repo(self, value: str) -> str:
+        return value
+
+    @MetaGUIDProperty(str)
+    def src_folder(self, value: str) -> str:
+        return value
+
+    @MetaGUIDProperty(str)
+    def output_folder(self, value: str) -> str:
         return value
