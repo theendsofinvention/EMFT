@@ -12,7 +12,7 @@ future==0.16.0
 geographiclib==1.48
 gitchangelog==3.0.3
 humanize==0.5.1
-hypothesis==3.11.0
+hypothesis==3.11.1
 mpmath==0.19
 natsort==5.0.3
 packaging==16.8
