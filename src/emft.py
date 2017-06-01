@@ -59,5 +59,8 @@ def main(test, verbose):
 
     check_cert()
 
+    from src.reorder.service.collect_local_profiles import CollectLocalProfiles
+    CollectLocalProfiles.collect_local_profiles()
+
     from src.ui.main_ui import start_ui
     start_ui(test)
