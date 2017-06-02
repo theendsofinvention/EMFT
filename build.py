@@ -127,6 +127,9 @@ def pre_build(env):
     )
 
 def build(env):
+    if sys.version_info[1] == 6:
+        logger.warning('running Python 3.6, installing dev version of PyInstaller')
+        install_pyinstaller_for_py36(env)
     logger.info('reading GitVersion output')
     version = loads(subprocess.check_output(['gitversion'], cwd='.').decode().rstrip())
     logger.debug('gitversion says: {}'.format(version))
@@ -218,16 +221,17 @@ def install_own_requirements(env):
 
 
 def build_requirements(env):
-    get_installed_packages(env)
+    # FIXME: re-make installed package check
+    # get_installed_packages(env)
     _write_own_requirements()
-    _write_requirements_in()
+    # _write_requirements_in()
     _compile_requirements(env)
 
 
 def update_requirements(env):
-    get_installed_packages(env)
+    # get_installed_packages(env)
     _write_own_requirements()
-    _write_requirements_in()
+    # _write_requirements_in()
     _compile_requirements(env, upgrade=True)
     sync_requirements(env)
     install_own_requirements(env)
