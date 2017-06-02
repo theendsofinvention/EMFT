@@ -126,10 +126,6 @@ def pre_build(env):
         logger_=logger,
     )
 
-
-# certifi-2017.1.23 cffi-1.9.1 cryptography-1.7.2 idna-2.2 packaging-16.8
-# paramiko-2.1.1 pyasn1-0.1.9 pycparser-2.17 pyparsing-2.1.10 scp-0.10.2 setuptools-34.1.1
-
 def build(env):
     logger.info('reading GitVersion output')
     version = loads(subprocess.check_output(['gitversion'], cwd='.').decode().rstrip())
