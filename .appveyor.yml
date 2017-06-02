@@ -75,7 +75,7 @@ install:
   - choco install gitversion.portable -pre -y
 #  - choco install gitversion.portable -y
   - git clone --branch=master https://github.com/132nd-etcher/verpatch.git C:\projects\verpatch
-  - curl -O http://esrg.sourceforge.net/utils_win_up/md5sum/crc32.exe
+#  - curl -O http://esrg.sourceforge.net/utils_win_up/md5sum/crc32.exe
 
 before_build:
   - ps: C:\ProgramData\chocolatey\bin\gitversion /l console /output buildserver /updateassemblyinfo /b (get-item env:APPVEYOR_REPO_BRANCH).Value
