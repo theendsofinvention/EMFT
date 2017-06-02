@@ -1,7 +1,7 @@
 [pytest]
 testpaths = test
 qt_api = pyqt5
-addopts = --cov=src --cov-config .coveragerc --cov-report xml --cov-report html --durations=10 --pep8
+addopts = --cov=src --cov-config .coveragerc --cov-report xml --cov-report html --durations=10 --pep8 --hypothesis-show-statistics
 pep8ignore =
     *.py E501 E126
     src/ui/qt_resource.py ALL
