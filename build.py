@@ -187,7 +187,7 @@ def _write_requirements_in():
 def _write_own_requirements():
     own_requirements = [
         'git+https://github.com/132nd-etcher/sltp.git#egg=sltp',
-        'git+https://github.com/132nd-etcher/utils.git#egg=utils'
+        'git+https://github.com/132nd-etcher/utils.git#egg=utils',
     ]
     Path('own-requirements.txt').write_text('\n'.join(own_requirements))
 
