@@ -3,6 +3,7 @@
 Runs a process in an external thread and logs the output to a standard Python logger
 """
 import os
+import sys
 import re
 import subprocess
 import threading
@@ -263,6 +264,8 @@ def install_local_dependencies(env):
 @click.option('-u', '--update-req', is_flag=True, help='Update all requirements')
 @click.option('-s', '--sync_req', is_flag=True, help='Sync requirements')
 def main(env, pre, req, cha, local_develop, update_req, sync_req):
+    if sys.version_info[0] < 3:
+        raise RuntimeError('nope.')
     if sync_req:
         sync_requirements(env)
         install_own_requirements(env)
