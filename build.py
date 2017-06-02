@@ -254,6 +254,16 @@ def install_local_dependencies(env):
     pip.main(['install', '-U', '--upgrade-strategy', 'only-if-needed', 'git+file://f:/dev/sltp@develop'])
 
 
+def install_pyinstaller_for_py36(env):
+    import pip
+    pip.main(
+        [
+            'install',
+            'git+https://github.com/pyinstaller/pyinstaller.git@develop#egg=PyInstaller'
+        ]
+    )
+
+
 @click.command()
 @click.argument('env', type=click.Path(exists=True, file_okay=False, dir_okay=True, readable=True))
 @click.option('-p', '--pre', is_flag=True, help='Pre build only')
