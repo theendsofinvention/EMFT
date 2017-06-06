@@ -137,8 +137,9 @@ class TabChildReorder(MainUiTabChild, TabReorderAdapter):
             )
         )
         self._initialize_config_values()
-        self.scan_branches()
-        self.scan_artifacts()
+        # self.scan_branches()
+        # self.scan_artifacts()
+        self.initial_scan()
 
     def _initialize_config_values(self):
         self.radio_single.setChecked(not Config().auto_mode)
@@ -355,6 +356,13 @@ class TabChildReorder(MainUiTabChild, TabReorderAdapter):
             else:
                 logger.warning('no local MIZ file found with version: {}'.format(self.remote.version))
                 return None
+
+    def _initial_scan(self):
+        self.tab_reorder_update_view_after_artifact_scan(self._scan_branches())
+        self._scan_artifacts()
+
+    def initial_scan(self):
+        self.main_ui.pool.queue_task(self._initial_scan)
 
     def _scan_branches(self):
         remote_branches = github.get_available_branches()
