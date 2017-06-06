@@ -2,7 +2,6 @@
 
 import os
 
-from PyQt5.QtWidgets import QLabel
 from utils.custom_logging import make_logger
 from utils.custom_path import Path
 
@@ -66,7 +65,7 @@ class TabChildReorder(MainUiTabChild, TabReorderAdapter):
         self.setLayout(
             VLayout(
                 [
-                    QLabel(
+                    Label(
                         'By design, LUA tables are unordered, which makes tracking changes extremely difficult.\n\n'
                         'This lets you reorder them alphabetically before you push them in a SCM.\n\n'
                         'It is recommended to set the "Output folder" to your local SCM repository.'
@@ -114,7 +113,7 @@ class TabChildReorder(MainUiTabChild, TabReorderAdapter):
                                     PushButton('Open', self.auto_out_open, self),
                                 ],
                                 [
-                                    QLabel('Branch filter'),
+                                    Label('Branch filter'),
                                     HLayout(
                                         [
                                             self.auto_scan_combo_branch,
