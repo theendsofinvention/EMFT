@@ -75,6 +75,17 @@ Fix
 
 Other
 ~~~~~
+- Pyup - initial update (#36) [pyup.io bot]
+
+  * Update hypothesis from 3.11.0 to 3.11.1
+
+  * Update pypiwin32 from 219 to 220
+
+  * Update pytest from 3.1.0 to 3.1.1
+
+  * Update raven from 6.0.0 to 6.1.0
+
+  * Update requests from 2.14.2 to 2.17.3
 - Dev: fix: remove default arg. [132nd-etcher]
 - Update changelog. [132nd-etcher]
 - Create README.md. [132nd-etcher]
