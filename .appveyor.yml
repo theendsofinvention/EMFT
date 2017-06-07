@@ -111,17 +111,17 @@ artifacts:
   - path: emft.exe
     name: emft
 
-branches:
-  only:
-    - master
-    - develop
-    - /release/.*/
-    - /pull/.*/
-    - /hotfix/.*/
-    - /feature/.*/
-
-  except:
-    - gh-pages
+# branches:
+#   only:
+#     - master
+#     - develop
+#     - /release/.*/
+#     - /pull/.*/
+#     - /hotfix/.*/
+#     - /feature/.*/
+# 
+#   except:
+#     - gh-pages
 
 deploy:
   - provider: GitHub
