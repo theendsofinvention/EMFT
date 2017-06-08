@@ -9,6 +9,14 @@ class RemoteGHRepo:
         self._repo_name = repo_name
         self._probe = GHProbe(repo_owner, repo_name)
 
+    @property
+    def repo_owner(self) -> str:
+        return self._repo_owner
+
+    @property
+    def repo_name(self) -> str:
+        return self._repo_name
+
     def refresh_remote_branches(self):
         self._probe.get_available_branches()
 

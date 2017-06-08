@@ -18,6 +18,14 @@ class RemoteAVRepo:
         self._build_version = None
 
     @property
+    def repo_name(self):
+        return self._repo_name
+
+    @property
+    def repo_owner(self):
+        return self._repo_owner
+
+    @property
     def __base_url(self):
         return r'https://ci.appveyor.com/api'
 
