@@ -10,7 +10,7 @@ from PyQt5.QtWidgets import QGroupBox, QBoxLayout, QSpacerItem, QWidget, QHBoxLa
     QRadioButton, QComboBox, QShortcut, QCheckBox, QLineEdit, QLabel, QPlainTextEdit, QSizePolicy, QGridLayout, \
     QMessageBox, QTableView, QAbstractItemView, QMenu, QMenuBar, QFileDialog, QTabWidget, QDoubleSpinBox, \
     QStyledItemDelegate, QStyleOptionViewItem, QFrame, QDialog
-from utils import make_logger, Path
+from src.utils import make_logger, Path
 
 SIGNAL = pyqtSignal
 

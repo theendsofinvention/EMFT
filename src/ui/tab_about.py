@@ -1,6 +1,6 @@
 # coding=utf-8
 
-from utils import make_logger
+from src.utils import make_logger
 
 from src import global_
 from src.ui.base import VLayout, Label, HSpacer, GridLayout, VSpacer

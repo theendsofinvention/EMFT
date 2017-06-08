@@ -1,7 +1,7 @@
 # coding=utf-8
 
 from src.meta import MetaFile
-from utils import Path
+from src.utils import Path
 
 
 class MetaFileRoster(MetaFile):

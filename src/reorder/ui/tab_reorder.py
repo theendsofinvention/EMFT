@@ -2,8 +2,8 @@
 
 import os
 
-from utils.custom_logging import make_logger
-from utils.custom_path import Path
+from src.utils.custom_logging import make_logger
+from src.utils.custom_path import Path
 
 from src.cfg.cfg import Config
 from src.global_ import MAIN_UI

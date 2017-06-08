@@ -4,7 +4,7 @@ from queue import Queue
 from PyQt5.QtCore import Qt
 from PyQt5.QtGui import QIcon, QKeySequence
 from PyQt5.QtWidgets import QMainWindow
-from utils import make_logger, nice_exit
+from src.utils import make_logger, nice_exit
 
 # noinspection PyProtectedMember
 from src import global_
@@ -134,7 +134,7 @@ def start_ui(test=False):
         I.show()
 
     logger.info('loading adapter: Progress')
-    from utils import Progress
+    from src.utils import Progress
     # noinspection PyTypeChecker
     Progress.register_adapter(I)
 
@@ -152,7 +152,7 @@ def start_ui(test=False):
         logger.critical('RUNNING IN TEST MODE')
         import time
         import src.sentry.sentry
-        from utils import ThreadPool, nice_exit
+        from src.utils import ThreadPool, nice_exit
         src.sentry.sentry.CRASH = True
 
         def test_hook():

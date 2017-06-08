@@ -1,5 +1,5 @@
 # coding=utf-8
-from utils import ProgressAdapter
+from src.utils import ProgressAdapter
 
 from src import global_
 

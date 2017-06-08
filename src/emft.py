@@ -5,8 +5,8 @@ from json import loads
 
 import click
 from natsort.natsort import natsorted
-from utils.custom_logging import make_logger, DEBUG, INFO
-from utils.custom_path import Path
+from src.utils.custom_logging import make_logger, DEBUG, INFO
+from src.utils.custom_path import Path
 
 __version__ = None
 
@@ -35,11 +35,11 @@ def check_cert():
     import certifi
     import os
 
-    from utils.custom_path import Path
+    from src.utils.custom_path import Path
     cacert = Path(certifi.where())
-    # noinspection SpellCheckingInspection
-    if not cacert.crc32() == '8EBF6C38':
-        raise ImportError('cacert.pem file is corrupted: {}'.format(cacert.crc32()))
+    # # noinspection SpellCheckingInspection
+    # if not cacert.crc32() == 'D069EE01':
+    #     raise ImportError('cacert.pem file is corrupted: {}'.format(cacert.crc32()))
     logger.debug('setting up local cacert file to: {}'.format(str(cacert)))
     os.environ['REQUESTS_CA_BUNDLE'] = str(cacert)
     logger.info('certificate: checked')
@@ -54,7 +54,7 @@ def check_cert():
 @click.option('-v', '--verbose', is_flag=True, help='Outputs debug messages')
 def main(test, verbose):
     if verbose:
-        from utils.custom_logging import CH
+        from src.utils.custom_logging import CH
         CH.setLevel(DEBUG)
 
     check_cert()

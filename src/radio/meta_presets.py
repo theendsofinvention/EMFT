@@ -3,7 +3,7 @@
 
 from collections import namedtuple, OrderedDict
 
-from utils import Path, make_logger
+from src.utils import Path, make_logger
 
 from src.meta import MetaFile
 

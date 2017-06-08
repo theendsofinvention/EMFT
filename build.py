@@ -3,9 +3,9 @@
 Runs a process in an external thread and logs the output to a standard Python logger
 """
 import os
-import sys
 import re
 import subprocess
+import sys
 import threading
 from json import loads
 
@@ -14,23 +14,22 @@ import click
 
 try:
     from src import global_
-    from utils.custom_logging import DEBUG, make_logger
-    from utils.custom_path import Path
+    from src.utils.custom_logging import DEBUG, make_logger
+    from src.utils.custom_path import Path
 except ImportError or ModuleNotFoundError:
-    import sys
 
     subprocess.check_call(
         [os.path.join(sys.argv[1], 'scripts/pip.exe'), 'install', '-r', 'own-requirements.txt'],
         stdout=subprocess.PIPE
     )
     from src import global_
-    from utils.custom_logging import DEBUG, make_logger
-    from utils.custom_path import Path
+    from src.utils.custom_logging import DEBUG, make_logger
+    from src.utils.custom_path import Path
 
 logger = make_logger(__name__)
 logger.setLevel(DEBUG)
 
-requirements = None
+requirements = []
 
 
 # noinspection PyPep8Naming
@@ -115,7 +114,7 @@ def patch_exe(path_to_exe: str or Path,
     run_piped_process(cmd, logger_=logger, cwd=wkdir)
 
 
-def pre_build(env):
+def _compile_qt_resources(env):
     logger.info('building UI resource files')
     run_piped_process(
         args=[
@@ -126,6 +125,11 @@ def pre_build(env):
         ],
         logger_=logger,
     )
+
+
+def pre_build(env):
+    _compile_qt_resources(env)
+
 
 def build(env):
     if sys.version_info[1] == 6:
@@ -184,14 +188,6 @@ def _write_requirements_in():
     Path('requirements.in').write_lines(x.split('==')[0] for x in requirements.split('\n'))
 
 
-def _write_own_requirements():
-    own_requirements = [
-        'git+https://github.com/132nd-etcher/sltp.git#egg=sltp',
-        'git+https://github.com/132nd-etcher/utils.git#egg=utils',
-    ]
-    Path('own-requirements.txt').write_text('\n'.join(own_requirements))
-
-
 def _compile_requirements(env, upgrade=False):
     args = [os.path.join(env, 'scripts/pip-compile.exe')]
 
@@ -214,28 +210,14 @@ def sync_requirements(env):
     ).stdout.read().decode('utf8'))
 
 
-def install_own_requirements(env):
-    logger.debug('\n' + subprocess.Popen(
-        [os.path.join(env, 'scripts/pip.exe'), 'install', '-r', 'own-requirements.txt'],
-        stdout=subprocess.PIPE
-    ).stdout.read().decode('utf8'))
-
-
 def build_requirements(env):
     # FIXME: re-make installed package check
-    # get_installed_packages(env)
-    _write_own_requirements()
-    # _write_requirements_in()
     _compile_requirements(env)
 
 
 def update_requirements(env):
-    # get_installed_packages(env)
-    _write_own_requirements()
-    # _write_requirements_in()
     _compile_requirements(env, upgrade=True)
     sync_requirements(env)
-    install_own_requirements(env)
 
 
 def generate_changelog(env):
@@ -259,7 +241,7 @@ def install_pyinstaller_for_py36(env):
     pip.main(
         [
             'install',
-            'git+https://github.com/pyinstaller/pyinstaller.git@develop#egg=PyInstaller'
+            'git+https://github.com/132nd-etcher/pyinstaller.git@develop#egg=PyInstaller'
         ]
     )
 
@@ -278,7 +260,6 @@ def main(env, pre, req, cha, local_develop, update_req, sync_req):
         raise RuntimeError('nope.')
     if sync_req:
         sync_requirements(env)
-        install_own_requirements(env)
         return
     if update_req:
         update_requirements(env)

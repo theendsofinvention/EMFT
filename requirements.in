@@ -5,7 +5,9 @@ colour
 coverage
 gitchangelog
 humanize
+httmock
 hypothesis
+mpmath
 natsort
 path.py
 pip-tools

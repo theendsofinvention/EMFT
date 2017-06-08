@@ -2,7 +2,7 @@
 import os
 import re
 
-from utils import make_logger
+from src.utils import make_logger
 
 from src.cfg import Config
 from src.misc.fs import dcs_installs, DCSInstall

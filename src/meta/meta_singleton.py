@@ -1,7 +1,7 @@
 # coding=utf-8
 
 import abc
-from utils.custom_path import Path
+from src.utils.custom_path import Path
 from .meta_file import MetaFile
 
 

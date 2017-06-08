@@ -4,7 +4,7 @@ import pytest
 import os
 from src.miz.miz import Miz
 from src.miz.mission import Mission
-from utils import Path
+from src.utils import Path
 
 if os.path.exists('./test_files'):
     BASE_PATH = './test_files'

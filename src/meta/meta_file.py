@@ -4,7 +4,7 @@ import time
 from collections import OrderedDict
 
 from ruamel.yaml import load as yload, resolver, add_constructor, add_representer
-from utils import make_logger, Path
+from src.utils import make_logger, Path
 
 from src.meta.meta import Meta
 

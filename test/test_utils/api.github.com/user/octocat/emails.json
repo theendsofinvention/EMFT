@@ -1,0 +1,12 @@
+[
+  {
+    "email": "octocat@github.com",
+    "verified": true,
+    "primary": true
+  },
+  {
+    "email": "octocat@catsunited.com",
+    "verified": false,
+    "primary": false
+  }
+]

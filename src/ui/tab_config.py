@@ -3,7 +3,7 @@
 import os
 import webbrowser
 
-from utils import Path, Version, AVRelease, make_logger
+from src.utils import Path, Version, AVRelease, make_logger
 
 from src import global_
 from src.__version__ import __version__

@@ -5,7 +5,7 @@ from src.ui.main_ui_interface import I
 import os
 import re
 
-from utils import make_logger, Path
+from src.utils import make_logger, Path
 
 from src.cfg import Config
 from ._winreg import winreg, A_REG

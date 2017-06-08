@@ -1,5 +1,5 @@
 # coding=utf-8
-from utils import Path, make_logger
+from src.utils import Path, make_logger
 from ._winreg import winreg, A_REG
 from src.cfg import Config
 

@@ -2,8 +2,8 @@
 """
 Convenience module for storing/restoring per-user configuration values
 """
-from utils.custom_logging import make_logger
-from utils.singleton import Singleton
+from src.utils.custom_logging import make_logger
+from src.utils.singleton import Singleton
 
 # noinspection PyProtectedMember
 from src import global_
