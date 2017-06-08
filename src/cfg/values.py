@@ -1,7 +1,7 @@
 # coding=utf-8
 
 import path
-from src.utils.custom_logging import make_logger
+from utils.custom_logging import make_logger
 
 from src.meta import MetaPropertyWithDefault, MetaGUIDPropertyWithDefault
 
