@@ -2,13 +2,17 @@
 
 import string
 import subprocess
+import sys
 
 import pytest
 from hypothesis import strategies as st, given
 
 from src.utils.custom_path import Path
 
-
+@pytest.mark.skipif(
+    sys.platform in {'linux', 'linux2'},
+    reason='running on Linux',
+)
 def test_get_version():
     import os
     p = Path(r'c:\windows\explorer.exe')

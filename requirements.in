@@ -13,7 +13,6 @@ path.py
 pip-tools
 pipdeptree
 polycircles
-pypiwin32
 PyQt5
 pytest
 pytest-cache

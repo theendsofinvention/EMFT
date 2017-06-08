@@ -954,16 +954,39 @@ class Group(Country):
     class Route:
 
         class Point:
-            def __init__(self, parent_route):
-                assert isinstance(parent_route, Group.Route)
+            def __init__(self, parent_route, point_index, l10n):
                 self.parent_route = parent_route
+                self._l10n = l10n
+                self._point_idx = point_index
 
             def __repr__(self):
-                return 'Route({})'.format(self.parent_route.parent_group.group_name)
+                return f'Point({self.parent_route}, {self._point_idx})'
+                
+            @property
+            def _point(self):
+                return self.parent_route[self._point_idx]
+                
+            @property
+            def action(self):
+                return self._point['action']
+                
+            @property
+            def x(self):
+                return self._point['x']
+                
+            @property
+            def y(self):
+                return self._point['y']
+                
+            @property
+            def name(self):
+                return self._l10n[self._point['name']]
+            
 
-        def __init__(self, parent_group):
+        def __init__(self, parent_group, l10n):
             assert isinstance(parent_group, Group)
             self.parent_group = parent_group
+            self._l10n = l10n
 
         def __repr__(self):
             return 'Route({})'.format(self.parent_group.group_name)
@@ -974,7 +997,8 @@ class Group(Country):
 
         @property
         def points(self):
-            raise NotImplementedError('uh')
+            for idx in self._section_route:
+                yield Group.Route.Point(self._section_route, idx, self._l10n)
 
     validator_group_route = Validator(_type=Route, exc=ValueError, logger=logger)
     units_class_enum = None
@@ -1007,7 +1031,7 @@ class Group(Country):
     def group_route(self) -> 'Group.Route':
         #  TODO
         if self.__group_route is None:
-            self.__group_route = Group.Route(self)
+            self.__group_route = Group.Route(self, self.l10n)
         return self.__group_route
 
     @group_route.setter

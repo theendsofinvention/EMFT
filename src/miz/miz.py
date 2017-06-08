@@ -77,7 +77,7 @@ class Miz:
             logger.debug('closing Mission object context')
             if not self.keep_temp_dir:
                 logger.debug('removing temp dir: {}'.format(self.tmpdir.abspath()))
-                self.tmpdir.rmtree()
+                self.tmpdir.rmtree(must_exist=False)
 
     @property
     def mission_file(self):

@@ -4,10 +4,22 @@ import binascii
 import os
 import shutil
 import tempfile
-import win32api
+
+
+class DummyWin32api:
+    
+    def __init__(self):
+        pass
+
+
+try:
+    import win32api
+    import pywintypes
+except ImportError:
+    win32api = DummyWin32api()
+    pywintypes = DummyWin32api()
 
 import path
-import pywintypes
 from humanize import filesize
 
 
@@ -167,17 +179,20 @@ class Path(path.Path):
         return path.Path.write_text(self, text, encoding, errors, linesep, append)
 
     def rmtree(self, must_exist=True):
+        
+        if not self.exists():
+            if must_exist:
+                raise ValueError('directory does not exist: {}'.format(self.abspath()))
+            else:
+                return
 
         if not self.isdir():
             raise TypeError('not a directory: {}'.format(self.abspath()))
 
-        if must_exist and not self.exists():
-            raise ValueError('directory does not exist: {}'.format(self.abspath()))
-
         for root, _, filenames in os.walk(str(self.abspath())):
             for file in filenames:
-                os.chmod(root + '\\' + file, 0o777)
-                os.remove(root + '\\' + file)
+                os.chmod(f'{root}/{file}', 0o777)
+                os.remove(f'{root}/{file}')
 
         shutil.rmtree(self.abspath())
 
