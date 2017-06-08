@@ -4,7 +4,7 @@ from collections import namedtuple
 
 import humanize
 import requests
-from utils import make_logger
+from src.utils import make_logger
 
 from src.sentry import SENTRY
 

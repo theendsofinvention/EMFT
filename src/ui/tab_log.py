@@ -3,7 +3,7 @@
 import logging
 import typing
 
-from utils import create_new_paste
+from src.utils import create_new_paste
 
 from src import global_
 from src.cfg import Config

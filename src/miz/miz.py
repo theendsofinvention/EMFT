@@ -4,8 +4,8 @@ from filecmp import dircmp
 from os.path import exists, join
 from zipfile import ZipFile, BadZipFile, ZipInfo
 
-from sltp import SLTP
-from utils import make_logger, Path, Progress
+from src.sltp import SLTP
+from src.utils import make_logger, Path, Progress
 
 from src.dummy_miz import dummy_miz
 from src.global_ import ENCODING

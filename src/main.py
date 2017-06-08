@@ -8,17 +8,17 @@ if __name__ == '__main__':
     """Init Sentry"""
     # noinspection PyUnresolvedReferences
     from src.sentry import SENTRY
-    from utils.threadpool import register_sentry
+    from src.utils.threadpool import register_sentry
     register_sentry(SENTRY)
 
     """Setup logging"""
-    from utils.custom_logging import make_logger
+    from src.utils.custom_logging import make_logger
     # noinspection PyProtectedMember
     from src.global_ import PATH_LOG_FILE
     from src.misc.logging_handler import persistent_logging_handler
 
     """Other imports"""
-    from utils import nice_exit
+    from src.utils import nice_exit
 
     try:
         logger = make_logger(__name__, log_file_path=PATH_LOG_FILE, custom_handler=persistent_logging_handler)

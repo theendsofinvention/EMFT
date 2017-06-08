@@ -2,7 +2,7 @@
 
 import typing
 
-from utils import Path, ThreadPool, make_logger
+from src.utils import Path, ThreadPool, make_logger
 
 from src.cfg import Config
 from src.misc.fs import saved_games_path

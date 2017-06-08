@@ -6,7 +6,7 @@ import subprocess
 import sys
 from json import loads, JSONDecodeError
 
-from utils.custom_path import Path
+from src.utils.custom_path import Path
 
 __version__ = None
 

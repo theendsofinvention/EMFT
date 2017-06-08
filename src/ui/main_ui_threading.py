@@ -1,7 +1,7 @@
 # coding=utf-8
 from PyQt5.QtCore import QObject, pyqtSignal, QThread
 
-from utils import make_logger, ThreadPool
+from src.utils import make_logger, ThreadPool
 from .main_ui_threading_adapter import MainUiThreadingAdapter
 
 logger = make_logger(__name__)

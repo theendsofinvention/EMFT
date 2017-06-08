@@ -2,7 +2,7 @@
 
 import time
 
-from utils import Downloader, make_logger
+from src.utils import Downloader, make_logger
 
 from src.ui.main_ui_interface import I
 

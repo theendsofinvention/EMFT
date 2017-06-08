@@ -7,7 +7,7 @@ from time import sleep
 from zipfile import BadZipFile
 
 import pytest
-from utils import Path
+from src.utils import Path
 
 from src.global_ import ENCODING
 from src.miz.mission import Mission, Country, Group, BaseUnit, FlyingUnit, EPOCH_DELTA, Coalition

@@ -1,7 +1,7 @@
 # coding=utf-8
 
 import abc
-from utils import ThreadPool
+from src.utils import ThreadPool
 
 
 class MainUiThreadingAdapter:

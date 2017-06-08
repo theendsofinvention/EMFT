@@ -48,6 +48,10 @@ Changes
 
 Fix
 ~~~
+- Fix bug in cfg values. [132nd-etcher]
+
+  # Conflicts:
+  #	src/cfg/values.py
 - Fixed pending or failed AV build not detected. [132nd-etcher]
 - Fix lag due to scanning of remote branch. [132nd-etcher]
 - Fixed laggy progress dialog when downloading a MIZ file. [132nd-

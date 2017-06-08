@@ -12,7 +12,7 @@ import raven.handlers.logging
 from src import global_
 from src.__version__ import __version__
 from src.sentry.sentry_context_provider import ISentryContextProvider
-from utils import Singleton, make_logger, nice_exit
+from src.utils import Singleton, make_logger, nice_exit
 
 logger = make_logger(__name__)
 
