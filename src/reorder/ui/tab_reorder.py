@@ -14,9 +14,9 @@ from src.ui.base import GroupBox, HLayout, VLayout, PushButton, Radio, Checkbox,
     BrowseDialog, LineEdit
 from src.ui.main_ui_interface import I
 from src.ui.main_ui_tab_widget import MainUiTabChild
+from .dialog_profile_editor import DialogProfileEditor
 from .tab_reorder_adapter import TabReorderAdapter, TAB_NAME
 from ..finder.find_local_profile import FindLocalProfile
-from .dialog_profile_editor import DialogProfileEditor
 
 try:
     import winreg
@@ -172,7 +172,6 @@ class TabChildReorder(MainUiTabChild, TabReorderAdapter):
             self.auto_src_le.setText(profile.src_folder)
             self.auto_out_le.setText(profile.output_folder)
 
-
     def _initialize_config_values(self):
         """Retrieves values from config files to initialize the UI"""
 
@@ -300,7 +299,7 @@ class TabChildReorder(MainUiTabChild, TabReorderAdapter):
         local_file = self._look_for_local_file(self.remote.version)
 
         if local_file is None:
-          error = f'no local file found for version: {self.remote.version}'
+            error = f'no local file found for version: {self.remote.version}'
         elif not local_file.isfile():
             error = f'not a file: {local_file.abspath()}'
         elif not self.auto_out_path:

@@ -1,15 +1,14 @@
-from src.ui.base import Dialog, Label, GridLayout, LineEdit, VSpacer, PushButton, HSpacer, HLayout, BrowseDialog,\
-    box_warning
-from src.reorder.value.reorder_profile import ReorderProfile
-from src.reorder.value.local_profiles import local_profiles
 from utils import make_logger
 
+from src.reorder.value.local_profiles import local_profiles
+from src.reorder.value.reorder_profile import ReorderProfile
+from src.ui.base import Dialog, Label, GridLayout, LineEdit, VSpacer, PushButton, HLayout, BrowseDialog, \
+    box_warning
 
 logger = make_logger(__name__)
 
 
 class DialogProfileEditor(Dialog):
-
     def __init__(self, parent=None):
         Dialog.__init__(self, parent=parent)
         self.setMinimumWidth(600)
@@ -47,8 +46,6 @@ class DialogProfileEditor(Dialog):
                 ],
             ),
         )
-
-
 
     def _on_browse_src_folder(self):
         p = BrowseDialog.get_directory(self, 'Select the source folder')

@@ -19,7 +19,6 @@ class AbstractMeta(ISentryContextProvider, metaclass=abc.ABCMeta):
 
 
 class AbstractMetaFile(AbstractMeta, metaclass=abc.ABCMeta):
-
     @property
     @abc.abstractmethod
     def meta_header(self):

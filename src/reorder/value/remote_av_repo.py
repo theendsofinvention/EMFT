@@ -1,16 +1,13 @@
+import humanize
 import requests
 from utils import make_logger
+
 from .av_probe_result import AVProbeResult
-
-import humanize
-
 
 logger = make_logger(__name__)
 
 
-
 class RemoteAVRepo:
-
     def __init__(self, repo_owner: str, repo_name: str):
         self._repo_name = repo_name
         self._repo_owner = repo_owner

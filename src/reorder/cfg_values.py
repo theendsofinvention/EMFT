@@ -1,9 +1,9 @@
-from src.meta import MetaPropertyWithDefault, MetaGUIDPropertyWithDefault
 from utils import Path
+
+from src.meta import MetaPropertyWithDefault, MetaGUIDPropertyWithDefault
 
 
 class ReorderConfigValues():
-
     # noinspection PyPep8Naming
     @MetaPropertyWithDefault('All', str)
     def reorder_selected_auto_branch(self, value: str):
