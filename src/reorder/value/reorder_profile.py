@@ -1,5 +1,5 @@
 from src.meta import MetaFile, MetaProperty, MetaGUIDProperty
-from utils import Path, make_logger
+from src.utils import Path, make_logger
 from collections.abc import Set
 
 logger = make_logger(__name__)

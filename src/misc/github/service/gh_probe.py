@@ -1,7 +1,8 @@
 import requests
-from utils import make_logger
+
 from src.misc.github.value.branch import Branch, BranchesArray
 from src.sentry import SENTRY
+from src.utils import make_logger
 
 logger = make_logger(__name__)
 

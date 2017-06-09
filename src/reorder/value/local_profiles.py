@@ -28,4 +28,4 @@ class LocalProfiles(MutableMapping):
         return sorted(self._data.keys())
 
 
-local_profiles = LocalProfiles()
+LOCAL_PROFILES = LocalProfiles()

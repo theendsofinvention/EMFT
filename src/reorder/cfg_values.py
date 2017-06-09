@@ -1,4 +1,4 @@
-from utils import Path
+from src.utils import Path
 
 from src.meta import MetaPropertyWithDefault, MetaGUIDPropertyWithDefault
 

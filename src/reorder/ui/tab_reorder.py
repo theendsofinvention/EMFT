@@ -2,9 +2,6 @@
 
 import os
 
-from src.utils.custom_logging import make_logger
-from src.utils.custom_path import Path
-
 from src.cfg.cfg import Config
 from src.global_ import MAIN_UI
 from src.misc import appveyor, downloader, github_old
@@ -14,9 +11,13 @@ from src.ui.base import GroupBox, HLayout, VLayout, PushButton, Radio, Checkbox,
     BrowseDialog, LineEdit
 from src.ui.main_ui_interface import I
 from src.ui.main_ui_tab_widget import MainUiTabChild
+from src.utils.custom_logging import make_logger
+from src.utils.custom_path import Path
 from .dialog_profile_editor import DialogProfileEditor
 from .tab_reorder_adapter import TabReorderAdapter, TAB_NAME
 from ..finder.find_local_profile import FindLocalProfile
+from src.reorder.service import ChangeActiveProfile
+from src.reorder.value import ACTIVE_PROFILE
 
 try:
     import winreg
@@ -29,6 +30,9 @@ logger = make_logger(__name__)
 
 
 class TabChildReorder(MainUiTabChild, TabReorderAdapter):
+    def tab_reorder_change_active_profile(self, new_profile_name):
+        self.profile_combo.set_index_from_text(new_profile_name)
+
     def tab_clicked(self):
         self.scan_artifacts()
 
@@ -161,16 +165,13 @@ class TabChildReorder(MainUiTabChild, TabReorderAdapter):
         self._load_values_from_profile()
 
     def _on_profile_change(self, selected_profile_name):
-        Config().reorder_last_profile_name = selected_profile_name
+        ChangeActiveProfile.change_active_profile(selected_profile_name)
         self._load_values_from_profile()
 
     def _load_values_from_profile(self):
-        profile_name = Config().reorder_last_profile_name
-        if profile_name:
-            assert isinstance(profile_name, str)
-            profile = FindLocalProfile.find_profile_by_name(profile_name)
-            self.auto_src_le.setText(profile.src_folder)
-            self.auto_out_le.setText(profile.output_folder)
+        if ACTIVE_PROFILE:
+            self.auto_src_le.setText(ACTIVE_PROFILE.src_folder)
+            self.auto_out_le.setText(ACTIVE_PROFILE.output_folder)
 
     def _initialize_config_values(self):
         """Retrieves values from config files to initialize the UI"""

@@ -1,6 +1,6 @@
-from utils import make_logger
+from src.utils import make_logger
 
-from src.reorder.value.local_profiles import local_profiles
+from src.reorder.value.local_profiles import LOCAL_PROFILES
 from src.reorder.value.reorder_profile import ReorderProfile
 from src.ui.base import Dialog, Label, GridLayout, LineEdit, VSpacer, PushButton, HLayout, BrowseDialog, \
     box_warning
@@ -73,7 +73,7 @@ class DialogProfileEditor(Dialog):
     def to_profile(self, profile_name):
         if self._is_valid():
             try:
-                profile = local_profiles[profile_name]
+                profile = LOCAL_PROFILES[profile_name]
             except KeyError:
                 profile = ReorderProfile(profile_name)
             logger.debug(f'profile is valid, saving to file: {profile.path.abspath()}')

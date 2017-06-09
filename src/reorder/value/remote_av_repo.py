@@ -1,6 +1,6 @@
 import humanize
 import requests
-from utils import make_logger
+from src.utils import make_logger
 
 from .av_probe_result import AVProbeResult
 
