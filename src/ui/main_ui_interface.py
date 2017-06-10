@@ -4,7 +4,7 @@
 import threading
 
 from src import global_
-from src.reorder.ui.tab_reorder_adapter import TabReorderAdapter
+from src.reorder.adapter.tab_reorder_adapter import TabReorderAdapter
 from .main_ui_mixins_adapter import MainUiMixinsAdapter
 from .tab_config_adapter import TabConfigAdapter
 from .tab_log_adapter import TabLogAdapter

@@ -1,6 +1,6 @@
 import pytest
 
-from src.reorder.service.convert_url import ConvertUrl
+from src.reorder.service import ConvertUrl
 
 
 class TestConvertUrl:

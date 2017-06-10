@@ -1,8 +1,7 @@
 # coding=utf-8
 
 from src.cfg import Config
-from src.reorder.ui.output_folder_model import OutputFoldersModelContainer
-from src.reorder.value import OutputFolder, OutputFolders
+from src.reorder.value import OutputFolder, OutputFolders, OutputFoldersModelContainer
 from src.utils import Path, make_logger
 
 logger = make_logger(__name__)
@@ -48,6 +47,7 @@ class ManageOutputFolders:
             ManageOutputFolders.write_output_folders_to_config()
         else:
             raise FileExistsError(f'another output folder is already registered with the path: {path.abspath()}')
+        return True
 
     @staticmethod
     def get_by_name(name: str):

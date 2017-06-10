@@ -1,7 +1,7 @@
 import humanize
 import requests
-from src.utils import make_logger
 
+from src.utils import make_logger
 from .av_probe_result import AVProbeResult
 
 logger = make_logger(__name__)
@@ -111,4 +111,3 @@ class RemoteAVRepo:
             remote_file_name=remote_file_name,
             remote_file_size=remote_file_size,
         )
-        # return AVResult(version=latest, branch=branch, download_url=download_url, file_size=remote_file_size, file_name=local_file_name)

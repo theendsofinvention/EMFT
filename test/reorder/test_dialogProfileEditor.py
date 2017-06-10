@@ -5,9 +5,6 @@ from unittest import mock
 import pytest
 
 from src.reorder.ui import dialog_profile_editor
-from src.reorder.value.local_profiles import LocalProfiles
-from src.reorder.value.reorder_profile import ReorderProfile
-from src.utils import Path
 
 
 class TestDialogProfileEditor:

@@ -1,8 +1,8 @@
 from src.utils import Path
 
 
+# noinspection PyAbstractClass
 class LocalMizFile(Path):
-
     def __init__(self, path_str: str):
         Path.__init__(self, path_str)
 

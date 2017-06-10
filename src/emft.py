@@ -59,9 +59,8 @@ def main(test, verbose):
 
     check_cert()
 
-    from src.reorder.service import CollectLocalProfiles, ChangeActiveProfile
-    CollectLocalProfiles.collect_local_profiles()
-    ChangeActiveProfile.restore_last_profile_from_config()
+    import src.reorder
+    src.reorder.initialize()
 
     from src.ui.main_ui import start_ui
     start_ui(test)

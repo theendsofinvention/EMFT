@@ -1,6 +1,5 @@
 from src.meta import MetaFile, MetaProperty, MetaGUIDProperty
-from src.utils import Path, make_logger
-from collections.abc import Set
+from src.utils import make_logger
 
 logger = make_logger(__name__)
 
@@ -21,18 +20,10 @@ class ReorderProfile(MetaFile):
         MetaFile.__init__(self, path=f'./{profile_name}.profile')
         if self.path.exists():
             self.read()
-        self._name = profile_name
-
-    @MetaProperty(str)
-    def gh_owner(self, value: str) -> str:
-        return value
+        self.name = profile_name
 
     @MetaProperty(str)
     def gh_repo(self, value: str) -> str:
-        return value
-
-    @MetaProperty(str)
-    def av_owner(self, value: str) -> str:
         return value
 
     @MetaProperty(str)

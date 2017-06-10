@@ -1,9 +1,9 @@
-from src.misc.github import GHProbe, Branch, BranchesArray
 import typing
+
+from src.misc.github import GHProbe, Branch
 
 
 class RemoteGHRepo:
-
     def __init__(self, repo_owner: str, repo_name: str):
         self._repo_owner = repo_owner
         self._repo_name = repo_name

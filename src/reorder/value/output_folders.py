@@ -16,8 +16,8 @@ class OutputFolders(MutableMapping, metaclass=Singleton):
     def __iter__(self) -> typing.Iterator[str]:
         return self._data.__iter__()
 
-    def values(self) -> typing.Iterator[OutputFolder]:
-        return self._data.values()
+    def values(self) -> typing.List[OutputFolder]:
+        return list(self._data.values())
 
     @property
     def data(self) -> dict:
