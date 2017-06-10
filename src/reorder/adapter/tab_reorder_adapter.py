@@ -4,7 +4,7 @@ import abc
 
 from src.ui.main_ui_tab_widget import MainUiTabMethod
 
-TAB_NAME = 'Reorder lua tables'
+TAB_NAME = 'Reorder MIZ'
 
 
 class TabReorderAdapter:
