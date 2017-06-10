@@ -59,7 +59,7 @@ class GroupBox(QGroupBox):
             self.setTitle(title)
         if layout:
             self.setLayout(layout)
-        self.setContentsMargins(10, 18, 10, 10)
+        self.setContentsMargins(10, 25, 10, 10)
 
 
 class _WithChildren:
