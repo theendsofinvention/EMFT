@@ -5,7 +5,7 @@ from abc import abstractmethod
 
 from PyQt5.QtCore import Qt, QAbstractTableModel, QModelIndex, QVariant, QSortFilterProxyModel, QAbstractItemModel, \
     QRegExp, pyqtSignal
-from PyQt5.QtGui import QKeySequence, QIcon, QContextMenuEvent, QColor, QRegExpValidator
+from PyQt5.QtGui import QKeySequence, QIcon, QContextMenuEvent, QColor, QRegExpValidator, QStandardItemModel
 from PyQt5.QtWidgets import QGroupBox, QBoxLayout, QSpacerItem, QWidget, QHBoxLayout, QVBoxLayout, QPushButton, \
     QRadioButton, QComboBox, QShortcut, QCheckBox, QLineEdit, QLabel, QPlainTextEdit, QSizePolicy, QGridLayout, \
     QMessageBox, QTableView, QAbstractItemView, QMenu, QMenuBar, QFileDialog, QTabWidget, QDoubleSpinBox, \
@@ -61,7 +61,7 @@ class GroupBox(QGroupBox):
             self.setTitle(title)
         if layout:
             self.setLayout(layout)
-        self.setContentsMargins(10, 18, 10, 10)
+        self.setContentsMargins(10, 25, 10, 10)
 
 
 class _WithChildren:
@@ -239,31 +239,50 @@ class Radio(QRadioButton):
 
 
 class Combo(QComboBox):
-    def __init__(self, on_change: callable, choices: list = None, parent=None):
+    def __init__(self, on_change: callable, choices: list = None, parent=None, model: QStandardItemModel = None):
         QComboBox.__init__(self, parent=parent)
         self.on_change = on_change
         if choices:
             self.addItems(choices)
+        if model:
+            self.setModel(model)
+            # noinspection PyUnresolvedReferences
+            model.modelAboutToBeReset.connect(self.begin_reset_model)
+            # noinspection PyUnresolvedReferences
+            model.modelReset.connect(self.end_reset_model)
         # noinspection PyUnresolvedReferences
-        self.currentTextChanged.connect(on_change)
+        self.activated.connect(on_change)
+        self._current_text = None
+
+    def begin_reset_model(self):
+        self._current_text = self.currentText()
+
+    def end_reset_model(self):
+        if self._current_text:
+            try:
+                self.set_index_from_text(self._current_text)
+            except ValueError:
+                pass
 
     def __enter__(self):
-        self.blockSignals(True)
+        pass
+        # self.blockSignals(True)
 
     def __exit__(self, exc_type, exc_val, exc_tb):
-        self.blockSignals(False)
+        pass
+        # self.blockSignals(False)
 
     def set_index_from_text(self, text):
-        self.blockSignals(True)
+        # self.blockSignals(True)
         idx = self.findText(text, Qt.MatchExactly)
         if idx < 0:
             self.setCurrentIndex(0)
             raise ValueError(text)
         self.setCurrentIndex(idx)
-        self.blockSignals(False)
+        # self.blockSignals(False)
 
     def reset_values(self, choices: list):
-        self.blockSignals(True)
+        # self.blockSignals(True)
         current = self.currentText()
         self.clear()
         self.addItems(choices)
@@ -272,7 +291,7 @@ class Combo(QComboBox):
                 self.set_index_from_text(current)
             except ValueError:
                 logger.warning('value "{}" has been deleted'.format(current))
-        self.blockSignals(False)
+        # self.blockSignals(False)
 
 
 class Shortcut(QShortcut):
@@ -290,6 +309,7 @@ class LineEdit(QLineEdit, Expandable):
             read_only: bool = False,
             clear_btn_enabled: bool = False,
             validation_regex: str = None,
+            set_enabled: bool = True,
     ):
         QLineEdit.__init__(self, text)
         if on_text_changed:
@@ -299,11 +319,13 @@ class LineEdit(QLineEdit, Expandable):
         self.setClearButtonEnabled(clear_btn_enabled)
         if validation_regex:
             self.setValidator(QRegExpValidator(QRegExp(validation_regex), self))
+        self.setEnabled(set_enabled)
 
 
 class Label(QLabel):
-    def __init__(self, text, text_color='black', bg_color='rgba(255, 255, 255, 10)'):
+    def __init__(self, text, text_color='black', bg_color='rgba(255, 255, 255, 10)', word_wrap: bool = False):
         QLabel.__init__(self, text)
+        self.setWordWrap(word_wrap)
         self.text_color = text_color
         self.bg_color = bg_color
 

@@ -8,51 +8,65 @@ no-bump-message: '\+semver:\s?(none|skip)'
 branches:
   feature:
     regex: features?[/-]
+    mode: ContinuousDelivery
     tag: alpha.{BranchName}
     increment: Patch
     prevent-increment-of-merged-branch-version: false
-    track-merge-target: true
+    track-merge-target: false
+    tracks-release-branches: false
     is-release-branch: false
   pull-request:
     regex: (pull|pull\-requests|pr)[/-]
+    mode: ContinuousDelivery
     tag: beta.{BranchName}
     increment: Patch
     prevent-increment-of-merged-branch-version: false
     tag-number-pattern: '[/-](?<number>\d+)[-/]'
-    track-merge-target: true
+    track-merge-target: false
+    tracks-release-branches: false
     is-release-branch: false
   develop:
     regex: dev(elop)?(ment)?$
+    mode: ContinuousDeployment
     tag: dev
     increment: Patch
     prevent-increment-of-merged-branch-version: false
     track-merge-target: true
+    tracks-release-branches: true
     is-release-branch: false
   release:
     regex: releases?[/-]
+    mode: ContinuousDelivery
     tag: rc
     increment: Patch
     prevent-increment-of-merged-branch-version: true
     track-merge-target: false
+    tracks-release-branches: false
     is-release-branch: true
   hotfix:
     regex: hotfix(es)?[/-]
+    mode: ContinuousDelivery
     tag: patch
     increment: Patch
     prevent-increment-of-merged-branch-version: false
     track-merge-target: false
+    tracks-release-branches: false
     is-release-branch: false
   support:
     regex: support[/-]
+    mode: ContinuousDelivery
     tag: deprecated
     increment: Patch
     prevent-increment-of-merged-branch-version: true
     track-merge-target: false
+    tracks-release-branches: false
     is-release-branch: false
   master:
     regex: master
+    mode: ContinuousDelivery
     tag: ''
     increment: Patch
     prevent-increment-of-merged-branch-version: true
     track-merge-target: false
+    tracks-release-branches: false
     is-release-branch: false

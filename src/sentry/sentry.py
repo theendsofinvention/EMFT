@@ -54,6 +54,9 @@ class Sentry(raven.Client, metaclass=Singleton):
 
     def captureMessage(self, message, **kwargs):
         self.set_context()
+        if not global_.FROZEN:
+            logger.warning(f'message would have been sent: {message}')
+            return
         if kwargs.get('data') is None:
             kwargs['data'] = {}
         if kwargs['data'].get('level') is None:
