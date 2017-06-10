@@ -300,8 +300,9 @@ class LineEdit(QLineEdit, Expandable):
 
 
 class Label(QLabel):
-    def __init__(self, text, text_color='black', bg_color='rgba(255, 255, 255, 10)'):
+    def __init__(self, text, text_color='black', bg_color='rgba(255, 255, 255, 10)', word_wrap: bool = False):
         QLabel.__init__(self, text)
+        self.setWordWrap(word_wrap)
         self.text_color = text_color
         self.bg_color = bg_color
 
