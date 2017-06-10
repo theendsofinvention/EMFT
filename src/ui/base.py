@@ -243,25 +243,27 @@ class Combo(QComboBox):
         if choices:
             self.addItems(choices)
         # noinspection PyUnresolvedReferences
-        self.currentTextChanged.connect(on_change)
+        self.activated.connect(on_change)
 
     def __enter__(self):
-        self.blockSignals(True)
+        pass
+        # self.blockSignals(True)
 
     def __exit__(self, exc_type, exc_val, exc_tb):
-        self.blockSignals(False)
+        pass
+        # self.blockSignals(False)
 
     def set_index_from_text(self, text):
-        self.blockSignals(True)
+        # self.blockSignals(True)
         idx = self.findText(text, Qt.MatchExactly)
         if idx < 0:
             self.setCurrentIndex(0)
             raise ValueError(text)
         self.setCurrentIndex(idx)
-        self.blockSignals(False)
+        # self.blockSignals(False)
 
     def reset_values(self, choices: list):
-        self.blockSignals(True)
+        # self.blockSignals(True)
         current = self.currentText()
         self.clear()
         self.addItems(choices)
@@ -270,7 +272,7 @@ class Combo(QComboBox):
                 self.set_index_from_text(current)
             except ValueError:
                 logger.warning('value "{}" has been deleted'.format(current))
-        self.blockSignals(False)
+        # self.blockSignals(False)
 
 
 class Shortcut(QShortcut):
