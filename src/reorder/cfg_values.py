@@ -86,3 +86,7 @@ class ReorderConfigValues:
     @MetaGUIDPropertyWithDefault(None, str)
     def last_miz_file_in_manual_mode(self, value: str):
         return value
+
+    @MetaGUIDPropertyWithDefault(None, str)
+    def last_used_auto_profile(self, value: str):
+        return value

@@ -136,6 +136,8 @@ class GridLayout(QGridLayout):
                     align = child[c][1].get('align', 'l')
                     span = child[c][1].get('span', [1, 1])
                     self.addWidget(child[c][0], r, c, *span, self.align[align])
+                elif isinstance(child[c], GridLayout):
+                    self.addLayout(child[c], r, c)
                 elif isinstance(child[c], QBoxLayout):
                     self.addLayout(child[c], r, c)
                 elif isinstance(child[c], int):
@@ -213,7 +215,15 @@ class GridFrame(Frame):
 
 
 class PushButton(QPushButton):
-    def __init__(self, text, func: callable, parent=None, min_height=None):
+    def __init__(
+            self,
+            text: str,
+            func: callable,
+            parent=None,
+            min_height=None,
+            text_color='black',
+            bg_color='rgba(255, 255, 255, 10)'
+    ):
         QPushButton.__init__(self, text, parent)
         # noinspection PyUnresolvedReferences
         self.clicked.connect(func)
@@ -221,6 +231,19 @@ class PushButton(QPushButton):
                            'padding-top: 3px; padding-bottom: 3px;')
         if min_height:
             self.setMinimumHeight(min_height)
+        self.text_color = text_color
+        self.bg_color = bg_color
+
+    def __update_style_sheet(self):
+        self.setStyleSheet('PushButton {{ background-color : {}; color : {}; }}'.format(self.bg_color, self.text_color))
+
+    def set_text_color(self, color):
+        self.text_color = color
+        self.__update_style_sheet()
+
+    def set_bg_color(self, color):
+        self.bg_color = color
+        self.__update_style_sheet()
 
 
 class Checkbox(QCheckBox):

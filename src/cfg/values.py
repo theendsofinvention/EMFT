@@ -75,9 +75,3 @@ class ConfigValues(ReorderConfigValues):
     @MetaGUIDPropertyWithDefault(None, str)
     def tab_radios_meta_path_last_dir(self, value: str):
         return value
-
-    @MetaPropertyWithDefault([], list)
-    def reorder_auto_profiles(self, value: list):
-        if not isinstance(value, list):
-            raise TypeError(type(value))
-        return value

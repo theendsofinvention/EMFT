@@ -1,5 +1,6 @@
 # coding=utf-8
 import os
+import webbrowser
 from src.cfg import Config
 from src.ui.base import BrowseDialog
 from src.utils import Path
@@ -22,6 +23,9 @@ class BrowseForFiles:
 
     @staticmethod
     def show_file_or_folder_in_explorer(path: Path or str):
+        if isinstance(path, str) and path.startswith('http'):
+            webbrowser.open_new_tab(path)
+            return
         if isinstance(path, str):
             path = Path(path)
         if not path.exists():

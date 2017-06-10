@@ -21,7 +21,7 @@ class ConvertUrl:
             if m:
                 return m.group('repo_owner'), m.group('repo_name')
         SENTRY.captureMessage(f'failed to parse url: {url_str}')
-        raise ValueError(url_str)
+        raise ValueError(f'URL not recognized: {url_str}')
 
     @staticmethod
     def convert_gh_url(gh_repo_url: str) -> typing.Tuple[str, str]:

@@ -1,9 +1,7 @@
-from src.utils import make_logger, Path
-
-from src.reorder.value.reorder_profile import ReorderProfile
-from src.reorder.service.convert_url import ConvertUrl
+from src.reorder.service import ConvertUrl, ManageProfiles
 from src.ui.base import Dialog, Label, GridLayout, LineEdit, VSpacer, PushButton, HLayout, BrowseDialog, \
     box_warning
+from src.utils import make_logger, Path
 
 logger = make_logger(__name__)
 
@@ -100,29 +98,11 @@ class DialogProfileEditor(Dialog):
 
     def to_profile(self):
         if self._is_valid():
-            profile = ReorderProfile(self._name_le.text())
-            logger.debug(f'profile is valid, saving to file: {profile.path.abspath()}')
-            profile.av_repo = self._av_repo_le.text()
-            profile.gh_repo = self._gh_repo_le.text()
-            profile.src_folder = self._src_folder.text()
-            profile.output_folder = self._output_folder.text()
-            profile.write()
-            # LocalProfiles()[self._name_le.text()] = profile
+            ManageProfiles.add_profile_from_values(
+                name=self._name_le.text(),
+                gh_repo=self._gh_repo_le.text(),
+                av_repo=self._av_repo_le.text(),
+                src_folder=self._src_folder.text(),
+                output_folder=self._output_folder.text()
+            )
             return True
-
-    def update_from_profile(self, profile: ReorderProfile):
-        self._name_le.setText(profile.name)
-        self._av_repo_le.setText(profile.av_repo)
-        self._gh_repo_le.setText(profile.gh_repo)
-        self._src_folder.setText(profile.src_folder)
-        self._output_folder.setText(profile.output_folder)
-
-    @staticmethod
-    def create_new_dialog_from_profile(profile: ReorderProfile, parent=None) -> 'DialogProfileEditor':
-        dialog = DialogProfileEditor(parent=parent)
-        dialog._name_le.setText(profile.name)
-        dialog._av_repo_le.setText(profile.av_repo)
-        dialog._gh_repo_le.setText(profile.gh_repo)
-        dialog._src_folder.setText(profile.src_folder)
-        dialog._output_folder.setText(profile.output_folder)
-        return dialog

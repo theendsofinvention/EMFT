@@ -7,6 +7,7 @@ from src.ui.base import VLayout, Label, Checkbox, GroupBox, Radio, HLayout, Push
 from src.ui.main_ui_tab_widget import MainUiTabChild
 from src.utils.custom_logging import make_logger
 from .widget_manual_reorder import WidgetManualReorder
+from .widget_auto_reorder import WidgetAutoReorder
 
 logger = make_logger(__name__)
 
@@ -40,6 +41,7 @@ class TabChildReorder(MainUiTabChild, TabReorderAdapter):
         self.radio_auto = Radio('Auto mode', self._on_click_radio_manual_or_auto)
 
         self.widget_manual = WidgetManualReorder(self)
+        self.widget_auto = WidgetAutoReorder(self)
 
         self.btn_reorder = PushButton(
             text='Reorder MIZ file',
@@ -82,6 +84,7 @@ class TabChildReorder(MainUiTabChild, TabReorderAdapter):
                         layout=VLayout(
                             [
                                 self.widget_manual,
+                                self.widget_auto,
                             ],
                         ),
                     ),
@@ -113,8 +116,8 @@ class TabChildReorder(MainUiTabChild, TabReorderAdapter):
         Config().skip_options_file = self.check_skip_options.isChecked()
 
     def _on_click_radio_manual_or_auto(self):
-        show_manual = self.radio_manual.isChecked()
-        self.widget_manual.setVisible(show_manual)
+        self.widget_manual.setVisible(self.radio_manual.isChecked())
+        self.widget_auto.setVisible(self.radio_auto.isChecked())
         self._write_selected_mode_to_config()
 
     def _reorder_manual(self):
@@ -124,6 +127,15 @@ class TabChildReorder(MainUiTabChild, TabReorderAdapter):
             skip_option_file=self.check_skip_options.isChecked(),
         )
 
+    def _reorder_auto(self):
+        ReorderMiz().reorder_miz_file(
+            miz_file_path=self.widget_auto.path_to_miz,
+            output_folder_path=self.widget_auto.path_to_output_folder,
+            skip_option_file=self.check_skip_options.isChecked(),
+        )
+
     def _on_click_reorder_btn(self):
         if self._manual_mode_is_selected:
             self._reorder_manual()
+        elif self._auto_mode_is_selected:
+            self._reorder_auto()
