@@ -59,6 +59,30 @@ class ReorderConfigValues:
                 return None
             return str(p.abspath())
 
-    @MetaPropertyWithDefault(None, str)
-    def reorder_last_profile_name(self, value: str) -> str:
+    @MetaGUIDPropertyWithDefault(None, dict)
+    def output_folders(self, value: dict):
+        return value
+
+    @MetaGUIDPropertyWithDefault(None, dict)
+    def reorder_auto_profiles(self, value: dict):
+        return value
+
+    @MetaGUIDPropertyWithDefault(None, str)
+    def last_used_output_folder_in_manual_mode(self, value: str):
+        return value
+
+    @MetaGUIDPropertyWithDefault(None, str)
+    def last_used_output_folder_in_auto_mode(self, value: str):
+        return value
+
+    @MetaGUIDPropertyWithDefault(None, str)
+    def last_browse_miz_dirname(self, value: str):
+        return value
+
+    @MetaGUIDPropertyWithDefault(None, str)
+    def last_browse_output_folder_dirname(self, value: str):
+        return value
+
+    @MetaGUIDPropertyWithDefault(None, str)
+    def last_miz_file_in_manual_mode(self, value: str):
         return value
