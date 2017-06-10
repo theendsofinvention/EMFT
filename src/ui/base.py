@@ -288,6 +288,7 @@ class LineEdit(QLineEdit, Expandable):
             read_only: bool = False,
             clear_btn_enabled: bool = False,
             validation_regex: str = None,
+            set_enabled: bool = True,
     ):
         QLineEdit.__init__(self, text)
         if on_text_changed:
@@ -297,6 +298,7 @@ class LineEdit(QLineEdit, Expandable):
         self.setClearButtonEnabled(clear_btn_enabled)
         if validation_regex:
             self.setValidator(QRegExpValidator(QRegExp(validation_regex), self))
+        self.setEnabled(set_enabled)
 
 
 class Label(QLabel):
