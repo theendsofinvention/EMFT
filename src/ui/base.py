@@ -5,7 +5,7 @@ from abc import abstractmethod
 
 from PyQt5.QtCore import Qt, QAbstractTableModel, QModelIndex, QVariant, QSortFilterProxyModel, QAbstractItemModel, \
     QRegExp, pyqtSignal
-from PyQt5.QtGui import QKeySequence, QIcon, QContextMenuEvent, QColor, QRegExpValidator
+from PyQt5.QtGui import QKeySequence, QIcon, QContextMenuEvent, QColor, QRegExpValidator, QStandardItemModel
 from PyQt5.QtWidgets import QGroupBox, QBoxLayout, QSpacerItem, QWidget, QHBoxLayout, QVBoxLayout, QPushButton, \
     QRadioButton, QComboBox, QShortcut, QCheckBox, QLineEdit, QLabel, QPlainTextEdit, QSizePolicy, QGridLayout, \
     QMessageBox, QTableView, QAbstractItemView, QMenu, QMenuBar, QFileDialog, QTabWidget, QDoubleSpinBox, \
@@ -237,13 +237,30 @@ class Radio(QRadioButton):
 
 
 class Combo(QComboBox):
-    def __init__(self, on_change: callable, choices: list = None, parent=None):
+    def __init__(self, on_change: callable, choices: list = None, parent=None, model: QStandardItemModel = None):
         QComboBox.__init__(self, parent=parent)
         self.on_change = on_change
         if choices:
             self.addItems(choices)
+        if model:
+            self.setModel(model)
+            # noinspection PyUnresolvedReferences
+            model.modelAboutToBeReset.connect(self.begin_reset_model)
+            # noinspection PyUnresolvedReferences
+            model.modelReset.connect(self.end_reset_model)
         # noinspection PyUnresolvedReferences
         self.activated.connect(on_change)
+        self._current_text = None
+
+    def begin_reset_model(self):
+        self._current_text = self.currentText()
+
+    def end_reset_model(self):
+        if self._current_text:
+            try:
+                self.set_index_from_text(self._current_text)
+            except ValueError:
+                pass
 
     def __enter__(self):
         pass
