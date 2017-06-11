@@ -16,7 +16,7 @@ logger = make_logger(__name__)
 
 class ManageRemoteVersions:
     _WATCHERS = []
-    _POOL = ThreadPool(1, 'ManageRemoteVersion')
+    _POOL = ThreadPool(1, 'ManageRemoteVersion', _daemon=True)
 
     @staticmethod
     def watch_remote_version_change(func: callable):

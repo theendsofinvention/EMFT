@@ -11,7 +11,7 @@ from src.utils import ThreadPool
 class ManageBranches:
     _GH_SESSION = None
     _WATCHERS = []
-    _POOL = ThreadPool(1, 'ManageBranches')
+    _POOL = ThreadPool(1, 'ManageBranches', _daemon=True)
 
     @staticmethod
     def watch_branch_change(func: callable):
