@@ -28,7 +28,7 @@ APP_FULL_NAME = 'Etcher\'s Mission Files Tools'
 APP_VERSION = src.__version__.__version__
 APP_AUTHOR = 'etcher'
 APP_STATUS = 'ALPHA'
-APP_RELEASE_NAME = 'Refreshingly Unconcerned With the Vulgar Exigencies of Veracity'
+APP_RELEASE_NAME = 'Another Fine Product From The Nonsense Factory'
 APP_WEBSITE = r'https://github.com/132nd-etcher/EMFT'
 
 ENCODING = 'iso8859_15'
