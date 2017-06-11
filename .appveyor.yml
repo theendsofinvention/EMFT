@@ -134,6 +134,17 @@ deploy:
       branch: master
       appveyor_repo_tag: false
 
+  - provider: GitHub
+    artifact: emft
+    draft: false
+    prerelease: true
+    tag: $(GitVersion_SemVer)
+    auth_token:
+      secure: T9LMiMzikVwlfnYhxlIpzhmfotDN75SUmEv1FSGLHZ/vMHMCMT3SEapSOH1iPdaD
+    on:
+      branch: /release\/.+/
+      appveyor_repo_tag: true
+
 notifications:
   - provider: Webhook
     url: $(GITTER_WH)
