@@ -30,6 +30,11 @@ New
 
 Changes
 ~~~~~~~
+- Re-worked the re-ordering system. [132nd-etcher]
+
+  Added pre-selection of output folders, added the possibility to define a number of profiles (TRMT, SDCM, ...) to the auto-reordering, and started working on encapsulating all of this in a manageable framework to ease maintenance & growth.
+  Finish #14_reorder-profiles
+  Closes #14
 - Changed layout margins. [132nd-etcher]
 - Using single re-order button for both manual and auto mode. [132nd-
   etcher]
@@ -48,10 +53,6 @@ Changes
 
 Fix
 ~~~
-- Fix bug in cfg values. [132nd-etcher]
-
-  # Conflicts:
-  #	src/cfg/values.py
 - Fixed pending or failed AV build not detected. [132nd-etcher]
 - Fix lag due to scanning of remote branch. [132nd-etcher]
 - Fixed laggy progress dialog when downloading a MIZ file. [132nd-
