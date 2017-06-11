@@ -1,6 +1,7 @@
 # coding=utf-8
 
 from PyQt5.QtGui import QStandardItemModel, QStandardItem
+
 from src.utils import Singleton
 
 
@@ -20,5 +21,3 @@ class AutoProfileModel(QStandardItemModel):
     def appendRow(self, output_folder_name: str):
         item = QStandardItem(output_folder_name)
         super(AutoProfileModel, self).appendRow(item)
-
-
