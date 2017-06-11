@@ -3,10 +3,13 @@
 import urllib.parse
 
 from src.reorder.service import ConvertUrl
-from src.reorder.finder import FindProfile, FindBranch
+from src.reorder.finder import FindProfile, FindBranch, FindRemoteVersion
 from src.reorder.value import AVProbeResult, RemoteVersion
-from src.utils import make_logger, ThreadPool
+from src.utils import make_logger, ThreadPool, Path
+from src.misc import downloader
 from src.utils.av import AVSession
+from src.ui.base import box_question
+from src.utils import Progress
 
 logger = make_logger(__name__)
 
@@ -66,3 +69,36 @@ class ManageRemoteVersions:
             kwargs=dict(branch=branch),
             _task_callback=task_callback,
         )
+
+    @staticmethod
+    def download_latest_remote_version(ui_parent=None):
+
+        def task_callback(*_):
+            pass
+
+        latest = FindRemoteVersion.get_latest()
+        profile = FindProfile.get_active_profile()
+
+        if latest and profile:
+
+            local_file = Path(profile.src_folder).joinpath(latest.remote_file_name).abspath()
+
+            if local_file.exists():
+                if not box_question(ui_parent, 'Local file already exists; do you want to overwrite?'):
+                    return
+
+            Progress.start(
+                'Downloading {}'.format(latest.download_url.split('/').pop()),
+                length=100,
+                label=latest.remote_file_name
+            )
+
+            ManageRemoteVersions._POOL.queue_task(
+                downloader.download,
+                kwargs=dict(
+                    url=latest.download_url,
+                    local_file=local_file,
+                    file_size=latest.remote_file_size,
+                ),
+                _task_callback=task_callback,
+            )

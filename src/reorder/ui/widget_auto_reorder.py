@@ -64,6 +64,11 @@ class WidgetAutoReorder(Widget):
             func=self._refresh_remote_version
         )
 
+        self.btn_download_remote_version = PushButton(
+            text='Download',
+            func=self._refresh_download_version
+        )
+
         self.label_remote_version_version = Label('')
         self.label_remote_version_branch = Label('')
         self.label_remote_version_size = Label('')
@@ -134,9 +139,10 @@ class WidgetAutoReorder(Widget):
                                             Label('URL:'), (self.label_remote_version_url, dict(align='l')),
                                         ],
                                     ],
-                                    stretch=[0, 1]
+                                    stretch=[0, 1],
                                 ),
-                                self.btn_refresh_remote_version
+                                self.btn_refresh_remote_version,
+                                self.btn_download_remote_version,
                             ],
                         ],
                     ),
@@ -160,6 +166,9 @@ class WidgetAutoReorder(Widget):
 
     def _refresh_remote_version(self):
         ManageRemoteVersions.get_latest_remote_version()
+
+    def _refresh_download_version(self):
+        ManageRemoteVersions.download_latest_remote_version(self)
 
     def _on_remote_version_change(self):
         latest = FindRemoteVersion.get_latest()

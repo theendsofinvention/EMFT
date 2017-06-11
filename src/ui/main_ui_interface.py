@@ -18,9 +18,9 @@ class MainUiMethod:
 
     def __call__(self, *args, **kwargs):
         # noinspection PyProtectedMember
-        if isinstance(threading.current_thread(), threading._MainThread):
-            # FIXME: this should raise only on scripted run; if ran from compiled, this should capture & send via SENTRY instead
-            raise RuntimeError(f'Interface method "{self.func.__name__}" called in main thread')
+        # if isinstance(threading.current_thread(), threading._MainThread):
+        #     # FIXME: this should raise only on scripted run; if ran from compiled, this should capture & send via SENTRY instead
+        #     raise RuntimeError(f'Interface method "{self.func.__name__}" called in main thread')
         if global_.MAIN_UI is None:
             raise RuntimeError('Main UI not initialized')
         global_.MAIN_UI.do('main_ui', self.func.__name__, *args, **kwargs)
