@@ -223,12 +223,12 @@ class Miz:
                 for item in zip_file.infolist():  # not using ZipFile.extractall() for security reasons
                     assert isinstance(item, ZipInfo)
 
-                    logger.debug('unzipping item: {}'.format(item))
+                    logger.debug('unzipping item: {}'.format(item.filename))
 
                     try:
                         zip_file.extract(item, self.tmpdir.abspath())
                     except:
-                        logger.error('failed to extract archive member: {}'.format(item))
+                        logger.error('failed to extract archive member: {}'.format(item.filename))
                         raise
 
         except BadZipFile:
