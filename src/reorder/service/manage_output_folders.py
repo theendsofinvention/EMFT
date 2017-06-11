@@ -25,8 +25,9 @@ class ManageOutputFolders:
 
     @staticmethod
     def read_output_folders_from_config():
-        OutputFolders(init_dict={k: OutputFolder(v) for k, v in Config().output_folders.items()})
-        ManageOutputFolders._set_combo_model()
+        if Config().output_folders:
+            OutputFolders(init_dict={k: OutputFolder(v) for k, v in Config().output_folders.items()})
+            ManageOutputFolders._set_combo_model()
 
     @staticmethod
     def add_output_folder(name: str, path: Path or str) -> bool:
