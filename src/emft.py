@@ -59,5 +59,8 @@ def main(test, verbose):
 
     check_cert()
 
+    import src.reorder
+    src.reorder.initialize()
+
     from src.ui.main_ui import start_ui
     start_ui(test)

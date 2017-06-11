@@ -33,7 +33,9 @@ logger = make_logger(__name__)
 class Dialog(QDialog):
 
     def __init__(self, parent=None):
-        QDialog.__init__(parent=parent, flags=Qt.Widget)
+        from src.ui import qt_resource
+        QDialog.__init__(self, parent=parent, flags=Qt.Dialog)
+        self.setWindowIcon(QIcon(':/ico/app.ico'))
 
 
 class Expandable:
@@ -59,7 +61,7 @@ class GroupBox(QGroupBox):
             self.setTitle(title)
         if layout:
             self.setLayout(layout)
-        self.setContentsMargins(10, 25, 10, 10)
+        self.setContentsMargins(20, 30, 20, 20)
 
 
 class _WithChildren:
@@ -110,13 +112,24 @@ class GridLayout(QGridLayout):
         'r': Qt.AlignRight,
     }
 
-    def __init__(self, children: list, stretch: list = None, auto_right=True):
+    def __init__(
+            self,
+            children: list,
+            stretch: list = None,
+            auto_right=True,
+            horizontal_spacing: int = None,
+            vertical_spacing: int = None,
+    ):
         QGridLayout.__init__(self)
         self.auto_right = auto_right
         self.add_children(children)
         if stretch:
             for x in range(len(stretch)):
                 self.setColumnStretch(x, stretch[x])
+        if horizontal_spacing:
+            self.setHorizontalSpacing(horizontal_spacing)
+        if vertical_spacing:
+            self.setVerticalSpacing(vertical_spacing)
 
     # noinspection PyArgumentList
     def add_children(self, children: list):
@@ -130,10 +143,14 @@ class GridLayout(QGridLayout):
                         self.addWidget(child[c], r, c, Qt.AlignRight)
                     else:
                         self.addWidget(child[c], r, c)
+                elif isinstance(child[c], int):
+                    self.addItem(VSpacer(child[c]))
                 elif isinstance(child[c], tuple):
                     align = child[c][1].get('align', 'l')
                     span = child[c][1].get('span', [1, 1])
                     self.addWidget(child[c][0], r, c, *span, self.align[align])
+                elif isinstance(child[c], GridLayout):
+                    self.addLayout(child[c], r, c)
                 elif isinstance(child[c], QBoxLayout):
                     self.addLayout(child[c], r, c)
                 elif isinstance(child[c], int):
@@ -211,7 +228,15 @@ class GridFrame(Frame):
 
 
 class PushButton(QPushButton):
-    def __init__(self, text, func: callable, parent=None, min_height=None):
+    def __init__(
+            self,
+            text: str,
+            func: callable,
+            parent=None,
+            min_height=None,
+            text_color='black',
+            bg_color='rgba(255, 255, 255, 10)'
+    ):
         QPushButton.__init__(self, text, parent)
         # noinspection PyUnresolvedReferences
         self.clicked.connect(func)
@@ -219,6 +244,19 @@ class PushButton(QPushButton):
                            'padding-top: 3px; padding-bottom: 3px;')
         if min_height:
             self.setMinimumHeight(min_height)
+        self.text_color = text_color
+        self.bg_color = bg_color
+
+    def __update_style_sheet(self):
+        self.setStyleSheet('PushButton {{ background-color : {}; color : {}; }}'.format(self.bg_color, self.text_color))
+
+    def set_text_color(self, color):
+        self.text_color = color
+        self.__update_style_sheet()
+
+    def set_bg_color(self, color):
+        self.bg_color = color
+        self.__update_style_sheet()
 
 
 class Checkbox(QCheckBox):
@@ -637,6 +675,10 @@ class TableEditableModel(TableModel):
 def box_info(parent, title: str, text: str):
     # noinspection PyArgumentList
     QMessageBox.information(parent, title, text)
+
+
+def box_warning(parent, title: str, text: str):
+    QMessageBox.warning(parent, title, text)
 
 
 def box_question(parent, text: str, title: str = 'Please confirm'):

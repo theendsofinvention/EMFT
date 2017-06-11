@@ -89,7 +89,7 @@ def start_ui(test=False):
     global_.MAIN_UI = main_ui
 
     logger.info('loading module: re-order')
-    from src.ui.tab_reorder import TabChildReorder
+    from src.reorder.ui.tab_reorder import TabChildReorder
     global_.MAIN_UI.add_tab(TabChildReorder(main_ui))
 
     logger.info('loading module: dcs_installs')
