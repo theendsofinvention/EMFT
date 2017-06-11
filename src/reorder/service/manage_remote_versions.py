@@ -38,6 +38,7 @@ class ManageRemoteVersions:
 
     @staticmethod
     def _get_latest_remote_version(branch: str = 'All'):
+        RemoteVersion.LATEST_REMOTE_VERSION = None
         build = ManageRemoteVersions._get_build(branch)
         if build:
             logger.debug(f'latest build found on Appveyor: {build.build.version.raw_version_str}')
