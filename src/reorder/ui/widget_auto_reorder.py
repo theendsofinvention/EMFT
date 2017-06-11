@@ -1,9 +1,9 @@
 # coding=utf-8
 
-from src.reorder.service import BrowseForFiles, ManageProfiles, ManageBranches, RemoteVersions
+from src.reorder.service import BrowseForFiles, ManageProfiles, ManageBranches, ManageRemoteVersions
 from src.reorder.ui.dialog_profile_editor import DialogProfileEditor
 from src.reorder.value import AutoProfileModelContainer, BranchesModelContainer
-from src.reorder.finder import FindProfile
+from src.reorder.finder import FindProfile, FindBranch, FindRemoteVersion
 from src.ui.base import VLayout, Label, Widget, PushButton, GridLayout, Combo, HSpacer
 from src.utils import make_logger
 
@@ -55,11 +55,6 @@ class WidgetAutoReorder(Widget):
         self.combo_branch = Combo(
             on_change=self._on_combo_branch_activated,
             model=BranchesModelContainer().model
-        )
-
-        self.btn_refresh_branches = PushButton(
-            text='Refresh',
-            func=ManageBranches().refresh_gh_branches
         )
 
         self.label_latest_remote_version = Label('')
@@ -118,7 +113,6 @@ class WidgetAutoReorder(Widget):
                             [
                                 Label('Branch'),
                                 self.combo_branch,
-                                self.btn_refresh_branches,
                             ],
                             [
                                 None,
@@ -153,19 +147,23 @@ class WidgetAutoReorder(Widget):
 
         self._load_values_from_config()
 
+        ManageBranches.watch_branch_change(self._on_active_branch_change)
+        ManageProfiles.watch_profile_change(self._on_active_profile_change)
+        ManageRemoteVersions.watch_remote_version_change(self._on_remote_version_change)
+
     def _load_values_from_config(self):
         if FindProfile.get_active_profile():
             self.combo_profile.set_index_from_text(FindProfile.get_active_profile().name)
-            self._update_profile_labels()
-            if ManageBranches.get_active_branch():
-                self.combo_branch.set_index_from_text(ManageBranches.get_active_branch().name)
+            self._on_active_profile_change()
+            if FindBranch.get_active_branch():
+                self.combo_branch.set_index_from_text(FindBranch.get_active_branch().name)
 
     def _refresh_remote_version(self):
-        self._remote_version = RemoteVersions.get_latest_remote_version(self.selected_branch_name)
-        self._update_remote_version_labels()
+        ManageRemoteVersions.get_latest_remote_version()
 
-    def _update_remote_version_labels(self):
-        if self._remote_version:
+    def _on_remote_version_change(self):
+        latest = FindRemoteVersion.get_latest()
+        if latest:
             params = [
                 ('version', 'version'),
                 ('branch', 'branch'),
@@ -174,9 +172,9 @@ class WidgetAutoReorder(Widget):
                 ('human_file_size', 'size'),
             ]
             for av, own in params:
-                getattr(self, f'label_remote_version_{own}').setText(str(getattr(self._remote_version, av)))
+                getattr(self, f'label_remote_version_{own}').setText(str(getattr(latest, av)))
 
-    def _update_profile_labels(self):
+    def _on_active_profile_change(self):
         params = [
             (self.label_profile_src_path, 'src_folder'),
             (self.label_profile_output_path, 'output_folder'),
@@ -193,8 +191,8 @@ class WidgetAutoReorder(Widget):
                 label.setText('No profile selected')
                 label.set_text_color('black')
 
-    def _update_branch_combo(self):
-        active_branch = ManageBranches.get_active_branch()
+    def _on_active_branch_change(self):
+        active_branch = FindBranch.get_active_branch()
         if active_branch:
             self.combo_branch.set_index_from_text(active_branch.name)
 
@@ -209,25 +207,25 @@ class WidgetAutoReorder(Widget):
     def _on_combo_profile_activated(self):
         if self.selected_profile_name:
             ManageProfiles.change_active_profile(self.selected_profile_name)
-            ManageBranches.refresh_gh_branches()
-            self._update_profile_labels()
-            self._update_branch_combo()
 
     def _on_combo_branch_activated(self):
-        print(self.selected_branch_name)
         if self.selected_branch_name:
             ManageBranches.change_active_branch(self.selected_branch_name)
 
-    def _on_src_folder_clicked(self):
+    @staticmethod
+    def _on_src_folder_clicked():
         BrowseForFiles.show_file_or_folder_in_explorer(FindProfile.get_active_profile().src_folder)
 
-    def _on_output_folder_clicked(self):
+    @staticmethod
+    def _on_output_folder_clicked():
         BrowseForFiles.show_file_or_folder_in_explorer(FindProfile.get_active_profile().output_folder)
 
-    def _on_gh_repo_clicked(self):
+    @staticmethod
+    def _on_gh_repo_clicked():
         BrowseForFiles.show_file_or_folder_in_explorer(FindProfile.get_active_profile().gh_repo)
 
-    def _on_av_repo_clicked(self):
+    @staticmethod
+    def _on_av_repo_clicked():
         BrowseForFiles.show_file_or_folder_in_explorer(FindProfile.get_active_profile().av_repo)
 
     def _on_btn_add_profile_clicked(self):

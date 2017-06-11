@@ -2,7 +2,7 @@
 
 import typing
 from src.cfg import Config
-from src.reorder.service import ConvertUrl
+from .convert_url import ConvertUrl
 from src.reorder.value import AutoProfile, AutoProfiles, AutoProfileModelContainer
 from src.reorder.finder import FindProfile
 from src.utils import Path, make_logger
@@ -11,6 +11,16 @@ logger = make_logger(__name__)
 
 
 class ManageProfiles:
+    _WATCHERS = []
+
+    @staticmethod
+    def watch_profile_change(func: callable):
+        ManageProfiles._WATCHERS.append(func)
+
+    @staticmethod
+    def notify_watchers():
+        for func in ManageProfiles._WATCHERS:
+            func()
 
     @staticmethod
     def _set_combo_model():
@@ -89,6 +99,7 @@ class ManageProfiles:
         profile = FindProfile.get_by_name(profile_name)
         Config().last_used_auto_profile = profile_name
         AutoProfiles.ACTIVE_PROFILE = profile
+        ManageProfiles.notify_watchers()
 
     @staticmethod
     def get_gh_repo_info() -> typing.Tuple[str, str]:

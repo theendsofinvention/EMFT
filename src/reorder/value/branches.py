@@ -19,6 +19,8 @@ class Branch:
 
 
 class Branches(MutableSequence, metaclass=Singleton):
+    ACTIVE_BRANCH = None
+
     def __init__(self, init_list: list = None):
         self._data = init_list or list()
 
