@@ -61,7 +61,7 @@ class GroupBox(QGroupBox):
             self.setTitle(title)
         if layout:
             self.setLayout(layout)
-        self.setContentsMargins(10, 25, 10, 10)
+        self.setContentsMargins(20, 30, 20, 20)
 
 
 class _WithChildren:
@@ -112,13 +112,24 @@ class GridLayout(QGridLayout):
         'r': Qt.AlignRight,
     }
 
-    def __init__(self, children: list, stretch: list = None, auto_right=True):
+    def __init__(
+            self,
+            children: list,
+            stretch: list = None,
+            auto_right=True,
+            horizontal_spacing: int = None,
+            vertical_spacing: int = None,
+    ):
         QGridLayout.__init__(self)
         self.auto_right = auto_right
         self.add_children(children)
         if stretch:
             for x in range(len(stretch)):
                 self.setColumnStretch(x, stretch[x])
+        if horizontal_spacing:
+            self.setHorizontalSpacing(horizontal_spacing)
+        if vertical_spacing:
+            self.setVerticalSpacing(vertical_spacing)
 
     # noinspection PyArgumentList
     def add_children(self, children: list):
@@ -132,6 +143,8 @@ class GridLayout(QGridLayout):
                         self.addWidget(child[c], r, c, Qt.AlignRight)
                     else:
                         self.addWidget(child[c], r, c)
+                elif isinstance(child[c], int):
+                    self.addItem(VSpacer(child[c]))
                 elif isinstance(child[c], tuple):
                     align = child[c][1].get('align', 'l')
                     span = child[c][1].get('span', [1, 1])

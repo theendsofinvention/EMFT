@@ -12,12 +12,6 @@ class DialogEditOutputFolder(Dialog):
 
         self.setWindowTitle('Edit output folder')
 
-        self.label_help = Label(
-            text='The output folder is where EMFT will unzip the re-ordered mission files. '
-                 'All the content of the MIZ files will end up in that folder.\n\n'
-                 'Usually, this will be your SCM folder (ie. your Github repository).',
-        )
-
         self.le_name = LineEdit(
             text=name or '',
             clear_btn_enabled=True,
@@ -49,11 +43,11 @@ class DialogEditOutputFolder(Dialog):
         self.setLayout(
             GridLayout(
                 [
-                    [
-                        (self.label_help, dict(span=[1, -1])),
-                        None,
-                        None,
-                    ],
+                    # [
+                    #     (self.label_help, dict(span=[1, -1])),
+                    #     None,
+                    #     None,
+                    # ],
                     [
                         Label('Name'),
                         self.le_name,

@@ -3,7 +3,7 @@
 from src.cfg import Config
 from src.reorder.adapter.tab_reorder_adapter import TabReorderAdapter, TAB_NAME
 from src.reorder.service.reorder_miz import ReorderMiz
-from src.ui.base import VLayout, Label, Checkbox, GroupBox, Radio, HLayout, PushButton
+from src.ui.base import VLayout, Label, Checkbox, GroupBox, Radio, HLayout, PushButton, HSpacer
 from src.ui.main_ui_tab_widget import MainUiTabChild
 from src.utils.custom_logging import make_logger
 from .widget_manual_reorder import WidgetManualReorder
@@ -74,8 +74,11 @@ class TabChildReorder(MainUiTabChild, TabReorderAdapter):
                         title='Select re-ordering method',
                         layout=HLayout(
                             [
+                                HSpacer(),
                                 self.radio_manual,
+                                HSpacer(),
                                 self.radio_auto,
+                                HSpacer(),
                             ],
                         ),
                     ),
@@ -100,6 +103,7 @@ class TabChildReorder(MainUiTabChild, TabReorderAdapter):
     def _load_from_config(self):
         self.radio_auto.setChecked(Config().auto_mode)
         self.radio_manual.setChecked(not Config().auto_mode)
+        self.check_skip_options.setChecked(Config().skip_options_file)
 
     def _write_selected_mode_to_config(self):
         Config().auto_mode = self._auto_mode_is_selected

@@ -37,6 +37,10 @@ class AVVersion:
         return getattr(self, '_parsed_version')
 
     @property
+    def raw_version_str(self):
+        return self._full_version_str
+
+    @property
     def url_safe_version_str(self):
         return urllib.parse.quote(self._full_version_str, safe='')
 

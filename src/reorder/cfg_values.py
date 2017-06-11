@@ -90,3 +90,7 @@ class ReorderConfigValues:
     @MetaGUIDPropertyWithDefault(None, str)
     def last_used_auto_profile(self, value: str):
         return value
+
+    @MetaGUIDPropertyWithDefault(None, dict)
+    def last_used_branch(self, value: dict):
+        return value

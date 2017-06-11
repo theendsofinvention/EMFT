@@ -83,7 +83,7 @@ class AVSession(requests.Session):
 
         return AVLastBuild(self._get_json())
 
-    def get_artifacts(self, job_id):
+    def get_artifacts(self, job_id) -> AllAVArtifacts:
 
         self.build_req('buildjobs', job_id, 'artifacts')
 

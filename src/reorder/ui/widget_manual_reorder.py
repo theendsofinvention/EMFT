@@ -35,6 +35,12 @@ class WidgetManualReorder(Widget):
             parent=self
         )
 
+        self.label_help_output_folder = Label(
+            text='The output folder is where EMFT will unzip the re-ordered mission files. '
+                 'All the content of the MIZ files will end up in that folder.\n\n'
+                 'Usually, this will be your SCM folder (ie. your Github repository).',
+        )
+
         self.combo_output_folder = Combo(
             self._on_combo_output_folder_activated,
             parent=self,
@@ -66,6 +72,7 @@ class WidgetManualReorder(Widget):
                                 self.btn_browse_for_miz,
                                 self.btn_open_miz,
                             ],
+                            [40],
                             [
                                 Label('Output folder'),
                                 self.combo_output_folder,
@@ -74,11 +81,14 @@ class WidgetManualReorder(Widget):
                             ],
                             [
                                 None,
+                                (self.label_help_output_folder, dict(span=[1, -1])),
+                            ],
+                            [
+                                None,
                                 HLayout(
                                     [
                                         Label('Selected output folder path:', word_wrap=False),
                                         self.label_output_folder_path,
-                                        Label('(click to open in explorer)'),
                                         HSpacer(),
                                     ]
                                 ),
@@ -97,6 +107,9 @@ class WidgetManualReorder(Widget):
         if self.selected_output_folder_name:
             output_folder = ManageOutputFolders.get_by_name(self.selected_output_folder_name)
             self.label_output_folder_path.setText(str(output_folder.abspath()))
+            self.label_output_folder_path.set_text_color('blue')
+        else:
+            self.label_output_folder_path.set_text_color('black')
 
     def _load_values_from_config(self):
         if Config().last_used_output_folder_in_manual_mode:

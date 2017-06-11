@@ -8,7 +8,7 @@ logger = make_logger(__name__)
 
 
 # noinspection PyAbstractClass
-class ReorderProfile:
+class AutoProfile:
     __slots__ = ['name', 'gh_repo', 'av_repo', 'src_folder', 'output_folder']
 
     def __init__(
@@ -26,21 +26,22 @@ class ReorderProfile:
         self.output_folder = output_folder
 
 
+class AutoProfiles(MutableMapping, metaclass=Singleton):
+    ACTIVE_PROFILE = None
 
-class ReorderProfiles(MutableMapping, metaclass=Singleton):
     def __init__(self, init_dict: dict = None):
         self._data = init_dict or dict()
 
-    def __getitem__(self, key) -> ReorderProfile:
+    def __getitem__(self, key) -> AutoProfile:
         return self._data.__getitem__(key)
 
     def __iter__(self) -> typing.Iterator[str]:
         return self._data.__iter__()
 
-    def values(self) -> typing.List[ReorderProfile]:
+    def values(self) -> typing.List[AutoProfile]:
         return list(self._data.values())
 
-    def items(self) -> typing.List[typing.Tuple[str, ReorderProfile]]:
+    def items(self) -> typing.List[typing.Tuple[str, AutoProfile]]:
         return list(self._data.items())
 
     @property
@@ -53,5 +54,5 @@ class ReorderProfiles(MutableMapping, metaclass=Singleton):
     def __delitem__(self, key):
         return self._data.__delitem__(key)
 
-    def __setitem__(self, key, value: ReorderProfile):
+    def __setitem__(self, key, value: AutoProfile):
         return self._data.__setitem__(key, value)

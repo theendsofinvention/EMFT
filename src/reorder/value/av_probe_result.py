@@ -1,3 +1,5 @@
+import humanize
+
 class AVProbeResult:
     __slots__ = [
         '_version',
@@ -5,6 +7,7 @@ class AVProbeResult:
         '_download_url',
         '_remote_file_name',
         '_remote_file_size',
+        '_human_file_size',
     ]
 
     def __init__(
@@ -20,6 +23,7 @@ class AVProbeResult:
         self._download_url = download_url
         self._remote_file_size = remote_file_size
         self._remote_file_name = remote_file_name
+        self._human_file_size = humanize.naturalsize(remote_file_size)
 
     @property
     def version(self):
@@ -40,3 +44,7 @@ class AVProbeResult:
     @property
     def remote_file_name(self):
         return self._remote_file_name
+
+    @property
+    def human_file_size(self):
+        return self._human_file_size
