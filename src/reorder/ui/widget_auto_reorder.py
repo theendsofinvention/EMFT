@@ -66,7 +66,7 @@ class WidgetAutoReorder(Widget):
 
         self.btn_download_remote_version = PushButton(
             text='Download',
-            func=self._refresh_download_version
+            func=self._download_latest_version
         )
 
         self.label_remote_version_version = Label('')
@@ -164,10 +164,11 @@ class WidgetAutoReorder(Widget):
             if FindBranch.get_active_branch():
                 self.combo_branch.set_index_from_text(FindBranch.get_active_branch().name)
 
-    def _refresh_remote_version(self):
+    @staticmethod
+    def _refresh_remote_version():
         ManageRemoteVersions.get_latest_remote_version()
 
-    def _refresh_download_version(self):
+    def _download_latest_version(self):
         ManageRemoteVersions.download_latest_remote_version(self)
 
     def _on_remote_version_change(self):
