@@ -75,7 +75,7 @@ class ManageRemoteVersions:
     def download_latest_remote_version(ui_parent=None):
 
         def task_callback(*_):
-            pass
+            Progress.done()
 
         latest = FindRemoteVersion.get_latest()
         profile = FindProfile.get_active_profile()
