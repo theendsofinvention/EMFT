@@ -1,4 +1,5 @@
 # EMFT
+
 Etcher's Mission File Tools
 
 [![Open Source Love](https://badges.frapsoft.com/os/v3/open-source-200x33.png?v=103)](https://github.com/ellerbrock/open-source-badges/)
@@ -15,3 +16,4 @@ Etcher's Mission File Tools
 [![Codacy coverage](https://img.shields.io/codacy/coverage/500397cdda004fd6bccacdca94d27e55.svg)](https://www.codacy.com/app/132nd-etcher/EMFT?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=132nd-etcher/EMFT&amp;utm_campaign=Badge_Coverage)
 [![CodeFactor](https://www.codefactor.io/repository/github/132nd-etcher/emft/badge)](https://www.codefactor.io/repository/github/132nd-etcher/emft)
 [![Updates](https://pyup.io/repos/github/132nd-etcher/EMFT/shield.svg)](https://pyup.io/repos/github/132nd-etcher/EMFT/)
+[![Gitter](https://badges.gitter.im/EMFT/Lobby.svg)](https://gitter.im/EMFT/Lobby?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
