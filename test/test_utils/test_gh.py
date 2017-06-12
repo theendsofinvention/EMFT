@@ -95,7 +95,8 @@ def mock_gh_api(url, request):
     return response(200, content, HEADERS, 'Success', 5, request)
 
 
-@pytest.mark.skipif(os.path.exists('./tests/api.github.com'), reason='No test files')
+@pytest.mark.skipif(not os.path.exists('./tests/api.github.com'), reason='No test files')
+@pytest.mark.skipif(os.getenv('APPVEYOR'), reason='Skipping Github tests on Appveyor to prevent rate limit')
 class TestGH:
     @with_httmock(mock_gh_api)
     def test_api_down(self):
@@ -290,7 +291,7 @@ class TestGH:
 
 
 # noinspection PyPep8Naming
-@pytest.mark.skipif(os.getenv('APPVEYOR'), reason='AppVeyor gets 403 from GH all the time')
+@pytest.mark.skipif(os.getenv('APPVEYOR'), reason='Skipping Github tests on Appveyor to prevent rate limit')
 class TestGHAnonymousSession:
 
     def test_users_repos(self):
