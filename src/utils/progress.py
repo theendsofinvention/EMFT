@@ -61,7 +61,7 @@ class Progress:
     @staticmethod
     def start(title: str, length: int = 100, label: str = '', start_value: int = 0):
         if Progress.started:
-            raise RuntimeError()
+            raise RuntimeError(f'progress already started with {Progress.title}')
         if length < 1:
             raise ValueError(length)
         Progress.started = True
