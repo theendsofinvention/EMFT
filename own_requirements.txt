@@ -1,2 +1,0 @@
-git+https://github.com/132nd-etcher/sltp.git#egg=sltp
-git+https://github.com/132nd-etcher/utils.git#egg=utils

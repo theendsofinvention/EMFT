@@ -5,18 +5,31 @@ Runs a process in an external thread and logs the output to a standard Python lo
 import os
 import re
 import subprocess
+import sys
 import threading
 from json import loads
 
 import certifi
 import click
 
-from src import global_
-from utils.custom_logging import DEBUG, make_logger
-from utils.custom_path import Path
+try:
+    from src import global_
+    from src.utils.custom_logging import DEBUG, make_logger
+    from src.utils.custom_path import Path
+except ImportError or ModuleNotFoundError:
+
+    subprocess.check_call(
+        [os.path.join(sys.argv[1], 'scripts/pip.exe'), 'install', '-r', 'own-requirements.txt'],
+        stdout=subprocess.PIPE
+    )
+    from src import global_
+    from src.utils.custom_logging import DEBUG, make_logger
+    from src.utils.custom_path import Path
 
 logger = make_logger(__name__)
 logger.setLevel(DEBUG)
+
+requirements = []
 
 
 # noinspection PyPep8Naming
@@ -101,7 +114,7 @@ def patch_exe(path_to_exe: str or Path,
     run_piped_process(cmd, logger_=logger, cwd=wkdir)
 
 
-def pre_build(env):
+def _compile_qt_resources(env):
     logger.info('building UI resource files')
     run_piped_process(
         args=[
@@ -114,10 +127,14 @@ def pre_build(env):
     )
 
 
-# certifi-2017.1.23 cffi-1.9.1 cryptography-1.7.2 idna-2.2 packaging-16.8
-# paramiko-2.1.1 pyasn1-0.1.9 pycparser-2.17 pyparsing-2.1.10 scp-0.10.2 setuptools-34.1.1
+def pre_build(env):
+    _compile_qt_resources(env)
+
 
 def build(env):
+    if sys.version_info[1] == 6:
+        logger.warning('running Python 3.6, installing dev version of PyInstaller')
+        install_pyinstaller_for_py36(env)
     logger.info('reading GitVersion output')
     version = loads(subprocess.check_output(['gitversion'], cwd='.').decode().rstrip())
     logger.debug('gitversion says: {}'.format(version))
@@ -150,30 +167,109 @@ def build(env):
     logger.info('all done')
 
 
+def get_installed_packages(env):
+    global requirements
+    if requirements is None:
+        requirements = subprocess.Popen(
+            [os.path.join(env, 'scripts/pip.exe'), 'freeze'],
+            stdout=subprocess.PIPE
+        ).stdout.read().decode('utf8')
+        requirements = requirements.rstrip()
+        requirements = requirements.replace('\r\n', '\n')
+        # requirements = requirements.replace(r'PyInstaller==3.3.dev0+gb78bfe5',
+        #                                     r'git+https://github.com/132nd-etcher/pyinstaller.git#egg=PyInstaller')
+        requirements = re.sub(r'SLTP==\d+.\d+.\d+.*\n?', r'', requirements)
+        requirements = re.sub(r'utils==\d+.\d+.\d+.*\n?', r'', requirements)
+        requirements.strip()
+    return requirements
+
+
+def _write_requirements_in():
+    Path('requirements.in').write_lines(x.split('==')[0] for x in requirements.split('\n'))
+
+
+def _compile_requirements(env, upgrade=False):
+    args = [os.path.join(env, 'scripts/pip-compile.exe')]
+
+    if upgrade:
+        args.append('--upgrade')
+
+    logger.debug('\n' + subprocess.Popen(
+        args,
+        stdout=subprocess.PIPE
+    ).stdout.read().decode('utf8'))
+
+    req_file = Path('requirements.txt')
+    req_file.write_lines([x for x in req_file.lines() if not x.startswith('#')])
+
+
+def sync_requirements(env):
+    logger.debug('\n' + subprocess.Popen(
+        [os.path.join(env, 'scripts/pip-sync.exe')],
+        stdout=subprocess.PIPE
+    ).stdout.read().decode('utf8'))
+
+
 def build_requirements(env):
-    requirements = subprocess.Popen(
-        [os.path.join(env, 'scripts/pip.exe'), 'freeze'],
+    # FIXME: re-make installed package check
+    _compile_requirements(env)
+
+
+def update_requirements(env):
+    _compile_requirements(env, upgrade=True)
+    sync_requirements(env)
+
+
+def generate_changelog(env):
+    logger.debug('building changelog')
+    changelog = subprocess.Popen(
+        [os.path.join(env, 'scripts/gitchangelog.exe'), '0.4.1..HEAD'],
         stdout=subprocess.PIPE
     ).stdout.read().decode('utf8')
-    requirements = requirements.rstrip()
-    requirements = requirements.replace('\r\n', '\n')
-    requirements = requirements.replace(r'PyInstaller==3.3.dev0+gb78bfe5',
-                                        r'git+https://github.com/132nd-etcher/pyinstaller.git#egg=PyInstaller')
-    requirements = re.sub(r'SLTP==\d+.\d+.\d+.*\n', r'', requirements)
-    requirements = re.sub(r'utils==\d+.\d+.\d+.*\n', r'', requirements)
-    Path('requirements.txt').write_text(requirements)
-    own_requirements = [
-        'git+https://github.com/132nd-etcher/sltp.git#egg=sltp',
-        'git+https://github.com/132nd-etcher/utils.git#egg=utils'
-    ]
-    Path('own_requirements.txt').write_text('\n'.join(own_requirements))
+    with open('CHANGELOG.rst', mode='w') as f:
+        f.write(changelog)
+
+
+def install_local_dependencies(env):
+    import pip
+    pip.main(['install', '-U', '--upgrade-strategy', 'only-if-needed', 'git+file://f:/dev/utils@develop'])
+    pip.main(['install', '-U', '--upgrade-strategy', 'only-if-needed', 'git+file://f:/dev/sltp@develop'])
+
+
+def install_pyinstaller_for_py36(env):
+    import pip
+    pip.main(
+        [
+            'install',
+            'git+https://github.com/132nd-etcher/pyinstaller.git@develop#egg=PyInstaller'
+        ]
+    )
 
 
 @click.command()
 @click.argument('env', type=click.Path(exists=True, file_okay=False, dir_okay=True, readable=True))
 @click.option('-p', '--pre', is_flag=True, help='Pre build only')
+@click.option('-l', '--local-develop',
+              is_flag=True, help='Only install local repositories from develop branch')
 @click.option('-r', '--req', is_flag=True, help='Req build only')
-def main(env, pre, req):
+@click.option('-c', '--cha', is_flag=True, help='Changelog build only')
+@click.option('-u', '--update-req', is_flag=True, help='Update all requirements')
+@click.option('-s', '--sync_req', is_flag=True, help='Sync requirements')
+def main(env, pre, req, cha, local_develop, update_req, sync_req):
+    if sys.version_info[0] < 3:
+        raise RuntimeError('nope.')
+    if sync_req:
+        sync_requirements(env)
+        return
+    if update_req:
+        update_requirements(env)
+        return
+    if local_develop:
+        install_local_dependencies(env)
+        return
+    if cha:
+        generate_changelog(env)
+        return
     if req:
         build_requirements(env)
         return

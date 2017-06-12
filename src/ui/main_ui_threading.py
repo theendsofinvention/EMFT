@@ -1,7 +1,8 @@
 # coding=utf-8
 from PyQt5.QtCore import QObject, pyqtSignal, QThread
 
-from utils.custom_logging import make_logger
+from src.utils import make_logger, ThreadPool
+from .main_ui_threading_adapter import MainUiThreadingAdapter
 
 logger = make_logger(__name__)
 
@@ -24,7 +25,7 @@ class MainGuiWorker(QObject):
             self.signal.emit(obj_name, func, args, kwargs)
 
 
-class MainUiThreading:
+class MainUiThreading(MainUiThreadingAdapter):
     """
     Encapsulates calls to the MainUi inside a Qt thread.
 
@@ -52,6 +53,11 @@ class MainUiThreading:
             'thread': t,
             'worker': w,
         }
+        self.__pool = ThreadPool(1, 'main_ui', False)
+
+    @property
+    def pool(self) -> ThreadPool:
+        return self.__pool
 
     def _do(self, obj_name, func, args, kwargs):
         """

@@ -1,12 +1,18 @@
 # coding=utf-8
 import abc
+import typing
+from abc import abstractmethod
 
-from PyQt5.QtCore import Qt, QAbstractTableModel, QModelIndex, QVariant, QSortFilterProxyModel
-from PyQt5.QtGui import QKeySequence, QIcon, QContextMenuEvent
+from PyQt5.QtCore import Qt, QAbstractTableModel, QModelIndex, QVariant, QSortFilterProxyModel, QAbstractItemModel, \
+    QRegExp, pyqtSignal
+from PyQt5.QtGui import QKeySequence, QIcon, QContextMenuEvent, QColor, QRegExpValidator, QStandardItemModel
 from PyQt5.QtWidgets import QGroupBox, QBoxLayout, QSpacerItem, QWidget, QHBoxLayout, QVBoxLayout, QPushButton, \
     QRadioButton, QComboBox, QShortcut, QCheckBox, QLineEdit, QLabel, QPlainTextEdit, QSizePolicy, QGridLayout, \
-    QMessageBox, QTableView, QAbstractItemView, QMenu, QMenuBar
-from utils import make_logger
+    QMessageBox, QTableView, QAbstractItemView, QMenu, QMenuBar, QFileDialog, QTabWidget, QDoubleSpinBox, \
+    QStyledItemDelegate, QStyleOptionViewItem, QFrame, QDialog
+from src.utils import make_logger, Path
+
+SIGNAL = pyqtSignal
 
 
 class Widget(QWidget):
@@ -14,14 +20,22 @@ class Widget(QWidget):
         QWidget.__init__(self, parent=parent, flags=Qt.Widget)
 
 
-LEFT_MARGIN = 10
-RIGHT_MARGIN = 10
-TOP_MARGIN = 10
-BOTTOM_MARGIN = 10
+LEFT_MARGIN = 0
+RIGHT_MARGIN = 0
+TOP_MARGIN = 0
+BOTTOM_MARGIN = 0
 
-DEFAULT_MARGINS = (LEFT_MARGIN, RIGHT_MARGIN, TOP_MARGIN, BOTTOM_MARGIN)
+DEFAULT_MARGINS = (LEFT_MARGIN, TOP_MARGIN, RIGHT_MARGIN, BOTTOM_MARGIN)
 
 logger = make_logger(__name__)
+
+
+class Dialog(QDialog):
+
+    def __init__(self, parent=None):
+        from src.ui import qt_resource
+        QDialog.__init__(self, parent=parent, flags=Qt.Dialog)
+        self.setWindowIcon(QIcon(':/ico/app.ico'))
 
 
 class Expandable:
@@ -47,7 +61,7 @@ class GroupBox(QGroupBox):
             self.setTitle(title)
         if layout:
             self.setLayout(layout)
-        self.setContentsMargins(*DEFAULT_MARGINS)
+        self.setContentsMargins(20, 30, 20, 20)
 
 
 class _WithChildren:
@@ -98,13 +112,24 @@ class GridLayout(QGridLayout):
         'r': Qt.AlignRight,
     }
 
-    def __init__(self, children: list, stretch: list = None, auto_right=True):
+    def __init__(
+            self,
+            children: list,
+            stretch: list = None,
+            auto_right=True,
+            horizontal_spacing: int = None,
+            vertical_spacing: int = None,
+    ):
         QGridLayout.__init__(self)
         self.auto_right = auto_right
         self.add_children(children)
         if stretch:
             for x in range(len(stretch)):
                 self.setColumnStretch(x, stretch[x])
+        if horizontal_spacing:
+            self.setHorizontalSpacing(horizontal_spacing)
+        if vertical_spacing:
+            self.setVerticalSpacing(vertical_spacing)
 
     # noinspection PyArgumentList
     def add_children(self, children: list):
@@ -118,20 +143,26 @@ class GridLayout(QGridLayout):
                         self.addWidget(child[c], r, c, Qt.AlignRight)
                     else:
                         self.addWidget(child[c], r, c)
+                elif isinstance(child[c], int):
+                    self.addItem(VSpacer(child[c]))
                 elif isinstance(child[c], tuple):
                     align = child[c][1].get('align', 'l')
                     span = child[c][1].get('span', [1, 1])
                     self.addWidget(child[c][0], r, c, *span, self.align[align])
+                elif isinstance(child[c], GridLayout):
+                    self.addLayout(child[c], r, c)
                 elif isinstance(child[c], QBoxLayout):
                     self.addLayout(child[c], r, c)
                 elif isinstance(child[c], int):
                     self.addItem(VSpacer(child[c]))
+                elif isinstance(child[c], QSpacerItem):
+                    self.addItem(child[c])
                 else:
                     raise ValueError('unmanaged child type: {}'.format(type(child[c])))
 
 
 class HLayout(QHBoxLayout, _WithChildren):
-    def __init__(self, children: list):
+    def __init__(self, children: list, add_stretch=False):
         """
         Creates a horizontal layout.
         Children can be either a single item, or a tuple including a configuration dictionary.
@@ -140,12 +171,16 @@ class HLayout(QHBoxLayout, _WithChildren):
         :param children: list of children
         """
         super(HLayout, self).__init__()
+
         self.setContentsMargins(*DEFAULT_MARGINS)
         self.add_children(children)
 
+        if add_stretch:
+            self.addStretch()
+
 
 class VLayout(QVBoxLayout, _WithChildren):
-    def __init__(self, children: list):
+    def __init__(self, children: list, add_stretch=False, set_stretch: list = None):
         """
         Creates a vertical layout.
         Children can be either a single item, or a tuple including a configuration dictionary.
@@ -155,15 +190,73 @@ class VLayout(QVBoxLayout, _WithChildren):
         :param children: list of children
         """
         super(VLayout, self).__init__()
+
         self.setContentsMargins(*DEFAULT_MARGINS)
         self.add_children(children)
 
+        if add_stretch:
+            self.addStretch()
+
+        if set_stretch:
+            for s in set_stretch:
+                self.setStretch(*s)
+
+
+class Frame(QFrame):
+    def __init__(self, layout, parent=None):
+        # noinspection PyArgumentList
+        QFrame.__init__(self, parent=parent, flags=Qt.Widget)
+        self.setLayout(layout)
+
+
+class VFrame(Frame):
+    def __init__(self, children: list, add_stretch=False, parent=None):
+        layout = VLayout(children, add_stretch)
+        Frame.__init__(self, layout, parent)
+
+
+class HFrame(Frame):
+    def __init__(self, children: list, add_stretch=False, parent=None):
+        layout = HLayout(children, add_stretch)
+        Frame.__init__(self, layout, parent)
+
+
+class GridFrame(Frame):
+    def __init__(self, children: list, stretch: list = None, auto_right=True, parent=None):
+        layout = GridLayout(children, stretch, auto_right)
+        Frame.__init__(self, layout, parent)
+
 
 class PushButton(QPushButton):
-    def __init__(self, text, func: callable):
-        QPushButton.__init__(self, text)
+    def __init__(
+            self,
+            text: str,
+            func: callable,
+            parent=None,
+            min_height=None,
+            text_color='black',
+            bg_color='rgba(255, 255, 255, 10)'
+    ):
+        QPushButton.__init__(self, text, parent)
         # noinspection PyUnresolvedReferences
         self.clicked.connect(func)
+        self.setStyleSheet('padding-left: 15px; padding-right: 15px;'
+                           'padding-top: 3px; padding-bottom: 3px;')
+        if min_height:
+            self.setMinimumHeight(min_height)
+        self.text_color = text_color
+        self.bg_color = bg_color
+
+    def __update_style_sheet(self):
+        self.setStyleSheet('PushButton {{ background-color : {}; color : {}; }}'.format(self.bg_color, self.text_color))
+
+    def set_text_color(self, color):
+        self.text_color = color
+        self.__update_style_sheet()
+
+    def set_bg_color(self, color):
+        self.bg_color = color
+        self.__update_style_sheet()
 
 
 class Checkbox(QCheckBox):
@@ -182,23 +275,59 @@ class Radio(QRadioButton):
 
 
 class Combo(QComboBox):
-    def __init__(self, on_change: callable, choices: list = None, parent=None):
+    def __init__(self, on_change: callable, choices: list = None, parent=None, model: QStandardItemModel = None):
         QComboBox.__init__(self, parent=parent)
         self.on_change = on_change
         if choices:
             self.addItems(choices)
+        if model:
+            self.setModel(model)
+            # noinspection PyUnresolvedReferences
+            model.modelAboutToBeReset.connect(self.begin_reset_model)
+            # noinspection PyUnresolvedReferences
+            model.modelReset.connect(self.end_reset_model)
         # noinspection PyUnresolvedReferences
-        self.currentTextChanged.connect(on_change)
+        self.activated.connect(on_change)
+        self._current_text = None
+
+    def begin_reset_model(self):
+        self._current_text = self.currentText()
+
+    def end_reset_model(self):
+        if self._current_text:
+            try:
+                self.set_index_from_text(self._current_text)
+            except ValueError:
+                pass
+
+    def __enter__(self):
+        pass
+        # self.blockSignals(True)
+
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        pass
+        # self.blockSignals(False)
 
     def set_index_from_text(self, text):
-        # noinspection PyUnresolvedReferences
-        self.currentTextChanged.disconnect()
+        # self.blockSignals(True)
         idx = self.findText(text, Qt.MatchExactly)
         if idx < 0:
+            self.setCurrentIndex(0)
             raise ValueError(text)
         self.setCurrentIndex(idx)
-        # noinspection PyUnresolvedReferences
-        self.currentTextChanged.connect(self.on_change)
+        # self.blockSignals(False)
+
+    def reset_values(self, choices: list):
+        # self.blockSignals(True)
+        current = self.currentText()
+        self.clear()
+        self.addItems(choices)
+        if current:
+            try:
+                self.set_index_from_text(current)
+            except ValueError:
+                logger.warning('value "{}" has been deleted'.format(current))
+        # self.blockSignals(False)
 
 
 class Shortcut(QShortcut):
@@ -209,18 +338,30 @@ class Shortcut(QShortcut):
 
 
 class LineEdit(QLineEdit, Expandable):
-    def __init__(self, text, on_text_changed: callable = None, read_only=False, clear_btn_enabled=False):
+    def __init__(
+            self,
+            text,
+            on_text_changed: callable = None,
+            read_only: bool = False,
+            clear_btn_enabled: bool = False,
+            validation_regex: str = None,
+            set_enabled: bool = True,
+    ):
         QLineEdit.__init__(self, text)
         if on_text_changed:
             # noinspection PyUnresolvedReferences
             self.textChanged.connect(on_text_changed)
         self.setReadOnly(read_only)
         self.setClearButtonEnabled(clear_btn_enabled)
+        if validation_regex:
+            self.setValidator(QRegExpValidator(QRegExp(validation_regex), self))
+        self.setEnabled(set_enabled)
 
 
 class Label(QLabel):
-    def __init__(self, text, text_color='black', bg_color='rgba(255, 255, 255, 10)'):
+    def __init__(self, text, text_color='black', bg_color='rgba(255, 255, 255, 10)', word_wrap: bool = False):
         QLabel.__init__(self, text)
+        self.setWordWrap(word_wrap)
         self.text_color = text_color
         self.bg_color = bg_color
 
@@ -263,82 +404,6 @@ class VSpacer(QSpacerItem):
             QSpacerItem.__init__(self, 1, size)
 
 
-class WithMsgBoxAdapter:
-    @abc.abstractmethod
-    def msg(self, text: str, follow_up: callable = None, title: str = None):
-        pass
-
-    @abc.abstractmethod
-    def error(self, text: str, follow_up: callable = None, title: str = None):
-        pass
-
-    @abc.abstractmethod
-    def confirm(self, text: str, follow_up: callable, title: str = None, follow_up_on_no: callable = None):
-        pass
-
-
-class WithMsgBox(WithMsgBoxAdapter):
-    def __init__(self, title: str, ico: str):
-        self.title = title
-        self.ico = ico
-
-    def _run_box(
-            self,
-            text: str,
-            follow_up: callable = None,
-            title: str = None,
-            is_question=False,
-            follow_up_on_no: callable = None,
-    ):
-
-        msgbox = QMessageBox()
-
-        msgbox.setWindowIcon(QIcon(self.ico))
-        msgbox.setText(text)
-
-        if title:
-            msgbox.setWindowTitle(title)
-
-        else:
-            msgbox.setWindowTitle(self.title)
-
-        if is_question:
-            msgbox.addButton(QMessageBox.Yes)
-            msgbox.addButton(QMessageBox.No)
-
-        else:
-            msgbox.addButton(QPushButton('Ok'), QMessageBox.YesRole)
-
-        if is_question:
-
-            if msgbox.exec() == QMessageBox.Yes:
-                if follow_up:
-                    follow_up()
-
-            else:
-                if follow_up_on_no:
-                    follow_up_on_no()
-
-        else:
-
-            msgbox.exec()
-            if follow_up:
-                follow_up()
-
-    def msg(self, text: str, follow_up: callable = None, title: str = None):
-        self._run_box(text=text, follow_up=follow_up, title=title)
-
-    def error(self, text: str, follow_up: callable = None, title: str = None):
-        self._run_box(text=text, follow_up=follow_up, title=title)
-
-    def confirm(self, text: str, follow_up: callable, title: str = None, follow_up_on_no: callable = None):
-
-        if title is None:
-            title = 'Please confirm'
-
-        self._run_box(text=text, follow_up=follow_up, title=title, follow_up_on_no=follow_up_on_no, is_question=True)
-
-
 class Menu(QMenu):
     def __init__(self, title: str = '', parent=None):
         super(Menu, self).__init__(title, parent)
@@ -365,7 +430,7 @@ class _TableViewWithRowContextMenu:
         self._menu = menu
 
     # noinspection PyPep8Naming
-    def contextMenuEvent(self, event):  # TODO
+    def contextMenuEvent(self, event):
         logger.debug('in')
         if self._menu:
             logger.debug('menu')
@@ -396,6 +461,13 @@ class TableView(QTableView):
         self.setSortingEnabled(True)
         self.verticalHeader().hide()
 
+    def setModel(self, model: QAbstractItemModel):
+        if isinstance(model, TableEditableModel):
+            for i, delegate in enumerate(model.delegates):
+                if delegate:
+                    self.setItemDelegateForColumn(i, delegate)
+        return super(TableView, self).setModel(model)
+
 
 class TableViewWithSingleRowMenu(TableView, _TableViewWithRowContextMenu):
     def __init__(self, menu, parent=None):
@@ -421,7 +493,7 @@ class TableProxy(QSortFilterProxyModel):
             for column, filter_ in enumerate(self._filter):
                 if filter_:
                     item_text = model.data(model.index(row, column), role=Qt.DisplayRole)
-                    if filter_ not in item_text:
+                    if filter_.lower() not in item_text.lower():
                         return False
         return True
 
@@ -431,18 +503,40 @@ class TableProxy(QSortFilterProxyModel):
 
 
 class TableModel(QAbstractTableModel):
-    def __init__(self, data: list, header_data: list, parent=None):
+    align = {
+        'c': Qt.AlignCenter,
+        'l': Qt.AlignLeft,
+        'r': Qt.AlignRight,
+        'vc': Qt.AlignVCenter,
+    }
+
+    def __init__(
+            self,
+            data: list,
+            header_data: list,
+            parent=None,
+            bg: list = None,
+            fg: list = None,
+            align: list = None,
+            default_align='vc'
+    ):
         super(TableModel, self).__init__(parent=parent)
         self._data = data[:]
         self._header_data = header_data[:]
+        self._bg = bg
+        self._fg = fg
+        self._align = align
+        self._default_align = TableModel.align[default_align]
 
-    # def sort(self, p_int, order=None):
-    #     print('sorting model')
-    #     super(TableModel, self).sort(p_int, order)
-
-    def reset_data(self, new_data):
+    def reset_data(self, new_data: list, bg: list = None, fg: list = None, align: list = None):
         self.beginResetModel()
         self._data = new_data[:]
+        if bg:
+            self._bg = bg
+        if fg:
+            self._fg = fg
+        if align:
+            self._align = align
         self.endResetModel()
         self.sort(0, Qt.AscendingOrder)
 
@@ -452,13 +546,39 @@ class TableModel(QAbstractTableModel):
     def columnCount(self, parent=None, *args, **kwargs):
         return len(self._header_data)
 
+    @staticmethod
+    def _get_color(color):
+        if isinstance(color, str):
+            return QColor(color)
+        elif isinstance(color, tuple):
+            return QColor(*color)
+        else:
+            raise TypeError(type(color))
+
     def data(self, index: QModelIndex, role=Qt.DisplayRole):
-        if role == Qt.DisplayRole:
-            if index.isValid():
+        if index.isValid():
+            if role == Qt.DisplayRole:
                 item = self._data[index.row()]
                 if hasattr(item, '__len__'):
                     return item[index.column()]
                 return item
+            elif self._bg and role == Qt.BackgroundColorRole and self._bg[index.row()]:
+                c = self._bg[index.row()]
+                if isinstance(c, list):
+                    return QVariant(self._get_color(c[index.column()]))
+                else:
+                    return QVariant(self._get_color(c))
+            elif self._fg and role == Qt.ForegroundRole and self._fg[index.row()]:
+                c = self._fg[index.row()]
+                if isinstance(c, list):
+                    return QVariant(self._get_color(c[index.column()]))
+                else:
+                    return QVariant(self._get_color(c))
+            elif role == Qt.TextAlignmentRole:
+                if self._align:
+                    return self._default_align | TableModel.align[self._align[index.column()]]
+                else:
+                    return self._default_align
         return QVariant()
 
     def headerData(self, col, orientation=Qt.Horizontal, role=Qt.DisplayRole):
@@ -466,3 +586,233 @@ class TableModel(QAbstractTableModel):
             if orientation == Qt.Horizontal:
                 return self._header_data[col]
         return QVariant()
+
+
+class TableEditableModel(TableModel):
+    class StringDelegate(QStyledItemDelegate):
+
+        def __init__(self, validation_regex: str = None, parent=None):
+            QStyledItemDelegate.__init__(self, parent)
+            self._regex = validation_regex
+
+        def displayText(self, value, locale):
+            return str(value)
+
+        def createEditor(self, parent: QWidget, style: QStyleOptionViewItem, index: QModelIndex):
+            editor = QLineEdit(parent)
+            if self._regex:
+                validator = QRegExpValidator(editor)
+                validator.setRegExp(QRegExp(self._regex))
+                editor.setValidator(validator)
+            editor.setText(str(index.data(Qt.DisplayRole)))
+            return editor
+
+        def setEditorData(self, editor: QLineEdit, index: QModelIndex):
+            editor.setText(index.data(Qt.DisplayRole))
+
+        def setModelData(self, editor: QLineEdit, model: QAbstractItemModel, index: QModelIndex):
+            model.setData(index, editor.text())
+
+    class FloatDelegate(QStyledItemDelegate):
+
+        def __init__(self, min_value: float, max_value: float, parent=None):
+            QStyledItemDelegate.__init__(self, parent)
+            self._min = min_value
+            self._max = max_value
+
+        def displayText(self, value, locale):
+            return '{:07.3f}'.format(float(value))
+
+        def createEditor(self, parent: QWidget, style: QStyleOptionViewItem, index: QModelIndex):
+            editor = QDoubleSpinBox(parent)
+            editor.setMinimum(self._min)
+            editor.setMaximum(self._max)
+            editor.setDecimals(3)
+            editor.setValue(float(index.data(Qt.DisplayRole)))
+            return editor
+
+        def setEditorData(self, editor: QDoubleSpinBox, index: QModelIndex):
+            editor.setValue(float(index.data(Qt.DisplayRole)))
+
+        def setModelData(self, editor: QDoubleSpinBox, model: QAbstractItemModel, index: QModelIndex):
+            editor.interpretText()
+            model.setData(index, editor.value())
+
+    def __init__(
+            self,
+            data: list,
+            header_data: list,
+            delegates: list,
+            parent=None,
+            bg: list = None,
+            fg: list = None,
+            align: list = None
+    ):
+
+        TableModel.__init__(self, data, header_data, parent, bg, fg, align)
+        self.delegates = delegates
+
+    def flags(self, index: QModelIndex):
+        if index.isValid():
+            if self.delegates[index.column()] is not None:
+                return super(TableEditableModel, self).flags(index) | Qt.ItemIsEditable
+        return super(TableEditableModel, self).flags(index)
+
+    def data(self, index: QModelIndex, role=Qt.DisplayRole):
+        if role == Qt.EditRole:
+            return super(TableEditableModel, self).data(index)
+        return super(TableEditableModel, self).data(index, role)
+
+    def setData(self, index: QModelIndex, value, role=Qt.EditRole):
+        if index.isValid():
+            self._data[index.row()][index.column()] = value
+            # noinspection PyUnresolvedReferences
+            self.dataChanged.emit(index, index)
+            return True
+        return super(TableEditableModel, self).setData(index, value, role)
+
+
+def box_info(parent, title: str, text: str):
+    # noinspection PyArgumentList
+    QMessageBox.information(parent, title, text)
+
+
+def box_warning(parent, title: str, text: str):
+    QMessageBox.warning(parent, title, text)
+
+
+def box_question(parent, text: str, title: str = 'Please confirm'):
+    # noinspection PyArgumentList
+    reply = QMessageBox.question(parent, title, text)
+
+    return reply == QMessageBox.Yes
+
+
+class BrowseDialog(QFileDialog):
+    def __init__(self, parent, title: str):
+        QFileDialog.__init__(self, parent)
+        self.setWindowIcon(QIcon(':/ico/app.ico'))
+        self.setViewMode(QFileDialog.Detail)
+        self.setWindowTitle(title)
+
+    def parse_single_result(self) -> Path or None:
+        if self.exec():
+            result = self.selectedFiles()[0]
+            return Path(result)
+        else:
+            return None
+
+    def parse_multiple_results(self) -> typing.List[Path] or None:
+        if self.exec():
+            results = [Path(x) for x in self.selectedFiles()[0]]
+            return results
+        else:
+            return None
+
+    @staticmethod
+    def make(parent, title: str, filter_: typing.List[str] = None, init_dir: str = '.'):
+        if filter_ is None:
+            filter_ = ['*']
+        dialog = BrowseDialog(parent, title)
+        dialog.setOption(QFileDialog.DontResolveSymlinks)
+        dialog.setOption(QFileDialog.DontUseCustomDirectoryIcons)
+        dialog.setFileMode(QFileDialog.AnyFile)
+        dialog.setNameFilters(filter_)
+        dialog.setDirectory(init_dir)
+        dialog.setAcceptMode(QFileDialog.AcceptOpen)
+        # dialog.setOption(QFileDialog.ReadOnly)
+        return dialog
+
+    @staticmethod
+    def get_file(parent, title: str, filter_: typing.List[str] = None, init_dir: str = '.') -> Path or None:
+        dialog = BrowseDialog.make(parent, title, filter_, init_dir)
+        dialog.setFileMode(QFileDialog.AnyFile)
+        return dialog.parse_single_result()
+
+    @staticmethod
+    def get_existing_file(parent, title: str, filter_: typing.List[str] = None, init_dir: str = '.') -> Path or None:
+        dialog = BrowseDialog.make(parent, title, filter_, init_dir)
+        dialog.setFileMode(QFileDialog.ExistingFile)
+        return dialog.parse_single_result()
+
+    @staticmethod
+    def get_existing_files(parent, title: str, filter_: typing.List[str] = None,
+                           init_dir: str = '.') -> typing.List[Path] or None:
+        dialog = BrowseDialog.make(parent, title, filter_, init_dir)
+        dialog.setFileMode(QFileDialog.ExistingFiles)
+        return dialog.parse_multiple_results()
+
+    @staticmethod
+    def save_file(
+            parent,
+            title: str,
+            filter_: typing.List[str] = None,
+            init_dir: str = '.',
+            default_suffix=None
+    ) -> Path or None:
+        dialog = BrowseDialog.make(parent, title, filter_, init_dir)
+        dialog.setFileMode(QFileDialog.AnyFile)
+        dialog.setAcceptMode(QFileDialog.AcceptSave)
+        if default_suffix:
+            dialog.setDefaultSuffix(default_suffix)
+        return dialog.parse_single_result()
+
+    @staticmethod
+    def get_directory(parent, title: str, init_dir: str = '.') -> Path or None:
+        dialog = BrowseDialog.make(parent, title, init_dir=init_dir)
+        dialog.setFileMode(QFileDialog.Directory)
+        dialog.setOption(QFileDialog.ShowDirsOnly)
+        return dialog.parse_single_result()
+
+
+class TabChild(QWidget):
+    def __init__(self, parent):
+        QWidget.__init__(self, parent, flags=Qt.Widget)
+        self.setContentsMargins(20, 20, 20, 20)
+
+    # noinspection PyMethodMayBeStatic
+    def tab_leave(self) -> bool:
+        """Returns True if it's ok to leave this tab for another one"""
+        return True
+
+    @abstractmethod
+    def tab_clicked(self):
+        pass
+
+    @property
+    @abc.abstractmethod
+    def tab_title(self) -> str:
+        """"""
+
+
+class TabWidget(QTabWidget):
+    def __init__(self, parent=None):
+        QTabWidget.__init__(self, parent)
+        self._tabs = []
+        # noinspection PyUnresolvedReferences
+        self.currentChanged.connect(self._current_index_changed)
+        self._current_tab_index = 0
+
+    @property
+    def tabs(self) -> typing.Generator['TabChild', None, None]:
+        for tab in self._tabs:
+            yield tab
+
+    def get_tab_from_title(self, tab_title: str) -> 'TabChild':
+        for tab in self.tabs:
+            if tab.tab_title == tab_title:
+                return tab
+        raise KeyError('tab "{}" not found'.format(tab_title))
+
+    # noinspection PyMethodOverriding
+    def addTab(self, tab: 'TabChild'):
+        self._tabs.append(tab)
+        super(TabWidget, self).addTab(tab, tab.tab_title)
+
+    def _current_index_changed(self, new_tab_index):
+        if not new_tab_index == self._current_tab_index:
+            if not self._tabs[self._current_tab_index].tab_leave():
+                self.setCurrentIndex(self._current_tab_index)
+            else:
+                self._tabs[new_tab_index].tab_clicked()
+                self._current_tab_index = self.currentIndex()

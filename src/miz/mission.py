@@ -1,14 +1,19 @@
 # coding=utf-8
+
+import typing
 from calendar import timegm
 from itertools import chain
 from time import strftime, gmtime, strptime
 
-from utils import make_logger
-from utils import Logged, valid_str, valid_positive_int, Validator, valid_bool, valid_int, valid_float
+from src.utils import make_logger
+from src.utils import Logged, valid_str, valid_positive_int, Validator, valid_bool, valid_int, valid_float
 
 EPOCH_DELTA = 1306886400
 
 logger = make_logger(__name__)
+
+validator_group_or_unit_name = Validator(_type=str, _regex=r'[a-zA-Z0-9\_\-\#]+',
+                                         exc=ValueError, logger=logger)
 
 
 class BaseMissionObject(Logged):
@@ -19,7 +24,6 @@ class BaseMissionObject(Logged):
             raise TypeError('mission_dict should be an dict, got: {}'.format(type(mission_dict)))
 
         if not isinstance(l10n, dict):
-            print(l10n)
             raise TypeError('l10n should be an dict, got: {}'.format(type(l10n)))
 
         self.d = mission_dict
@@ -77,7 +81,7 @@ class BaseMissionObject(Logged):
                 return group
         return None
 
-    def get_clients_groups(self):
+    def get_clients_groups(self) -> typing.Generator['FlyingUnit', None, None]:
         for group in self.groups:
             assert isinstance(group, Group)
             if group.group_is_client_group:
@@ -230,6 +234,11 @@ class Mission(BaseMissionObject):
     def __repr__(self):
         return 'Mission({})'.format(self.d)
 
+    def farps(self) -> typing.Generator['Static', None, None]:
+        for coa in [self.blue_coa, self.red_coa]:
+            for farp in coa.farps:
+                yield farp
+
 
 # noinspection PyProtectedMember
 class Coalition(BaseMissionObject):
@@ -279,7 +288,7 @@ class Coalition(BaseMissionObject):
         return self._section_coalition['country']
 
     @property
-    def countries(self):
+    def countries(self) -> typing.Generator['Country', None, None]:
         for k in self._section_country:
             if k not in self._countries.keys():
                 country = Country(self.d, self.l10n, self.coa_color, k)
@@ -288,7 +297,7 @@ class Coalition(BaseMissionObject):
                 self._countries_by_name[country.country_name] = country
             yield self._countries[k]
 
-    def get_country_by_name(self, country_name):
+    def get_country_by_name(self, country_name) -> 'Country':
         valid_str.validate(country_name, 'get_country_by_name', exc=ValueError)
         if country_name not in self._countries_by_name.keys():
             for country in self.countries:
@@ -299,7 +308,7 @@ class Coalition(BaseMissionObject):
         else:
             return self._countries_by_name[country_name]
 
-    def get_country_by_id(self, country_id):
+    def get_country_by_id(self, country_id) -> 'Country':
         valid_positive_int.validate(country_id, 'get_country_by_id', exc=ValueError)
         if country_id not in self._countries_by_id.keys():
             for country in self.countries:
@@ -311,14 +320,31 @@ class Coalition(BaseMissionObject):
             return self._countries_by_id[country_id]
 
     @property
-    def groups(self):
+    def groups(self) -> typing.Generator['Group', None, None]:
         for country in self.countries:
             assert isinstance(country, Country)
             for group in country.groups:
                 assert isinstance(group, Group)
                 yield group
 
-    def get_groups_from_category(self, category):
+    @property
+    def statics(self) -> typing.Generator['Static', None, None]:
+        for country in self.countries:
+            assert isinstance(country, Country)
+            for static in country.statics:
+                assert isinstance(static, Static)
+                yield static
+
+    @property
+    def farps(self) -> typing.Generator['Static', None, None]:
+        for country in self.countries:
+            assert isinstance(country, Country)
+            for static in country.statics:
+                assert isinstance(static, Static)
+                if static.static_is_farp:
+                    yield static
+
+    def get_groups_from_category(self, category) -> typing.Generator['Group', None, None]:
         Mission.validator_group_category.validate(category, 'get_groups_from_category')
         for group in self.groups:
             assert isinstance(group, Group)
@@ -326,50 +352,46 @@ class Coalition(BaseMissionObject):
                 yield group
 
     @property
-    def units(self):
+    def units(self) -> typing.Generator['BaseUnit', None, None]:
         for group in self.groups:
             assert isinstance(group, Group)
             for unit in group.units:
                 yield unit
 
-    def get_units_from_category(self, category):
+    def get_units_from_category(self, category) -> typing.Generator['BaseUnit', None, None]:
         Mission.validator_group_category.validate(category, 'group category')
         for unit in self.units:
             assert isinstance(unit, BaseUnit)
             if unit.group_category == category:
                 yield unit
 
-    def get_group_by_id(self, group_id):
+    def get_group_by_id(self, group_id) -> 'Group':
         valid_positive_int.validate(group_id, 'get_group_by_id')
         for group in self.groups:
             assert isinstance(group, Group)
             if group.group_id == group_id:
                 return group
-        return None
 
-    def get_group_by_name(self, group_name):
+    def get_group_by_name(self, group_name) -> 'Group':
         valid_str.validate(group_name, 'get_group_by_name')
         for group in self.groups:
             assert isinstance(group, Group)
             if group.group_name == group_name:
                 return group
-        return None
 
-    def get_unit_by_name(self, unit_name):
+    def get_unit_by_name(self, unit_name) -> 'BaseUnit':
         valid_str.validate(unit_name, 'get_unit_by_name')
         for unit in self.units:
             assert isinstance(unit, BaseUnit)
             if unit.unit_name == unit_name:
                 return unit
-        return None
 
-    def get_unit_by_id(self, unit_id):
+    def get_unit_by_id(self, unit_id) -> 'BaseUnit':
         valid_positive_int.validate(unit_id, 'get_unit_by_id')
         for unit in self.units:
             assert isinstance(unit, BaseUnit)
             if unit.unit_id == unit_id:
                 return unit
-        return None
 
 
 class Trig(BaseMissionObject):
@@ -792,6 +814,7 @@ class Country(Coalition):
             'ship': {},
         }
         self.country_index = country_index
+        self.__static = {}
 
     def __repr__(self):
         return 'Country({}, {}, {})'.format(self._section_country, self.coa_color, self.country_index)
@@ -814,7 +837,7 @@ class Country(Coalition):
         return self._section_this_country['name']
 
     @property
-    def groups(self):
+    def groups(self) -> typing.Generator['Group', None, None]:
         for group_category in Mission.valid_group_categories:
             if group_category in self._section_this_country.keys():
                 for group_index in self._section_this_country[group_category]['group']:
@@ -824,49 +847,54 @@ class Country(Coalition):
                                                                            group_index)
                     yield self.__groups[group_category][group_index]
 
-    def get_groups_from_category(self, category):
+    @property
+    def statics(self) -> typing.Generator['Static', None, None]:
+        if 'static' in self._section_this_country.keys():
+            for static_index in self._section_this_country['static']['group']:
+                if static_index not in self.__static:
+                    self.__static[static_index] = Static(self.d, self.l10n, self.coa_color,
+                                                         self.country_index, static_index)
+                yield self.__static[static_index]
+
+    def get_groups_from_category(self, category) -> typing.Generator['Group', None, None]:
         Mission.validator_group_category.validate(category, 'get_groups_from_category')
         for group in self.groups:
             assert isinstance(group, Group)
             if group.group_category == category:
                 yield group
 
-    def get_group_by_id(self, group_id):
+    def get_group_by_id(self, group_id) -> 'Group':
         for group in self.groups:
             assert isinstance(group, Group)
             if group.group_id == group_id:
                 return group
-        return None
 
-    def get_group_by_name(self, group_name):
+    def get_group_by_name(self, group_name) -> 'Group':
         for group in self.groups:
             assert isinstance(group, Group)
             if group.group_name == group_name:
                 return group
-        return None
 
     @property
-    def units(self):
+    def units(self) -> typing.Generator['BaseUnit', None, None]:
         for group in self.groups:
             assert isinstance(group, Group)
             for unit in group.units:
                 yield unit
 
-    def get_unit_by_name(self, unit_name):
+    def get_unit_by_name(self, unit_name) -> 'BaseUnit':
         for unit in self.units:
             assert isinstance(unit, BaseUnit)
             if unit.unit_name == unit_name:
                 return unit
-        return None
 
-    def get_unit_by_id(self, unit_id):
+    def get_unit_by_id(self, unit_id) -> 'BaseUnit':
         for unit in self.units:
             assert isinstance(unit, BaseUnit)
             if unit.unit_id == unit_id:
                 return unit
-        return None
 
-    def get_units_from_category(self, category):
+    def get_units_from_category(self, category) -> typing.Generator['BaseUnit', None, None]:
         Mission.validator_group_category.validate(category, 'group category')
         for unit in self.units:
             assert isinstance(unit, BaseUnit)
@@ -874,12 +902,64 @@ class Country(Coalition):
                 yield unit
 
 
+class Static(Country):
+    def __init__(self, mission_dict, l10n, coa_color, country_index, static_index):
+        super(Static, self).__init__(mission_dict, l10n, coa_color, country_index)
+        self.static_index = static_index
+
+    @property
+    def static_id(self):
+        return self._section_static['groupId']
+
+    @static_id.setter
+    def static_id(self, value):
+        valid_int.validate(value, 'groupId')
+        self._section_static['groupId'] = value
+
+    @property
+    def _section_static(self):
+        return self._section_this_country['static']['group'][self.static_index]
+
+    @property
+    def _static_name_key(self):
+        return self._section_static['name']
+
+    @property
+    def static_name(self):
+        return self.l10n[self._static_name_key]
+
+    @static_name.setter
+    def static_name(self, value):
+        validator_group_or_unit_name.validate(value, 'group name')
+        self.l10n[self._static_name_key] = value
+
+    @property
+    def static_category(self):
+        return self._section_static['units'][1]['category']
+
+    @property
+    def static_is_farp(self):
+        return self.static_category == 'Heliports'
+
+    @property
+    def static_position(self):
+        unit = self._section_static['units'][1]
+        return unit['x'], unit['y']
+
+
 # noinspection PyProtectedMember
 class Group(Country):
-
     attribs = ('group_category', 'group_index', 'group_hidden', 'group_start_time', '_group_name_key')
 
     class Route:
+
+        class Point:
+            def __init__(self, parent_route):
+                assert isinstance(parent_route, Group.Route)
+                self.parent_route = parent_route
+
+            def __repr__(self):
+                return 'Route({})'.format(self.parent_route.parent_group.group_name)
 
         def __init__(self, parent_group):
             assert isinstance(parent_group, Group)
@@ -892,8 +972,10 @@ class Group(Country):
         def _section_route(self):
             return self.parent_group._section_group['route']['points']
 
-    validator_group_or_unit_name = Validator(_type=str, _regex=r'[a-zA-Z0-9\_\-\#]+',
-                                             exc=ValueError, logger=logger)
+        @property
+        def points(self):
+            raise NotImplementedError('uh')
+
     validator_group_route = Validator(_type=Route, exc=ValueError, logger=logger)
     units_class_enum = None
 
@@ -920,8 +1002,10 @@ class Group(Country):
                 '"other" must be an AbstractUnit instance; got: {}'.format(type(other)))
         return self._section_group == other._section_group
 
+    # noinspection PyTypeChecker
     @property
-    def group_route(self):
+    def group_route(self) -> 'Group.Route':
+        #  TODO
         if self.__group_route is None:
             self.__group_route = Group.Route(self)
         return self.__group_route
@@ -945,7 +1029,7 @@ class Group(Country):
 
     @group_name.setter
     def group_name(self, value):
-        self.validator_group_or_unit_name.validate(value, 'group name')
+        validator_group_or_unit_name.validate(value, 'group name')
         self.l10n[self._group_name_key] = value
 
     @property
@@ -964,7 +1048,7 @@ class Group(Country):
     @group_id.setter
     def group_id(self, value):
         valid_int.validate(value, 'groupId')
-        self._section_group['goupId'] = value
+        self._section_group['groupId'] = value
 
     @property
     def group_start_delay(self):
@@ -1005,6 +1089,13 @@ class Group(Country):
                                                                                       self.group_index, unit_index)
             yield self.__units[unit_index]
 
+    @property
+    def first_unit(self) -> 'BaseUnit':
+        return list(self.units)[0]
+
+    def group_size(self) -> int:
+        return len(list(self.units))
+
     def get_unit_by_name(self, unit_name):
         for unit in self.units:
             assert isinstance(unit, BaseUnit)
@@ -1035,6 +1126,10 @@ class Group(Country):
         first_unit = self.get_unit_by_index(1)
         assert isinstance(first_unit, BaseUnit)
         return first_unit.skill == 'Client'
+
+    @property
+    def group_start_position(self):
+        return self.group_route._section_route[1]['action']
 
 
 # noinspection PyProtectedMember
@@ -1067,7 +1162,7 @@ class BaseUnit(Group):
 
     @unit_name.setter
     def unit_name(self, value):
-        self.validator_group_or_unit_name.validate(value, 'unit name')
+        validator_group_or_unit_name.validate(value, 'unit name')
         self.l10n[self._unit_name_key] = value
 
     @property
@@ -1142,7 +1237,7 @@ class BaseUnit(Group):
         self._section_unit['heading'] = value
 
     @property
-    def radio_presets(self):
+    def radio_presets(self) -> typing.Generator['FlyingUnit.RadioPresets', None, None]:
         raise TypeError('unit #{}: {}'.format(self.unit_id, self.unit_name))
 
     @property
@@ -1245,6 +1340,54 @@ class FlyingUnit(BaseUnit):
                     'channels_qty': 4,
                 },
             },
+            'SpitfireLFMkIX': {
+                1: {
+                    'radio_name': 'SCR522',
+                    'min': 100,
+                    'max': 156,
+                    'channels_qty': 4,
+                },
+            },
+            'Bf-109K-4': {
+                1: {
+                    'radio_name': 'FuG 16 ZY',
+                    'min': 38,
+                    'max': 156,
+                    'channels_qty': 5,
+                },
+            },
+            'FW-190D9': {
+                1: {
+                    'radio_name': 'FuG 16',
+                    'min': 38.4,
+                    'max': 42.4,
+                    'channels_qty': 4,
+                },
+            },
+            'SA342L': {
+                1: {
+                    'radio_name': 'FM Radio',
+                    'min': 30,
+                    'max': 87.975,
+                    'channels_qty': 8,
+                },
+            },
+            'SA342M': {
+                1: {
+                    'radio_name': 'FM Radio',
+                    'min': 30,
+                    'max': 87.975,
+                    'channels_qty': 8,
+                },
+            },
+            'SA342Mistral': {
+                1: {
+                    'radio_name': 'FM Radio',
+                    'min': 30,
+                    'max': 87.975,
+                    'channels_qty': 8,
+                },
+            },
         }
 
         def __init__(self, parent_unit, radio_num):
@@ -1288,7 +1431,7 @@ class FlyingUnit(BaseUnit):
             return self._section_radio[self.radio_num]['channels']
 
         @property
-        def channels(self):
+        def channels(self) -> typing.Generator[tuple, None, None]:
             for k in self._section_channels:
                 yield (k, float(self._section_channels[k]))
 
@@ -1305,6 +1448,7 @@ class FlyingUnit(BaseUnit):
             valid_positive_int.validate(channel, 'set_frequency')
             valid_float.validate(frequency, 'set_frequency')
             if 1 <= channel <= self.channels_qty:
+                # noinspection PyTypeChecker
                 if self.min <= frequency <= self.max:
                     self._section_channels[channel] = float(frequency)
                 else:
@@ -1321,12 +1465,19 @@ class FlyingUnit(BaseUnit):
         super().__init__(mission_dict, l10n, coa_color, country_index, group_category, group_index, unit_index)
 
     @property
-    def radio_presets(self):
+    def radio_presets(self) -> typing.Generator['FlyingUnit.RadioPresets', None, None]:
         if self.skill == 'Client' and self.unit_type in FlyingUnit.RadioPresets.radio_enum.keys():
             for k in self._section_unit['Radio']:
                 yield FlyingUnit.RadioPresets(self, k)
         else:
             raise TypeError('unit #{}: {}'.format(self.unit_id, self.unit_name))
+
+    @property
+    def radios(self):
+        try:
+            return self._section_unit['Radio']
+        except KeyError:
+            raise KeyError(self.unit_type)
 
     def get_radio_by_name(self, radio_name):
         if self.has_radio_presets:

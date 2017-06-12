@@ -12,10 +12,11 @@ import raven.handlers.logging
 from src import global_
 from src.__version__ import __version__
 from src.sentry.sentry_context_provider import ISentryContextProvider
-from utils.custom_logging import make_logger
-from utils.singleton import Singleton
+from src.utils import Singleton, make_logger, nice_exit
 
 logger = make_logger(__name__)
+
+CRASH = False
 
 
 class Sentry(raven.Client, metaclass=Singleton):
@@ -53,6 +54,9 @@ class Sentry(raven.Client, metaclass=Singleton):
 
     def captureMessage(self, message, **kwargs):
         self.set_context()
+        if not global_.FROZEN:
+            logger.warning(f'message would have been sent: {message}')
+            return
         if kwargs.get('data') is None:
             kwargs['data'] = {}
         if kwargs['data'].get('level') is None:
@@ -73,6 +77,9 @@ class Sentry(raven.Client, metaclass=Singleton):
             assert isinstance(context_provider, ISentryContextProvider)
             SENTRY.extra_context({k: context_provider.get_context()})
         super(Sentry, self).captureException(exc_info, **kwargs)
+
+        if CRASH:
+            nice_exit(-1)
 
 
 logger.info('SENTRY: initializing')
