@@ -1,9 +1,9 @@
 # coding=utf-8
 
+from src.reorder.finder import FindProfile, FindBranch, FindRemoteVersion
 from src.reorder.service import BrowseForFiles, ManageProfiles, ManageBranches, ManageRemoteVersions
 from src.reorder.ui.dialog_profile_editor import DialogProfileEditor
 from src.reorder.value import AutoProfileModelContainer, BranchesModelContainer
-from src.reorder.finder import FindProfile, FindBranch, FindRemoteVersion
 from src.ui.base import VLayout, Label, Widget, PushButton, GridLayout, Combo, HSpacer
 from src.utils import make_logger
 

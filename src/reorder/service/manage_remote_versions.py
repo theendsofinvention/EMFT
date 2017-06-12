@@ -2,14 +2,14 @@
 
 import urllib.parse
 
-from src.reorder.service import ConvertUrl
-from src.reorder.finder import FindProfile, FindBranch, FindRemoteVersion
-from src.reorder.value import AVProbeResult, RemoteVersion
-from src.utils import make_logger, ThreadPool, Path
 from src.misc import downloader
-from src.utils.av import AVSession
+from src.reorder.finder import FindProfile, FindBranch, FindRemoteVersion
+from src.reorder.service import ConvertUrl
+from src.reorder.value import AVProbeResult, RemoteVersion
 from src.ui.base import box_question
 from src.utils import Progress
+from src.utils import make_logger, ThreadPool, Path
+from src.utils.av import AVSession
 
 logger = make_logger(__name__)
 
