@@ -79,8 +79,9 @@ class ManageRemoteVersions:
 
         latest = FindRemoteVersion.get_latest()
         profile = FindProfile.get_active_profile()
+        branch = FindBranch.get_active_branch().name
 
-        if latest and profile:
+        if latest and profile and branch:
 
             local_file = Path(profile.src_folder).joinpath(latest.remote_file_name).abspath()
 
