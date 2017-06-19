@@ -19,7 +19,7 @@ geographiclib==1.48       # via polycircles
 gitchangelog==3.0.3
 httmock==1.2.6
 humanize==0.5.1
-hypothesis==3.11.2
+hypothesis==3.11.6
 idna==2.5                 # via requests
 mpmath==0.19
 natsort==5.0.3
