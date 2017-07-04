@@ -1,0 +1,17 @@
+doc-warnings: true
+test-warnings: true
+strictness: veryhigh
+max-line-length: 120
+autodetect: false
+requirements:
+  - requirements.txt
+ignore-paths:
+  - docs
+  - mypackage/vendor
+ignore-patterns:
+  - ^example/doc_.*\.py$
+  - (^|/)docs(/|$)
+python-targets:
+  - 3
+pep8:
+  full: true
