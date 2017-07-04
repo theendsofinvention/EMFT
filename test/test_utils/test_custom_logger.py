@@ -8,10 +8,10 @@ import pytest
 from src.utils.custom_logging import make_logger, Logged
 
 
-class TestHandler(Handler):
+class DummyHandler(Handler):
     def __init__(self):
         # Bypass pytest
-        super(TestHandler, self).__init__()
+        super(DummyHandler, self).__init__()
 
     def emit(self, record):
         pass
@@ -62,7 +62,7 @@ class TestCustomLogging:
         assert mock.call_args_list == [mocker.call(str(p))]
 
     def test_custom_handler(self, mocker):
-        handler = TestHandler()
+        handler = DummyHandler()
         mock = mocker.MagicMock()
         handler.emit = mock
 
@@ -85,6 +85,6 @@ class TestCustomLogging:
 
     def test_sublogger_handler(self):
         make_logger()
-        handler = TestHandler
+        handler = DummyHandler
         sublogger = make_logger('sub', custom_handler=handler)
         assert handler in sublogger.handlers
