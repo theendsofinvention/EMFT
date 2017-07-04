@@ -1,8 +1,6 @@
 # coding=utf-8
 
 
-import threading
-
 from src import global_
 from src.reorder.adapter.tab_reorder_adapter import TabReorderAdapter
 from .main_ui_mixins_adapter import MainUiMixinsAdapter
@@ -19,7 +17,8 @@ class MainUiMethod:
     def __call__(self, *args, **kwargs):
         # noinspection PyProtectedMember
         # if isinstance(threading.current_thread(), threading._MainThread):
-        #     # FIXME: this should raise only on scripted run; if ran from compiled, this should capture & send via SENTRY instead
+        #     # FIXME: this should raise only on scripted run;
+        #     # if ran from compiled, this should capture & send via SENTRY instead
         #     raise RuntimeError(f'Interface method "{self.func.__name__}" called in main thread')
         if global_.MAIN_UI is None:
             raise RuntimeError('Main UI not initialized')
