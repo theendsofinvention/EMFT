@@ -150,6 +150,7 @@ RADIOS_TESTS = [
 ]
 
 
+@pytest.mark.nocleandir
 # noinspection PyPep8Naming
 class TestMizBasics:
     @pytest.fixture(autouse=True)
@@ -243,6 +244,7 @@ class TestMizBasics:
         #                 assert isinstance(miz, Miz)
 
 
+@pytest.mark.nocleandir
 # noinspection PyPep8Naming
 class TestMizValues:
     @pytest.fixture(scope='class')

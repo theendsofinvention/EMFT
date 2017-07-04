@@ -10,6 +10,7 @@ TEST_FILES_DIR = './test/test_files/sltp'
 ENCODING = 'iso8859_15'
 
 
+@pytest.mark.nocleandir
 @pytest.mark.parametrize('test_file', os.listdir(TEST_FILES_DIR))
 def test_encode_decode_files(test_file):
     test_file = os.path.join(TEST_FILES_DIR, test_file)

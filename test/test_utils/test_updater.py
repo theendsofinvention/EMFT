@@ -223,6 +223,7 @@ class TestAvailableReleases:
             ar.filter_by_channel(channel)
 
 
+@pytest.mark.nocleandir
 class TestUpdater:
     @pytest.fixture(scope='function')
     def upd(self, mocker):

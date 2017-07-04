@@ -21,6 +21,7 @@ ALL_OBJECTS = os.path.join(BASE_PATH, 'all_objects.miz')
 BAD_FILES = ['bad_zip_file.miz', 'missing_files.miz']
 
 
+@pytest.mark.nocleandir
 class TestMizPath:
 
     @pytest.mark.parametrize('cls', [Miz])
