@@ -479,7 +479,7 @@ class BaseUpdater(abc.ABC):
             _err_callback=failure_callback,
         )
 
-    def _find_and_install_latest_release(
+    def _find_and_install_latest_release(  # noqa C901
             self,
             current_version: str or Version,
             executable_path: str or Path,
