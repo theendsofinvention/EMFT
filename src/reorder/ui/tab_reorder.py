@@ -125,11 +125,7 @@ class TabChildReorder(MainUiTabChild, TabReorderAdapter):
         self._write_selected_mode_to_config()
 
     def _reorder_manual(self):
-        ReorderMiz.reorder_miz_file(
-            miz_file_path=self.widget_manual.path_to_miz,
-            output_folder_path=self.widget_manual.path_to_output_folder,
-            skip_option_file=self.check_skip_options.isChecked(),
-        )
+        ReorderMiz.manual_reorder(self.widget_manual.path_to_miz)
 
     @staticmethod
     def _reorder_auto():

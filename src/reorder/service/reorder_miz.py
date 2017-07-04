@@ -1,5 +1,5 @@
 from src.miz import Miz
-from src.reorder.finder import FindProfile, FindRemoteVersion
+from src.reorder.finder import FindProfile, FindRemoteVersion, FindOutputFolder
 from src.ui.main_ui_interface import I
 from src.utils import ThreadPool, make_logger, Path
 from src.cfg import Config
@@ -16,6 +16,29 @@ class ReorderMiz:
         I.error(f'Could not unzip the following file:\n\n{miz_file}\n\n'
                 'Please check the log, and eventually send it to me along with the MIZ file '
                 'if you think this is a bug.')
+
+    @staticmethod
+    def manual_reorder(path_to_miz : str):
+        error = None
+        miz_file = Path(path_to_miz)
+        output_folder = FindOutputFolder.get_active_output_folder()
+        if not miz_file.exists():
+            error = f'MIZ file does not exist: {miz_file.abspath()}'
+        if not output_folder:
+            error = 'no output folder selected'
+        else:
+            if not output_folder.exists():
+                error = f'output folder does not exist:\n\n{miz_file.abspath()}'
+        if error:
+            logger.error(error)
+            I.error(error.replace(':', ':\n\n').capitalize())
+            return
+        ReorderMiz.reorder_miz_file(
+            miz_file_path=str(miz_file.abspath()),
+            output_folder_path=output_folder,
+            skip_option_file=Config().skip_options_file,
+        )
+
 
     @staticmethod
     def auto_reorder():
