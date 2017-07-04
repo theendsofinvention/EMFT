@@ -19,10 +19,6 @@ else:
     # This is a potential security breach, but I'm leaving it as is as it should only be running scripted
     __version__ = loads(subprocess.check_output(['gitversion']).decode().rstrip()).get('FullSemVer')
 
-__guid__ = '4ae6dbb7-5b26-28c6-b797-2272f5a074f3'
-
-__appname__ = 'TEMP'
-
 logger = make_logger(__name__, ch_level=INFO)
 
 
