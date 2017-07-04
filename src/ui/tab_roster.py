@@ -258,10 +258,13 @@ class TabChildRoster(MainUiTabChild, TabRosterAdapter):
 
         print(roster)
 
-    # def _load_roster(self):
-    #
-    #     roster = BrowseDialog.get_existing_file(
-    #         self,
-    #         'Select roster file',
-    #         filter_=['*.roster'],
-    #         init_dir=self._roster_last_dir or saved_games_path.abspath())
+    def _load_roster(self):
+
+        roster = BrowseDialog.get_existing_file(
+            self,
+            'Select roster file',
+            filter_=['*.roster'],
+            init_dir=self._roster_last_dir or saved_games_path.abspath())
+
+        if roster:
+            pass
