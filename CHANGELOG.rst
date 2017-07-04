@@ -30,6 +30,8 @@ New
 
 Changes
 ~~~~~~~
+- Set "Save" button as default in output folder edit dialog. [132nd-
+  etcher]
 - Re-worked the re-ordering system. [132nd-etcher]
 
   Added pre-selection of output folders, added the possibility to define a number of profiles (TRMT, SDCM, ...) to the auto-reordering, and started working on encapsulating all of this in a manageable framework to ease maintenance & growth.
@@ -53,6 +55,7 @@ Changes
 
 Fix
 ~~~
+- Auto reorder: fixed bug when no branch is selected. [132nd-etcher]
 - Fixed pending or failed AV build not detected. [132nd-etcher]
 - Fix lag due to scanning of remote branch. [132nd-etcher]
 - Fixed laggy progress dialog when downloading a MIZ file. [132nd-
