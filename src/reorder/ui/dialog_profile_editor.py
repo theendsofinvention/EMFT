@@ -59,30 +59,22 @@ class DialogProfileEditor(Dialog):
         self.close()
 
     def _is_valid(self) -> bool:
-        if not self._name_le.text():
-            box_warning(self, 'Missing information', 'Please give a name to this profile')
-            return False
-        elif not self._gh_repo_le.text():
-            box_warning(self, 'Missing information', 'Please provide a Github repository')
-            return False
-        elif not self._av_repo_le.text():
-            box_warning(self, 'Missing information', 'Please provide a Appveyor repository')
-            return False
-        elif not self._src_folder.text():
-            box_warning(self, 'Missing information', 'Please provide a source folder')
-            return False
-        elif not self._output_folder.text():
-            box_warning(self, 'Missing information', 'Please provide an output folder')
-            return False
+        data_to_validate = [
+            (self._name_le.text(), 'Please give a name to this profile'),
+            (self._gh_repo_le.text(), 'Please provide a Github repository'),
+            (self._av_repo_le.text(), 'Please provide a Appveyor repository'),
+            (self._src_folder.text(), 'Please provide a source folder'),
+            (self._output_folder.text(), 'Please provide an output folder'),
+            (Path(self._src_folder.text()).exists(), f'The source folder does not exist:\n\n'
+                                                     f'{self._src_folder.text()}'),
+            (Path(self._output_folder.text()).exists(), f'The output folder does not exist:\n\n'
+                                                        f'{self._output_folder.text()}'),
+        ]
+        for data in data_to_validate:
+            if not data[0]:
+                box_warning(self, 'Oops', data[1])
+                return False
         else:
-            if not Path(self._src_folder.text()).exists():
-                box_warning(self, 'Incorrect information', f'The source folder does not exist:\n\n'
-                                                           f'{self._src_folder.text()}')
-                return False
-            if not Path(self._output_folder.text()).exists():
-                box_warning(self, 'Incorrect information', f'The output folder does not exist:\n\n'
-                                                           f'{self._output_folder.text()}')
-                return False
             try:
                 ConvertUrl.convert_gh_url(self._gh_repo_le.text())
             except ValueError:

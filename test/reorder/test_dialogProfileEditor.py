@@ -40,7 +40,7 @@ class TestDialogProfileEditor:
         assert not valid_dialog._is_valid()
         warning_box.assert_called_once_with(
             valid_dialog,
-            'Missing information',
+            'Oops',
             'Please give a name to this profile'
         )
         warning_box.reset_mock()
@@ -56,7 +56,7 @@ class TestDialogProfileEditor:
         assert not valid_dialog._is_valid()
         warning_box.assert_called_once_with(
             valid_dialog,
-            'Missing information',
+            'Oops',
             'Please provide a source folder'
         )
         warning_box.reset_mock()
@@ -64,7 +64,7 @@ class TestDialogProfileEditor:
         assert not valid_dialog._is_valid()
         warning_box.assert_called_once_with(
             valid_dialog,
-            'Incorrect information',
+            'Oops',
             'The source folder does not exist:\n\nsome folder'
         )
         warning_box.reset_mock()
@@ -81,7 +81,7 @@ class TestDialogProfileEditor:
         assert not valid_dialog._is_valid()
         warning_box.assert_called_once_with(
             valid_dialog,
-            'Missing information',
+            'Oops',
             'Please provide an output folder'
         )
         warning_box.reset_mock()
@@ -89,7 +89,7 @@ class TestDialogProfileEditor:
         assert not valid_dialog._is_valid()
         warning_box.assert_called_once_with(
             valid_dialog,
-            'Incorrect information',
+            'Oops',
             'The output folder does not exist:\n\nsome folder'
         )
         warning_box.reset_mock()
