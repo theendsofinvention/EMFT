@@ -31,6 +31,7 @@ class DialogEditOutputFolder(Dialog):
             func=self._on_btn_save_clicked,
             min_height=30,
         )
+        self.btn_save.setDefault(True)
 
         self.btn_cancel = PushButton(
             text='Cancel',
