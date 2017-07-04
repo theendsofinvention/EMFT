@@ -4,6 +4,7 @@ import re
 
 import mpmath
 from natsort import natsorted
+
 from src.utils.custom_logging import make_logger
 
 logger = make_logger(__name__)
@@ -106,7 +107,7 @@ class SLTP:
                 out.append(line)
         return '{}{} -- end of {}\n'.format(qualifier, self.newline.join(out), qualifier.replace('=', '').rstrip())
 
-    def __encode(self, obj, dict_name=None): # noqa C901
+    def __encode(self, obj, dict_name=None):  # noqa C901
         s = ''
         tab = self.tab
         newline = self.newline
