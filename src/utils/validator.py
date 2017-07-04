@@ -6,8 +6,19 @@ from re import fullmatch as re_full_match
 class Validator:
     """Validates many kind of values against pre-defined conditions, raises Exception and logs errors"""
 
-    def __init__(self, *, _type=None, _instance=None, _min=None, _max=None, _regex=None, _in_list=None, _path_exists=False, exc=None,
-                 logger=None):
+    def __init__(
+            self,
+            *,
+            _type=None,
+            _instance=None,
+            _min=None,
+            _max=None,
+            _regex=None,
+            _in_list=None,
+            _path_exists=False,
+            exc=None,
+            logger=None
+    ):
         self.type = _type
         self.instance = _instance
         self.min = _min
@@ -50,7 +61,8 @@ class Validator:
             self.error('invalid value for parameter "{}" (over maxima): {}'.format(param_name, value))
 
         if self.regex is not None and not re_full_match(self.regex, value):
-            self.error('invalid value for parameter "{}" (should match: "{}"): {}'.format(param_name, self.regex, value))
+            self.error('invalid value for parameter "{}" (should match: "{}"): {}'
+                       .format(param_name, self.regex, value))
 
         if self.in_list is not None and value not in self.in_list:
             self.error(
