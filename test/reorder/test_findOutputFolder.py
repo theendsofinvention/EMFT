@@ -4,10 +4,15 @@ import pytest
 
 from src.reorder.finder import FindOutputFolder
 from src.reorder.service import ManageOutputFolders
+from src.reorder.value import OutputFolders
 
 
 # coding=utf-8
 class TestFindOutputFolder:
+    @pytest.fixture(scope='function', autouse=True)
+    def cleanup(self):
+        OutputFolders()._data = dict()
+
     def test_get_active_output_folder(self):
         assert FindOutputFolder.get_active_output_folder() is None
         assert FindOutputFolder.get_active_output_folder_name() is None
