@@ -63,13 +63,17 @@ class ManageRemoteVersions:
         def task_callback(*_):
             ManageRemoteVersions.notify_watchers()
 
-        branch = FindBranch.get_active_branch().name
+        branch = FindBranch.get_active_branch()
 
-        ManageRemoteVersions._POOL.queue_task(
-            ManageRemoteVersions._get_latest_remote_version,
-            kwargs=dict(branch=branch),
-            _task_callback=task_callback,
-        )
+        if branch:
+            ManageRemoteVersions._POOL.queue_task(
+                ManageRemoteVersions._get_latest_remote_version,
+                kwargs=dict(branch=branch.name),
+                _task_callback=task_callback,
+            )
+
+        else:
+            logger.error('no active branch found')
 
     @staticmethod
     def download_latest_remote_version(ui_parent=None):
