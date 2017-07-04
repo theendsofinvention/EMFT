@@ -33,7 +33,8 @@ logger = make_logger(__name__)
 class Dialog(QDialog):
 
     def __init__(self, parent=None):
-        from src.ui import qt_resource
+        # noinspection PyUnresolvedReferences
+        from src.ui import qt_resource  # noqa F401
         QDialog.__init__(self, parent=parent, flags=Qt.Dialog)
         self.setWindowIcon(QIcon(':/ico/app.ico'))
 
