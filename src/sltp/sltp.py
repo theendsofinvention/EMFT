@@ -106,7 +106,7 @@ class SLTP:
                 out.append(line)
         return '{}{} -- end of {}\n'.format(qualifier, self.newline.join(out), qualifier.replace('=', '').rstrip())
 
-    def __encode(self, obj, dict_name=None):
+    def __encode(self, obj, dict_name=None): # noqa C901
         s = ''
         tab = self.tab
         newline = self.newline
@@ -209,7 +209,7 @@ class SLTP:
         print(ERRORS['unexp_end_string'])
 
     # noinspection PyMissingOrEmptyDocstring
-    def object(self):
+    def object(self):  # noqa C901
         o = dict()
         k = ''
         idx = 0
@@ -282,7 +282,7 @@ class SLTP:
                 return str(s)
 
     # noinspection PyMissingOrEmptyDocstring
-    def number(self):
+    def number(self):  # noqa C901
         # noinspection PyMissingOrEmptyDocstring
         def next_digit(err):
             _n = self.ch
