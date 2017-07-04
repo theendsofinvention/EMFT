@@ -24,6 +24,8 @@ class ReorderMiz:
         output_folder = FindOutputFolder.get_active_output_folder()
         if not miz_file.exists():
             error = f'MIZ file does not exist: {miz_file.abspath()}'
+        if not miz_file.isfile() or not miz_file.basename().endswith('miz'):
+            error = f'please select a valid miz file'
         if not output_folder:
             error = 'no output folder selected'
         else:
@@ -31,7 +33,7 @@ class ReorderMiz:
                 error = f'output folder does not exist:\n\n{miz_file.abspath()}'
         if error:
             logger.error(error)
-            I.error(error.replace(':', ':\n\n').capitalize())
+            I().error(error.replace(':', ':\n\n').capitalize())
             return
         ReorderMiz.reorder_miz_file(
             miz_file_path=str(miz_file.abspath()),
@@ -42,16 +44,21 @@ class ReorderMiz:
     @staticmethod
     def auto_reorder():
         profile = FindProfile.get_active_profile()
+        error = None
         if not profile:
-            logger.error('no active profile')
-            return
+            error = 'no active profile'
         latest = FindRemoteVersion.get_latest()
         if not latest:
-            logger.error('no remote version')
-            return
+            error = 'no remote version'
         local_file = Path(profile.src_folder).joinpath(latest.remote_file_name).abspath()
         if not local_file.exists():
-            logger.error(f'local file not found: {local_file.abspath()}')
+            error = f'local file not found: {local_file.abspath()}'
+        if not local_file.isfile() or not local_file.basename().endswith('miz'):
+            error = f'please select a valid miz file'
+        if error:
+            logger.error(error)
+            I().error(error.capitalize())
+            return
         ReorderMiz.reorder_miz_file(
             miz_file_path=str(local_file.abspath()),
             output_folder_path=profile.output_folder,
