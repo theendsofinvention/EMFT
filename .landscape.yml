@@ -2,15 +2,12 @@ doc-warnings: true
 test-warnings: true
 strictness: veryhigh
 max-line-length: 120
-autodetect: false
-requirements:
-  - requirements.txt
+autodetect: true
 ignore-paths:
-  - docs
-  - mypackage/vendor
+  - test
 ignore-patterns:
-  - ^example/doc_.*\.py$
-  - (^|/)docs(/|$)
+  - ^dummy_miz.py$
+  - ^qt_resource.py$
 python-targets:
   - 3
 pep8:
