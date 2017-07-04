@@ -17,6 +17,7 @@ from src.utils.gh import GHRelease, GHSession
 from src.utils.monkey import nice_exit
 from src.utils.progress import Progress
 from src.utils.threadpool import ThreadPool
+from src.sentry import SENTRY
 
 logger = make_logger(__name__)
 
@@ -520,7 +521,13 @@ class BaseUpdater(abc.ABC):
 
         self._gather_available_releases()
 
-        current_version = Version(current_version)
+        try:
+            current_version = Version(current_version)
+        except ValueError:
+            error = f'could no parse version: {current_version}'
+            SENTRY.captureMessage(error)
+            logger.exception(error)
+            return
 
         if branch is None:
             branch = current_version.branch
