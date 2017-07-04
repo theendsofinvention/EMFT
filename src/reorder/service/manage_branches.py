@@ -68,7 +68,7 @@ class ManageBranches:
                 last_used_branch = Config().last_used_branch[FindProfile.get_active_profile().name]
                 if last_used_branch:
                     Branches.ACTIVE_BRANCH = FindBranch.get_by_name(last_used_branch)
-            except ValueError:
+            except (KeyError, ValueError):
                 Branches.ACTIVE_BRANCH = FindBranch.get_by_name('All')
 
     @staticmethod
