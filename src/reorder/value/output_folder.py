@@ -13,6 +13,9 @@ class OutputFolder(Path):
 
 
 class OutputFolders(MutableMapping, metaclass=Singleton):
+    ACTIVE_OUTPUT_FOLDER = None
+    ACTIVE_OUTPUT_FOLDER_NAME = None
+
     def __init__(self, init_dict: dict = None):
         self._data = init_dict or dict()
 

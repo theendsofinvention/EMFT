@@ -1,6 +1,6 @@
 # coding=utf-8
 
-from src.reorder.finder import FindProfile, FindBranch, FindRemoteVersion
+from src.reorder.finder import FindProfile, FindRemoteVersion, FindBranch
 from src.reorder.service import BrowseForFiles, ManageProfiles, ManageBranches, ManageRemoteVersions
 from src.reorder.ui.dialog_profile_editor import DialogProfileEditor
 from src.reorder.value import AutoProfileModelContainer, BranchesModelContainer

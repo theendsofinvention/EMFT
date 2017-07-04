@@ -1,8 +1,8 @@
 # coding=utf-8
 
 from src.cfg import Config
-from src.reorder.service.browse_for_files import BrowseForFiles
-from src.reorder.service.manage_output_folders import ManageOutputFolders
+from src.reorder.finder import FindOutputFolder
+from src.reorder.service import BrowseForFiles, ManageOutputFolders
 from src.reorder.ui.dialog_edit_output_folder import DialogEditOutputFolder
 from src.reorder.value.output_folder_model import OutputFoldersModelContainer
 from src.ui.base import VLayout, Label, Widget, LineEdit, PushButton, HLayout, GridLayout, Combo, HSpacer
@@ -101,28 +101,35 @@ class WidgetManualReorder(Widget):
             ),
         )
 
-        self._load_values_from_config()
+        ManageOutputFolders.watch_output_folder_change(self._on_active_output_folder_change)
+        self._set_combo_current_index_to_active_output_folder()
+        # self._load_values_from_config()
+
+    def _set_combo_current_index_to_active_output_folder(self):
+        output_folder_name = FindOutputFolder.get_active_output_folder_name()
+        try:
+            self.combo_output_folder.set_index_from_text(output_folder_name)
+            self._update_output_folder_path_label()
+        except ValueError:
+            pass
 
     def _update_output_folder_path_label(self):
-        if self.selected_output_folder_name:
-            output_folder = ManageOutputFolders.get_by_name(self.selected_output_folder_name)
+        output_folder = FindOutputFolder.get_active_output_folder()
+        if output_folder:
             self.label_output_folder_path.setText(str(output_folder.abspath()))
             self.label_output_folder_path.set_text_color('blue')
         else:
             self.label_output_folder_path.set_text_color('black')
+            self.label_output_folder_path.setText('')
 
     def _load_values_from_config(self):
-        if Config().last_used_output_folder_in_manual_mode:
-            try:
-                self.combo_output_folder.set_index_from_text(Config().last_used_output_folder_in_manual_mode)
-                self._update_output_folder_path_label()
-            except ValueError:
-                pass
         if Config().last_miz_file_in_manual_mode:
             self.le_path_to_miz.setText(Config().last_miz_file_in_manual_mode)
+            self._update_output_folder_path_label()
 
     def _on_combo_output_folder_activated(self):
         if self.selected_output_folder_name:
+            ManageOutputFolders.change_active_output_folder(self.selected_output_folder_name)
             Config().last_used_output_folder_in_manual_mode = self.selected_output_folder_name
             self._update_output_folder_path_label()
 
@@ -132,7 +139,7 @@ class WidgetManualReorder(Widget):
 
     @property
     def path_to_output_folder(self):
-        output_folder = ManageOutputFolders().get_by_name(self.selected_output_folder_name)
+        output_folder = FindOutputFolder.get_by_name(self.selected_output_folder_name)
         return str(output_folder.abspath())
 
     @property
@@ -153,7 +160,12 @@ class WidgetManualReorder(Widget):
         dialog.exec()
 
     def _on_btn_remove_output_folder_clicked(self):
-        ManageOutputFolders.remove_output_folder(self.selected_output_folder_name)
+        if self.selected_output_folder_name:
+            ManageOutputFolders.remove_output_folder(self.selected_output_folder_name)
 
     def _on_output_folder_clicked(self):
         BrowseForFiles.show_file_or_folder_in_explorer(self.path_to_output_folder)
+
+    def _on_active_output_folder_change(self):
+        self._update_output_folder_path_label()
+        self._set_combo_current_index_to_active_output_folder()
