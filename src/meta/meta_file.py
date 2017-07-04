@@ -4,9 +4,9 @@ import time
 from collections import OrderedDict
 
 from ruamel.yaml import load as yload, resolver, add_constructor, add_representer
-from src.utils import make_logger, Path
 
 from src.meta.meta import Meta
+from src.utils import make_logger, Path
 
 logger = make_logger(__name__)
 
@@ -26,7 +26,6 @@ add_constructor(_yaml_mapping, odict_construct)
 
 
 class MetaFile(Meta):
-
     @property
     @abc.abstractmethod
     def meta_header(self):
@@ -204,7 +203,3 @@ class MetaFile(Meta):
         data = yload(path.text(encoding='utf8'))
 
         return data['header']
-
-
-def read_meta_header(meta_file_path: Path or str):
-    return MetaFile.read_header(meta_file_path)
