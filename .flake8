@@ -1,0 +1,26 @@
+[flake8]
+ignore =
+    D203,
+    E126,
+    # TODO: fix all of those
+    C901,
+max-line-length = 120
+exclude =
+    .svn,
+    CVS,
+    .bzr,
+    .hg,
+    .git,
+    __pycache__,
+    .tox,
+    __init__.py,
+    dummy_miz.py,
+    build,
+    dist,
+    output,
+    .cache,
+    .hypothesis,
+    qt_resource.py,
+    _parking_spots.py,
+    ./test/*,
+max-complexity = 10
