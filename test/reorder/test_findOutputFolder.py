@@ -29,8 +29,8 @@ class TestFindOutputFolder:
         with pytest.raises(ValueError):
             FindOutputFolder.get_by_name('test')
 
-    # def test_get_name_from_output_folder(self):
-    #     pytest.fail()
-    #
-    # def test_get_by_path(self):
-    #     pytest.fail()
+    def test_get_name_from_output_folder(self):
+        pytest.fail()
+
+    def test_get_by_path(self):
+        pytest.fail()
