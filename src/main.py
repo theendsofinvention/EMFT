@@ -1,9 +1,6 @@
 # coding=utf-8
 
 if __name__ == '__main__':
-    """Install better exception's hook"""
-    # noinspection PyUnresolvedReferences
-    import better_exceptions
 
     """Init Sentry"""
     # noinspection PyUnresolvedReferences
