@@ -1,8 +1,8 @@
+from src.cfg import Config
 from src.miz import Miz
 from src.reorder.finder import FindProfile, FindRemoteVersion, FindOutputFolder
 from src.ui.main_ui_interface import I
 from src.utils import ThreadPool, make_logger, Path
-from src.cfg import Config
 
 logger = make_logger(__name__)
 
@@ -18,7 +18,7 @@ class ReorderMiz:
                 'if you think this is a bug.')
 
     @staticmethod
-    def manual_reorder(path_to_miz : str):
+    def manual_reorder(path_to_miz: str):
         error = None
         miz_file = Path(path_to_miz)
         output_folder = FindOutputFolder.get_active_output_folder()
@@ -38,7 +38,6 @@ class ReorderMiz:
             output_folder_path=output_folder,
             skip_option_file=Config().skip_options_file,
         )
-
 
     @staticmethod
     def auto_reorder():
