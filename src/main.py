@@ -24,7 +24,7 @@ if __name__ == '__main__':
         """Another instance is locking the log file"""
         from PyQt5.QtWidgets import QApplication, QMessageBox
         from PyQt5.QtGui import QIcon
-        from src.ui import qt_resource
+        from src.ui import qt_resource  # noqa: F401
         from src.global_ import APP_SHORT_NAME, DEFAULT_ICON
         # noinspection PyArgumentList
         app = QApplication.instance()
