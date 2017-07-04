@@ -17,7 +17,6 @@ from src.utils.gh import GHRelease, GHSession
 from src.utils.monkey import nice_exit
 from src.utils.progress import Progress
 from src.utils.threadpool import ThreadPool
-from src.sentry import SENTRY
 
 logger = make_logger(__name__)
 
@@ -497,7 +496,6 @@ class BaseUpdater(abc.ABC):
             logger.debug('cancelling update')
 
             if cancel_update_hook:
-
                 logger.debug('running cancel hook')
                 cancel_update_hook()
 
@@ -506,7 +504,6 @@ class BaseUpdater(abc.ABC):
             logger.debug('no new version found')
 
             if no_new_version_hook:
-
                 logger.debug('calling no new version hook')
                 no_new_version_hook()
 
@@ -515,7 +512,6 @@ class BaseUpdater(abc.ABC):
             logger.debug('no candidate found')
 
             if no_candidates_hook:
-
                 logger.debug('calling no candidate hook')
                 no_candidates_hook()
 
@@ -525,6 +521,7 @@ class BaseUpdater(abc.ABC):
             current_version = Version(current_version)
         except ValueError:
             error = f'could no parse version: {current_version}'
+            from src.sentry import SENTRY
             SENTRY.captureMessage(error)
             logger.exception(error)
             return
