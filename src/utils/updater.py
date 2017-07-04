@@ -20,6 +20,8 @@ from src.utils.threadpool import ThreadPool
 
 logger = make_logger(__name__)
 
+# TODO: make this a finite state machine
+
 
 class Channel:
     valid_channels = [
