@@ -12,7 +12,7 @@ from src.reorder.value import OutputFolder
 class TestManageOutputFolders:
     manager = ManageOutputFolders()
 
-    def test_add_output_folder(self, cleandir):
+    def test_add_output_folder(self):
         os.makedirs('./some_path')
         self.manager.add_output_folder('name', './some_path')
         os.makedirs('./some_other_path')
@@ -26,22 +26,22 @@ class TestManageOutputFolders:
         assert f1 is f3
         assert f2 is f4
 
-    def test_path_not_found(self, cleandir):
+    def test_path_not_found(self):
         with pytest.raises(FileNotFoundError):
             self.manager.add_output_folder('path_not_found', './path_not_found')
 
-    def test_name_exists(self, cleandir):
+    def test_name_exists(self):
         os.makedirs('./test_name_exists')
         self.manager.add_output_folder('test_name_exists', './test_name_exists')
         with pytest.raises(FileExistsError):
             self.manager.add_output_folder('test_name_exists', './test_name_exists')
 
-    def test_path_exists(self, cleandir):
+    def test_path_exists(self):
         os.makedirs('./test_path_exists')
         self.manager.add_output_folder('test_path_exists', './test_path_exists')
         with pytest.raises(FileExistsError):
             self.manager.add_output_folder('test_path_exists_other_name', './test_path_exists')
 
-    def test_path_does_not_exist(self, cleandir):
+    def test_path_does_not_exist(self):
         with pytest.raises(FileNotFoundError):
             FindOutputFolder.get_by_path('./some_fancy_path')
