@@ -97,6 +97,38 @@ class MetaFile(Meta):
 
         self._path = value
 
+    def _update_meta_version(self):
+
+        meta_updated = False
+
+        while self.data['meta_version'] < self.meta_version:
+            current_version = self.data['meta_version']
+            next_version = self.data['meta_version'] + 1
+            logger.debug('upgrading meta from version "{}"'.format(current_version))
+
+            if not self.meta_version_upgrade(current_version):
+                raise RuntimeError('failed to upgrade metadata to version "{}"'.format(next_version))
+
+            else:
+                logger.debug('successfully upgraded meta to version "{}"'.format(next_version))
+                meta_updated = True
+
+            self.data['meta_version'] = next_version
+
+        return meta_updated
+
+    def _check_header(self):
+        try:
+            if not self.data['meta_header'] == self.meta_header:
+                raise TypeError('meta header mismatch, expected: "{}", got: "{}" on file: {}'.format(
+                    self.meta_header, self.data['meta_header'], self.path.abspath()
+                ))
+            else:
+                del self.data['meta_header']
+
+        except KeyError:
+            pass
+
     def read(self):
 
         self.wait_for_lock()
@@ -125,32 +157,10 @@ class MetaFile(Meta):
                     raise ValueError('{}: metadata file corrupted'.format(self.path.abspath()))
 
                 else:
-                    try:
-                        if not self.data['meta_header'] == self.meta_header:
-                            raise TypeError('meta header mismatch, expected: "{}", got: "{}" on file: {}'.format(
-                                self.meta_header, self.data['meta_header'], self.path.abspath()
-                            ))
-                        else:
-                            del self.data['meta_header']
 
-                    except KeyError:
-                        pass
+                    self._check_header()
 
-                    meta_updated = False
-
-                    while self.data['meta_version'] < self.meta_version:
-                        current_version = self.data['meta_version']
-                        next_version = self.data['meta_version'] + 1
-                        logger.debug('upgrading meta from version "{}"'.format(current_version))
-
-                        if not self.meta_version_upgrade(current_version):
-                            raise RuntimeError('failed to upgrade metadata to version "{}"'.format(next_version))
-
-                        else:
-                            logger.debug('successfully upgraded meta to version "{}"'.format(next_version))
-                            meta_updated = True
-
-                        self.data['meta_version'] = next_version
+                    meta_updated = self._update_meta_version()
 
         except OSError:
             self.exception('error while reading metadata file')
