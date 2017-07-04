@@ -204,6 +204,26 @@ class Miz:
 
         logger.info('encoding done')
 
+    def _check_extracted_content(self):
+
+        for filename in self.zip_content:
+            p = self.tmpdir.joinpath(filename)
+            if not p.exists():
+                raise FileNotFoundError(p.abspath())
+
+    def _extract_files_from_zip(self, zip_file):
+
+        for item in zip_file.infolist():  # not using ZipFile.extractall() for security reasons
+            assert isinstance(item, ZipInfo)
+
+            logger.debug('unzipping item: {}'.format(item.filename))
+
+            try:
+                zip_file.extract(item, self.tmpdir.abspath())
+            except:
+                logger.error('failed to extract archive member: {}'.format(item.filename))
+                raise
+
     def unzip(self, overwrite: bool = False):
 
         if self.zip_content and not overwrite:
@@ -219,16 +239,7 @@ class Miz:
 
                 self.zip_content = [f.filename for f in zip_file.infolist()]
 
-                for item in zip_file.infolist():  # not using ZipFile.extractall() for security reasons
-                    assert isinstance(item, ZipInfo)
-
-                    logger.debug('unzipping item: {}'.format(item.filename))
-
-                    try:
-                        zip_file.extract(item, self.tmpdir.abspath())
-                    except:
-                        logger.error('failed to extract archive member: {}'.format(item.filename))
-                        raise
+                self._extract_files_from_zip(zip_file)
 
         except BadZipFile:
             raise BadZipFile(self.miz_path.abspath())
@@ -255,10 +266,7 @@ class Miz:
                 logger.error('missing file in miz: {}'.format(miz_item))
                 raise FileNotFoundError(miz_item)
 
-        for filename in self.zip_content:
-            p = self.tmpdir.joinpath(filename)
-            if not p.exists():
-                raise FileNotFoundError(p.abspath())
+        self._check_extracted_content()
 
         logger.debug('all files have been found, miz successfully unzipped')
 
