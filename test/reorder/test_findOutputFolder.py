@@ -28,9 +28,19 @@ class TestFindOutputFolder:
     def test_get_by_name(self):
         with pytest.raises(ValueError):
             FindOutputFolder.get_by_name('test')
+        ManageOutputFolders.add_output_folder('test', '.')
+        output_folder = FindOutputFolder.get_by_name('test')
+        assert output_folder.abspath() == os.path.abspath('.')
 
     def test_get_name_from_output_folder(self):
-        pytest.fail()
+        ManageOutputFolders.add_output_folder('test', '.')
+        output_folder = FindOutputFolder.get_by_name('test')
+        name = FindOutputFolder.get_name_from_output_folder(output_folder)
+        assert name == 'test'
 
     def test_get_by_path(self):
-        pytest.fail()
+        with pytest.raises(FileNotFoundError):
+            FindOutputFolder.get_by_path('.')
+        ManageOutputFolders.add_output_folder('test', '.')
+        output_folder = FindOutputFolder.get_by_path('.')
+        assert output_folder.abspath() == os.path.abspath('.')
