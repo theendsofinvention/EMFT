@@ -8,10 +8,6 @@ from src.reorder.ui import dialog_profile_editor
 
 
 class TestDialogProfileEditor:
-    # noinspection PyUnusedLocal
-    @pytest.fixture(autouse=True)
-    def cleandir(self, cleandir):
-        yield
 
     @pytest.fixture()
     def valid_dialog(self, qtbot):

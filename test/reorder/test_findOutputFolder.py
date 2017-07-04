@@ -8,7 +8,7 @@ from src.reorder.service import ManageOutputFolders
 
 # coding=utf-8
 class TestFindOutputFolder:
-    def test_get_active_output_folder(self, cleandir):
+    def test_get_active_output_folder(self):
         assert FindOutputFolder.get_active_output_folder() is None
         assert FindOutputFolder.get_active_output_folder_name() is None
         ManageOutputFolders.add_output_folder('test', '.')
@@ -25,7 +25,7 @@ class TestFindOutputFolder:
         assert FindOutputFolder.get_active_output_folder() is None
         assert FindOutputFolder.get_active_output_folder_name() is None
 
-    def test_get_by_name(self, cleandir):
+    def test_get_by_name(self):
         with pytest.raises(ValueError):
             FindOutputFolder.get_by_name('test')
 
