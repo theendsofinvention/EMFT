@@ -133,7 +133,7 @@ class GridLayout(QGridLayout):
             self.setVerticalSpacing(vertical_spacing)
 
     # noinspection PyArgumentList
-    def add_children(self, children: list):
+    def add_children(self, children: list):  # noqa C901
         for r in range(len(children)):  # "r" is the row
             child = children[r]
             for c in range(len(child)):  # "c" is the column
