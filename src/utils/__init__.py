@@ -12,7 +12,3 @@ from .threadpool import ThreadPool
 from .decorators import TypedProperty
 from .pastebin import create_new_paste
 from .monkey import nice_exit
-
-from ._version import get_versions
-__version__ = get_versions()['version']
-del get_versions
