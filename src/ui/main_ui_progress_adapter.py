@@ -1,8 +1,6 @@
 # coding=utf-8
 from src.utils import ProgressAdapter
 
-from src import global_
-
 
 class MainUIProgressAdapter(ProgressAdapter):
     # @staticmethod
