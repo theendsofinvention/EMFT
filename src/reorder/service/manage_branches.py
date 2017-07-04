@@ -72,7 +72,7 @@ class ManageBranches:
                 Branches.ACTIVE_BRANCH = FindBranch.get_by_name('All')
 
     @staticmethod
-    def read_branches_from_config():
+    def load_values_from_config():
         profile_name = Config().last_used_auto_profile
         if profile_name:
             ManageBranches.refresh_gh_branches()
