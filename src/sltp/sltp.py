@@ -20,20 +20,25 @@ ERRORS = {
 }
 
 
-class SLTPErrors:
-    """Container class for SLTP exceptions"""
+class BaseSLTPError(Exception):
+    """Base exception for SLTP module"""
 
-    class BaseSLTPError(Exception):
-        """Base exception for SLTP module"""
+    def __init__(self, *args):
+        super().__init__(*args)
 
-        def __init__(self, *args, **kwargs):
-            super().__init__(*args, **kwargs)
 
-    class ParsingError(BaseSLTPError):
-        """Error during parsing"""
+class SLTPParsingError(BaseSLTPError):
+    """Error during parsing"""
 
-        def __init__(self, *args, **kwargs):
-            super().__init__(*args, **kwargs)
+    def __init__(self, *args):
+        super().__init__(*args)
+
+
+class SLTPEmptyObjectError(BaseSLTPError):
+    """Error during parsing"""
+
+    def __init__(self, *args):
+        super().__init__(*args)
 
 
 class SLTP:
@@ -64,7 +69,7 @@ class SLTP:
         logger.debug('decoding text to dictionary')
 
         if not text or type(text) is not str:
-            raise SLTPErrors.ParsingError(ERRORS['unexp_type_str'])
+            raise SLTPParsingError(ERRORS['unexp_type_str'])
 
         logger.debug('extracting qualifier')
         qual = re.compile(r'^(?P<value>(dictionary|mission|mapResource) = ?)\n')
@@ -289,7 +294,7 @@ class SLTP:
             _n = self.ch
             self.next_chr()
             if not self.ch or not self.ch.isdigit():
-                raise SLTPErrors.ParsingError(err)
+                raise SLTPParsingError(err)
             return _n
 
         n = ''
@@ -309,10 +314,10 @@ class SLTP:
                     n += self.ch
                     self.next_chr()
                     if not self.ch or self.ch not in ('+', '-'):
-                        raise SLTPErrors.ParsingError(ERRORS['mfnumber_sci'])
+                        raise SLTPParsingError(ERRORS['mfnumber_sci'])
                     n += next_digit(ERRORS['mfnumber_sci'])
                     n += self.digit()
-        except SLTPErrors.ParsingError as e:
+        except SLTPParsingError as e:
             print(e)
             return 0
         try:
