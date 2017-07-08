@@ -35,6 +35,7 @@ class ManageBranches:
     def _get_gh_session() -> GHSession:
         if ManageBranches._GH_SESSION is None:
             ManageBranches._GH_SESSION = GHSession()
+        assert isinstance(ManageBranches._GH_SESSION, GHSession)
         return ManageBranches._GH_SESSION
 
     @staticmethod
