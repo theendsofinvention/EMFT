@@ -1,6 +1,5 @@
 # coding=utf-8
 import os
-import typing
 
 from src.utils import make_logger, Path
 
@@ -108,10 +107,10 @@ class _RadiosTabWidget(TabWidget):
     """I'm so lazy ..."""
 
     @property
-    def tabs(self) -> typing.Generator['_RadioEditTab', None, None]:
+    def tabs(self):
         return super(_RadiosTabWidget, self).tabs
 
-    def get_tab_from_title(self, tab_title: str) -> '_RadioEditTab':
+    def get_tab_from_title(self, tab_title: str):
         return super(_RadiosTabWidget, self).get_tab_from_title(tab_title)
 
 
