@@ -78,7 +78,7 @@ class Roster(Sequence):
             if pilot.name == pilot_name:
                 return pilot
 
-    def __iter__(self) -> typing.Generator['Roster.Pilot', None, None]:
+    def __iter__(self) -> typing.Iterator['Roster.Pilot']:
         return self.pilots.__iter__()
 
     def __len__(self):
