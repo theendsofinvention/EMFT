@@ -252,7 +252,8 @@ class TestGH:
         assert asset.download_count == 42
         assert asset.created_at == '2013-02-27T19:35:32Z'
         assert asset.updated_at == '2013-02-27T19:35:32Z'
-        assert asset.browser_download_url == 'https://github.com/octocat/Hello-World/releases/download/v1.0.0/example.zip'
+        assert asset.browser_download_url == 'https://github.com/octocat/Hello-World/releases/' \
+                                             'download/v1.0.0/example.zip'
 
     @with_httmock(mock_gh_api)
     def test_get_all_asset(self):
@@ -294,7 +295,6 @@ class TestGH:
 # noinspection PyPep8Naming
 @pytest.mark.skipif(os.getenv('APPVEYOR'), reason='Skipping Github tests on Appveyor to prevent rate limit')
 class TestGHAnonymousSession:
-
     def test_users_repos(self):
         try:
             repos = GHAnonymousSession().list_user_repos('easitest')
