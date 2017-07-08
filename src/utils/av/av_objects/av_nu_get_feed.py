@@ -3,6 +3,7 @@
 from src.utils.custom_session import JSONObject, json_property
 
 
+# noinspection PyPep8Naming
 class AVNuGetFeed(JSONObject):
     @json_property
     def id(self):
