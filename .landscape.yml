@@ -1,5 +1,10 @@
-doc-warnings: yes
+doc-warnings: false
+pep8:
+  full: true
+test-warnings: false
+strictness: veryhigh
 max-line-length: 120
+autodetect: true
 ignore-paths:
     - test
 ignore-patterns:
@@ -7,5 +12,3 @@ ignore-patterns:
     - src/ui/qt_resource.py
 python-targets:
     - 3
-pyflakes:
-    run: false
