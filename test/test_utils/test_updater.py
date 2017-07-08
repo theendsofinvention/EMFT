@@ -480,7 +480,7 @@ class TestUpdater:
         no_candidate.assert_not_called()
         no_new_version.assert_not_called()
         popen.assert_called_with(['wscript.exe', 'update.vbs', 'update.bat'])
-        nice_exit.assert_called_with(0)
+        nice_exit.assert_called_with()
 
         assert Path('./update.bat').exists()
         assert Path('./update.vbs').exists()
@@ -611,7 +611,7 @@ class TestUpdater:
         assert DummyDownloader.downloaded is True
         cancel.assert_not_called()
         popen.assert_called_with(['wscript.exe', 'update.vbs', 'update.bat'])
-        nice_exit.assert_called_with(0)
+        nice_exit.assert_called_with()
         no_candidate.assert_not_called()
         no_new_version.assert_not_called()
 
