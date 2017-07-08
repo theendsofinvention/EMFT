@@ -225,7 +225,7 @@ class TestAvailableReleases:
 
 @pytest.mark.nocleandir
 class TestUpdater:
-    @pytest.fixture(scope='function')
+    @pytest.fixture()
     def upd(self, mocker):
         cancel = mocker.MagicMock()
         no_new_version = mocker.MagicMock()
@@ -236,13 +236,13 @@ class TestUpdater:
         )
         yield upd, cancel, no_new_version, no_candidate
 
-    @pytest.fixture(scope='function', autouse=True)
+    @pytest.fixture(autouse=True)
     def reset_downloader(self):
         DummyDownloader.downloaded = False
         DummyDownloader.download_return = True
         yield
 
-    @pytest.fixture(scope='function', autouse=True)
+    @pytest.fixture(autouse=True)
     def delete_temp_files(self):
         Path('./update.bat').remove_p()
         Path('./update.vbs').remove_p()

@@ -174,8 +174,8 @@ def get_installed_packages(env):
     return requirements
 
 
-def _write_requirements_in():
-    Path('requirements.in').write_lines(x.split('==')[0] for x in requirements.split('\n'))
+# def _write_requirements_in():
+#     Path('requirements.in').write_lines(x.split('==')[0] for x in requirements.split('\n'))
 
 
 def _compile_requirements(env, upgrade=False):
@@ -220,13 +220,13 @@ def generate_changelog(env):
         f.write(changelog)
 
 
-def install_local_dependencies(env):
+def install_local_dependencies(_):
     import pip
     pip.main(['install', '-U', '--upgrade-strategy', 'only-if-needed', 'git+file://f:/dev/utils@develop'])
     pip.main(['install', '-U', '--upgrade-strategy', 'only-if-needed', 'git+file://f:/dev/sltp@develop'])
 
 
-def install_pyinstaller_for_py36(env):
+def install_pyinstaller_for_py36(_):
     import pip
     pip.main(
         [
