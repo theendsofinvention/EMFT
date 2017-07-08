@@ -1,5 +1,15 @@
 # coding=utf-8
+"""
+Creates a dispatcher for function calls outside of the main UI.
 
+Calling interface methods from the main application thread will transfer the call to the main UI,
+while calling them in a separate thread will take advantage of Qt Signals to transfer them back to Qt
+EventLoop.
+
+Any module willing to add methods to the interface should use MainUiMixinsAdapter to do so.
+"""
+
+import threading
 
 from src import global_
 from src.reorder.adapter.tab_reorder_adapter import TabReorderAdapter
