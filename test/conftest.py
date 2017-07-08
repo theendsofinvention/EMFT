@@ -13,3 +13,13 @@ def cleandir(request, tmpdir):
         os.chdir(str(tmpdir))
         yield os.getcwd()
         os.chdir(current_dir)
+
+
+@pytest.fixture(autouse=True)
+def reset_progress(request):
+    if 'noresetprogress' in request.keywords:
+        yield
+    else:
+        from src.utils.progress import Progress
+        Progress.done()
+        yield
