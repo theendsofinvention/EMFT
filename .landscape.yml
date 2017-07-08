@@ -1,14 +1,11 @@
-doc-warnings: true
-test-warnings: true
-strictness: veryhigh
+doc-warnings: yes
 max-line-length: 120
-autodetect: true
 ignore-paths:
-  - test
+    - test
 ignore-patterns:
-  - ^dummy_miz.py$
-  - ^qt_resource.py$
+    - src/dummy_miz.py
+    - src/ui/qt_resource.py
 python-targets:
-  - 3
-pep8:
-  full: true
+    - 3
+pyflakes:
+    run: false
