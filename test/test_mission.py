@@ -150,8 +150,8 @@ RADIOS_TESTS = [
 ]
 
 
+# noinspection PyPep8Naming,PyShadowingNames
 @pytest.mark.nocleandir
-# noinspection PyPep8Naming
 class TestMizBasics:
     @pytest.fixture(autouse=True)
     def clean_up(self, OUT_FILE):
@@ -244,8 +244,8 @@ class TestMizBasics:
         #                 assert isinstance(miz, Miz)
 
 
+# noinspection PyPep8Naming,PyShadowingNames
 @pytest.mark.nocleandir
-# noinspection PyPep8Naming
 class TestMizValues:
     @pytest.fixture(scope='class')
     def miz(self, TEST_FILE):
