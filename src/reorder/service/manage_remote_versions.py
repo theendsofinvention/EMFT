@@ -95,7 +95,6 @@ class ManageRemoteVersions:
 
             Progress.start(
                 'Downloading {}'.format(latest.download_url.split('/').pop()),
-                length=100,
                 label=latest.remote_file_name
             )
 

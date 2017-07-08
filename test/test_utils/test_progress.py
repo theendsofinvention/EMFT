@@ -29,7 +29,7 @@ class TestProgressAdapter(ProgressAdapter):
 
 
 class TestProgress:
-    @pytest.fixture(scope='function', autouse=True)
+    @pytest.fixture(autouse=True)
     def reset_progress(self):
         Progress.done()
 

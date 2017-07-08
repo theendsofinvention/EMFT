@@ -38,7 +38,7 @@ if __name__ == '__main__':
         )
         msgbox.setWindowIcon(QIcon(DEFAULT_ICON))
         msgbox.exec()
-        nice_exit(0)
+        nice_exit()
 
     else:
 

@@ -9,7 +9,7 @@ from src.reorder.value import OutputFolders
 
 # coding=utf-8
 class TestFindOutputFolder:
-    @pytest.fixture(scope='function', autouse=True)
+    @pytest.fixture(autouse=True)
     def cleanup(self):
         OutputFolders()._data = dict()
 

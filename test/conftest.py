@@ -4,7 +4,7 @@ import os
 import pytest
 
 
-@pytest.fixture(autouse=True, scope='function')
+@pytest.fixture(autouse=True)
 def cleandir(request, tmpdir):
     if 'nocleandir' in request.keywords:
         yield

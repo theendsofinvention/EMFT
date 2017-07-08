@@ -335,7 +335,7 @@ class BaseUpdater(abc.ABC):
         logger.debug('starting update batch file')
         args = ['wscript.exe', 'update.vbs', 'update.bat']
         subprocess.Popen(args)
-        nice_exit(0)
+        nice_exit()
 
         return True  # for testing purpose
 

@@ -331,7 +331,6 @@ class TestUpdater:
 
         with HTTMock(mock_gh_api):
             assert not upd._find_and_install_latest_release(
-                channel='stable',
                 cancel_update_hook=cancel,
                 no_candidates_hook=no_candidate,
                 no_new_version_hook=no_new_version,
@@ -361,7 +360,6 @@ class TestUpdater:
 
         with HTTMock(mock_gh_api):
             assert not upd._find_and_install_latest_release(
-                channel='stable',
                 cancel_update_hook=cancel,
                 no_candidates_hook=no_candidate,
                 no_new_version_hook=no_new_version,
@@ -385,7 +383,6 @@ class TestUpdater:
 
         with HTTMock(mock_gh_api):
             assert not upd._find_and_install_latest_release(
-                channel='stable',
                 cancel_update_hook=cancel,
                 no_candidates_hook=no_candidate,
                 no_new_version_hook=no_new_version,
@@ -415,7 +412,6 @@ class TestUpdater:
             pre = mocker.MagicMock(return_value=False)
 
             assert not upd._find_and_install_latest_release(
-                channel='stable',
                 cancel_update_hook=cancel,
                 no_candidates_hook=no_candidate,
                 no_new_version_hook=no_new_version,
@@ -434,7 +430,6 @@ class TestUpdater:
             pre = mocker.MagicMock(return_value=True)
 
             assert upd._find_and_install_latest_release(
-                channel='stable',
                 cancel_update_hook=cancel,
                 no_candidates_hook=no_candidate,
                 no_new_version_hook=no_new_version,
@@ -472,7 +467,6 @@ class TestUpdater:
 
         with HTTMock(mock_gh_api):
             assert upd._find_and_install_latest_release(
-                channel='stable',
                 cancel_update_hook=cancel,
                 no_candidates_hook=no_candidate,
                 no_new_version_hook=no_new_version,
@@ -505,7 +499,6 @@ class TestUpdater:
 
         with HTTMock(mock_gh_api):
             assert not upd._find_and_install_latest_release(
-                channel='stable',
                 cancel_update_hook=cancel,
                 no_candidates_hook=no_candidate,
                 no_new_version_hook=no_new_version,
@@ -541,7 +534,6 @@ class TestUpdater:
 
         with HTTMock(mock_gh_api):
             assert not upd._find_and_install_latest_release(
-                channel='stable',
                 cancel_update_hook=cancel,
                 executable_path=exe_path,
                 no_candidates_hook=no_candidate,
@@ -573,7 +565,6 @@ class TestUpdater:
 
         with HTTMock(mock_gh_api):
             assert not upd._find_and_install_latest_release(
-                channel='stable',
                 cancel_update_hook=cancel,
                 no_candidates_hook=no_candidate,
                 no_new_version_hook=no_new_version,
@@ -609,7 +600,6 @@ class TestUpdater:
 
         with HTTMock(mock_gh_api):
             assert upd._find_and_install_latest_release(
-                channel='stable',
                 cancel_update_hook=cancel,
                 no_candidates_hook=no_candidate,
                 no_new_version_hook=no_new_version,
@@ -645,7 +635,6 @@ class TestUpdater:
 
         with HTTMock(mock_gh_api):
             assert not upd._find_and_install_latest_release(
-                channel='stable',
                 cancel_update_hook=cancel,
                 no_candidates_hook=no_candidate,
                 no_new_version_hook=no_new_version,
@@ -681,7 +670,6 @@ class TestUpdater:
 
         with HTTMock(mock_gh_api):
             assert not upd._find_and_install_latest_release(
-                channel='stable',
                 cancel_update_hook=cancel,
                 no_candidates_hook=no_candidate,
                 no_new_version_hook=no_new_version,
@@ -716,7 +704,6 @@ class TestUpdater:
 
         with HTTMock(mock_gh_api):
             assert not upd._find_and_install_latest_release(
-                channel='stable',
                 executable_path=str(tmpdir.join('example.zip')),
                 current_version='0.0.1'
             )
@@ -738,7 +725,7 @@ class TestUpdater:
         )
 
         with HTTMock(mock_gh_api):
-            latest = upd._get_latest_release('stable')
+            latest = upd._get_latest_release()
 
             assert latest.version.version_str == '0.0.2', latest.version.version_str
 

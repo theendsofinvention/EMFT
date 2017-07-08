@@ -66,7 +66,7 @@ class TestCustomLogging:
         mock = mocker.MagicMock()
         handler.emit = mock
 
-        logger = make_logger('__main__')
+        logger = make_logger()
         logger.handlers = [handler]
 
         disable(NOTSET)
