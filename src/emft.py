@@ -5,6 +5,7 @@ from json import loads
 
 import click
 from natsort.natsort import natsorted
+
 from src.utils.custom_logging import make_logger, DEBUG, INFO
 from src.utils.custom_path import Path
 
@@ -29,9 +30,6 @@ def find_latest_trmt(folder: Path or str):
 def check_cert():
     logger.info('certificate: checking')
     import certifi
-    import os
-
-    from src.utils.custom_path import Path
     cacert = Path(certifi.where())
     # # noinspection SpellCheckingInspection
     # if not cacert.crc32() == 'D069EE01':
