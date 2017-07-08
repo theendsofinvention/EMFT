@@ -92,7 +92,7 @@ def mock_gh_api(url, request):
             raise ValueError('request not handled: {}'.format(request.method))
     except EnvironmentError:
         return response(404, {}, HEADERS, 'FileNotFound: {}'.format(file_path), 5, request)
-    return response(200, content, HEADERS, 'Success', 5, request)
+    return response(content=content, headers=HEADERS, reason='Success', elapsed=5, request=request)
 
 
 @pytest.mark.nocleandir
