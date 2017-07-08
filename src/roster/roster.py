@@ -96,11 +96,12 @@ class Roster(Sequence):
 
         meta.write()
 
-    def from_file(self, file_path):
+    @staticmethod
+    def from_file(file_path):
 
         meta = MetaFileRoster(file_path)
         meta.read()
 
-        for pilot in meta:
-            pilot = Roster.Pilot.from_meta(meta[pilot])
-            self.add_pilot_from_values(pilot)
+        # for pilot in meta:
+        #     pilot = Roster.Pilot.from_meta(meta[pilot])
+        #     self.add_pilot_from_values(pilot)
