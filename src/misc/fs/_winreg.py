@@ -1,5 +1,5 @@
 # coding=utf-8
-
+# TODO: unit test missing packages
 try:
     import winreg
 except ImportError:
