@@ -91,15 +91,21 @@ class SLTP:
         result = self.value()
         return result, self.qual
 
-    def encode(self, obj, qualifier):
+    def encode(self, obj, qualifier: str):
         """Encodes a dictionary-like object to a Lua string
+        :param qualifier:
         :param obj: object to encode
         :return: valid Lua string
         """
         logger.debug('encoding dictionary to text')
         if not obj:
-            logger.error('missing object to encode')  # TODO manage error
-            return '{}\n{{\n}} -- end of {}\n'.format(qualifier, qualifier.replace('=', '').rstrip())
+            if qualifier.replace('=', '').rstrip() == 'mapResource':
+                # Accept empty mapResource
+                return '{}\n{{\n}} -- end of {}\n'.format(qualifier, qualifier.replace('=', '').rstrip())
+            else:
+                logger.error('{}\n{{\n}} -- end of {}\n'.format(qualifier, qualifier.replace('=', '').rstrip()))
+                raise SLTPEmptyObjectError(qualifier)
+                # return '{}\n{{\n}} -- end of {}\n'.format(qualifier, qualifier.replace('=', '').rstrip())
         self.depth = 0
         out = []
         s = self.__encode(obj)
