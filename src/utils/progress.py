@@ -1,6 +1,6 @@
 # coding=utf-8
 
-# noinspection PyProtectedMember
+import typing
 from abc import abstractmethod
 
 
@@ -38,23 +38,23 @@ class Progress:
     started = False
 
     @staticmethod
-    def _check_adapter(adapter):
+    def _check_adapter(adapter: typing.Type[ProgressAdapter]):
         if not issubclass(adapter, ProgressAdapter):
             raise TypeError(adapter.__class__)
 
     @staticmethod
-    def has_adapter(adapter: ProgressAdapter):
+    def has_adapter(adapter: typing.Type[ProgressAdapter]):
         return adapter in Progress.adapters
 
     @staticmethod
-    def register_adapter(adapter: ProgressAdapter):
+    def register_adapter(adapter: typing.Type[ProgressAdapter]):
         Progress._check_adapter(adapter)
         if Progress.has_adapter(adapter):
             return
         Progress.adapters.append(adapter)
 
     @staticmethod
-    def unregister_adapter(adapter: ProgressAdapter or str):
+    def unregister_adapter(adapter: typing.Type[ProgressAdapter]):
         if Progress.has_adapter(adapter):
             Progress.adapters.remove(adapter)
 
