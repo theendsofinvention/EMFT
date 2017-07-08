@@ -15,14 +15,20 @@ class MainUiMethod:
         self.func = func
 
     def __call__(self, *args, **kwargs):
-        # noinspection PyProtectedMember
-        # if isinstance(threading.current_thread(), threading._MainThread):
-        #     # FIXME: this should raise only on scripted run;
-        #     # if ran from compiled, this should capture & send via SENTRY instead
-        #     raise RuntimeError(f'Interface method "{self.func.__name__}" called in main thread')
         if global_.MAIN_UI is None:
             raise RuntimeError('Main UI not initialized')
-        global_.MAIN_UI.do('main_ui', self.func.__name__, *args, **kwargs)
+
+        # Check if this was called in the main thread (the one running Qt EventLoop)
+        # noinspection PyProtectedMember
+        if isinstance(threading.current_thread(), threading._MainThread):
+
+            # If we are in the EventLoop, there's no need to dispatch the call to the a signal
+            # noinspection PyProtectedMember
+            global_.MAIN_UI._do('main_ui', self.func.__name__, args, kwargs)
+        else:
+
+            # Otherwise, queue the call
+            global_.MAIN_UI.do('main_ui', self.func.__name__, *args, **kwargs)
 
 
 # noinspection PyAbstractClass
