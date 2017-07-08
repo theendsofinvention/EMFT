@@ -23,13 +23,13 @@ def test_encode_decode_files(test_file):
     encoded_data = parser.encode(decoded_data, qualifier)
 
     output = encoded_data.split('\n')
-    input = data.split('\n')
+    input_ = data.split('\n')
 
-    for x in input:
+    for x in input_:
         try:
             assert x in output
         except AssertionError:
             print(x)
             raise
 
-    assert len(input) == len(output)
+    assert len(input_) == len(output)
