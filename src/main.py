@@ -34,7 +34,7 @@ if __name__ == '__main__':
         msgbox = QMessageBox(
             QMessageBox.Critical,
             'Uh oh...',
-            'Another instance of EMFT is already running =)'.format(APP_SHORT_NAME)
+            f'Another instance of {APP_SHORT_NAME} is already running =)'
         )
         msgbox.setWindowIcon(QIcon(DEFAULT_ICON))
         msgbox.exec()
