@@ -156,7 +156,7 @@ class WidgetManualReorder(Widget):
         BrowseForFiles.show_file_or_folder_in_explorer(self.path_to_miz)
 
     def _on_btn_add_output_folder_clicked(self):
-        dialog = DialogEditOutputFolder(self)
+        dialog = DialogEditOutputFolder(parent=self)
         dialog.exec()
 
     def _on_btn_remove_output_folder_clicked(self):
