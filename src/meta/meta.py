@@ -75,6 +75,8 @@ class Meta(AbstractMeta):
         return self._data.get(key, None)
 
     def __repr__(self):
+        # FIXME: remove when opting out of OrderedDict
+        # noinspection PyArgumentList
         return '{!s}({!s})'.format(
             self.__class__.__name__,
             ', '.join('{}={}'.format(k, str(v)) for k, v in self._data.items())
