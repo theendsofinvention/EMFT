@@ -1,6 +1,9 @@
 # coding=utf-8
 
 
+import typing
+
+
 class _TypedProperty:
     """
     Actual descriptor object created during MetaProperty.__call___ below.
@@ -12,12 +15,11 @@ class _TypedProperty:
 
     # __slots__ = ['func', 'default', 'type', '__doc__']
 
-    def __init__(self, func: callable, type_: object):
+    def __init__(self, func: callable, type_: typing.Type):
         """
         Initialize the DESCRIPTOR.
 
         :param func: callable to overwrite
-        :param default: default value if there's nothing in the META yet
         :param type_: type of object allowed to be SET
         """
         self.func = func
@@ -89,7 +91,7 @@ class TypedProperty:
     Decorator-class that yields property of a certain type.
     """
 
-    def __init__(self, type_: object):
+    def __init__(self, type_: typing.Type):
         """
         Initialize properties of the descriptor.
 
