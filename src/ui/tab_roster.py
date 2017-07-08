@@ -117,7 +117,8 @@ class TabChildRoster(MainUiTabChild, TabRosterAdapter):
             livery = self.miz_model.data(idx[2])
             yield Roster.Pilot(pilot_name, aircraft, livery)
 
-    def _transfer_right(self):
+    @staticmethod
+    def _transfer_right():
         return
         # self.roster_model.beginResetModel()
         # for pilot in self.selected_left:
@@ -168,7 +169,7 @@ class TabChildRoster(MainUiTabChild, TabRosterAdapter):
 
         if len(miz_data) == 0:
             logger.error('no client group found in: {}'.format(self._miz_path.abspath()))
-            self.main_ui.error('No client group found in this MIZ file.')
+            I().error('No client group found in this MIZ file.')
 
         return miz_data
 

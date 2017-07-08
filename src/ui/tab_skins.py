@@ -9,7 +9,6 @@ from src.misc.fs import dcs_installs, DCSInstall
 from src.ui.base import VLayout, Combo, HLayout, Label, HSpacer, TableModel, TableViewWithSingleRowMenu, \
     TableProxy, LineEdit, GroupBox, GridLayout, Menu, Checkbox, PushButton
 from src.ui.main_ui_tab_widget import MainUiTabChild
-from .main_ui_interface import I
 from .tab_skins_adapter import TAB_NAME, TabSkinsAdapter
 
 logger = make_logger(__name__)
@@ -211,17 +210,21 @@ class TabChildSkins(MainUiTabChild, TabSkinsAdapter):
 
     def _display_list_of_skins_for_currently_selected_install(self):
 
-        def gather_data():
-            return [
-                [skin.skin_nice_name, skin.ac, skin.root_folder]
-                for skin in self._active_dcs_install.skins.values()
-            ]
+        # def gather_data():
+        #     return [
+        #         [skin.skin_nice_name, skin.ac, skin.root_folder]
+        #         for skin in self._active_dcs_install.skins.values()
+        #     ]
 
         if self._active_dcs_install:
-            self.main_ui.pool.queue_task(
-                task=gather_data,
-                _task_callback=I.tab_skins_show_skins_scan_result
-            )
+            pass
+
+            # TODO: find another way to call a common thread pool
+            # self.main_ui.pool.queue_task(
+            #     task=gather_data,
+            #     _task_callback=I.tab_skins_show_skins_scan_result
+            # )
+
             # self.model.reset_data(
             #     [skin_to_data_line(skin) for skin in self._active_dcs_install.skins.values()]
             # )

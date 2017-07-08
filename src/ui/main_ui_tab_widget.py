@@ -3,18 +3,13 @@ import abc
 
 from src import global_
 from src.ui.base import TabChild
-from src.ui.main_ui_mixins_adapter import MainUiMixinsAdapter
 
 
 class MainUiTabChild(TabChild):
 
-    def __init__(self, parent: MainUiMixinsAdapter):
+    def __init__(self, parent):
         TabChild.__init__(self, parent)
         self._main_ui = parent
-
-    @property
-    def main_ui(self) -> MainUiMixinsAdapter:
-        return self._main_ui
 
     @abc.abstractmethod
     def tab_clicked(self):
