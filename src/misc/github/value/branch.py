@@ -25,11 +25,13 @@ class BranchesArray(MutableSequence, Meta):
     def __getitem__(self, index):
         self.branches.__getitem__(index)
 
+    # noinspection PyMethodOverriding
     def __setitem__(self, key, value):
         self.branches.__setitem__(key, value)
 
     def __len__(self):
         return len(self.branches)
 
+    # noinspection PyMethodOverriding
     def __delitem__(self, index):
         self.branches.__delitem__(index)
