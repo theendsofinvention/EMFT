@@ -28,6 +28,7 @@ class TestProgressAdapter(ProgressAdapter):
         pass
 
 
+# noinspection PyMethodMayBeStatic
 class TestProgress:
     @pytest.fixture(autouse=True)
     def reset_progress(self):

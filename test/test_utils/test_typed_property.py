@@ -4,6 +4,7 @@ import pytest
 from hypothesis import given
 from hypothesis.strategies import text, integers, booleans
 
+# noinspection PyProtectedMember
 from src.utils.decorators.typed_property import TypedProperty, _TypedProperty
 
 
