@@ -679,6 +679,7 @@ def box_info(parent, title: str, text: str):
 
 
 def box_warning(parent, title: str, text: str):
+    # noinspection PyArgumentList
     QMessageBox.warning(parent, title, text)
 
 
