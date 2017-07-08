@@ -133,7 +133,7 @@ class Downloader:
         return content_length
 
     @staticmethod
-    def _best_block_size(time_, chunk):
+    def _best_block_size(time_, chunk: float):
 
         new_min = max(chunk / 2.0, 1.0)
         new_max = min(max(chunk * 2.0, 1.0), 4194304)  # Do not surpass 4 MB
@@ -220,8 +220,7 @@ class Downloader:
             if len(block) == 0:
                 break
 
-            self.block_size = self._best_block_size(end_block - start_block,
-                                                    len(block))
+            self.block_size = self._best_block_size(end_block - start_block, len(block))
             logger.debug('Block size: %s', self.block_size)
             self.file_binary_data += block
 
