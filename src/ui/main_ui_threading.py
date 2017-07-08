@@ -73,7 +73,7 @@ class MainUiThreading(MainUiThreadingAdapter):
         else:
             obj = getattr(self, obj_name, None)
             if obj is None:
-                raise ValueError('unknown object: {}'.format(obj_name))
+                raise ValueError('unknown member of MainUI: {}'.format(obj_name))
             method = getattr(obj, func, None)
         _args = kwargs.pop('args', None)
         try:
@@ -91,7 +91,7 @@ class MainUiThreading(MainUiThreadingAdapter):
                 method()
         except TypeError:
             logger.exception(
-                'method "{method}" of object "{func}" failed ([{args}], {{{kwargs}}})'.format(**locals()))
+                f'method "{method}" of object "{func}" failed ([{args}], {{{kwargs}}})')
 
     @classmethod
     def do(cls, obj_name, func, *args, **kwargs):
