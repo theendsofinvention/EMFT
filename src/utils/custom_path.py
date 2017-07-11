@@ -4,10 +4,9 @@ import binascii
 import os
 import shutil
 import tempfile
-import win32api
 
 import path
-import pywintypes
+import pefile
 from humanize import filesize
 
 
@@ -71,31 +70,28 @@ class Win32FileInfo:
         return self.__props.get('SpecialBuild')
 
     def __read_props(self):
-        prop_names = ('Comments', 'InternalName', 'ProductName',
-                      'CompanyName', 'LegalCopyright', 'ProductVersion',
-                      'FileDescription', 'LegalTrademarks', 'PrivateBuild',
-                      'FileVersion', 'OriginalFilename', 'SpecialBuild')
+
+        def _loword(dword):
+            return dword & 0x0000ffff
+
+        def _hiword(dword):
+            return dword >> 16
+
         self.__props = {}
+
         try:
-            fixed_info = win32api.GetFileVersionInfo(self.__path, '\\')
-            self.__props['fixed_version'] = "%d.%d.%d.%d" % (fixed_info['FileVersionMS'] / 65536,
-                                                             fixed_info['FileVersionMS'] % 65536,
-                                                             fixed_info['FileVersionLS'] / 65536,
-                                                             fixed_info['FileVersionLS'] % 65536)
-            lang, codepage = win32api.GetFileVersionInfo(self.__path, '\\VarFileInfo\\Translation')[0]
-            for name in prop_names:
-                try:
-                    self.__props[name] = str(win32api.GetFileVersionInfo(
-                        self.__path,
-                        u'\\StringFileInfo\\%04X%04X\\%s' % (lang, codepage, name)
-                    )).strip(' ')
-                    if self.__props[name] == 'None':
-                        self.__props[name] = None
-                except:
-                    raise
-        except getattr(pywintypes, 'error') as e:
-            if e.winerror == 1812:
-                raise ValueError('Win32FileInfo: {}: {}'.format(self.__path, e.strerror.lower()))
+            pe = pefile.PE(self.__path)
+        except pefile.PEFormatError as e:
+            raise ValueError(e.value)
+        else:
+            ms = pe.VS_FIXEDFILEINFO.ProductVersionMS
+            ls = pe.VS_FIXEDFILEINFO.ProductVersionLS
+            self.__props['fixed_version'] = '.'.join(map(str, (_hiword(ms), _loword(ms), _hiword(ls), _loword(ls))))
+            for file_info in pe.FileInfo:
+                if file_info.Key == b'StringFileInfo':
+                    for st in file_info.StringTable:
+                        for entry in st.entries.items():
+                            self.__props[entry[0].decode('latin_1')] = entry[1].decode('latin_1')
 
 
 # noinspection PyAbstractClass
@@ -218,3 +214,8 @@ def create_temp_dir(
     temp_dir = tempfile.mkdtemp(suffix=suffix, prefix=prefix, dir=create_in_dir or tempfile.gettempdir())
 
     return Path(temp_dir)
+
+
+if __name__ == '__main__':
+    t = Path(r'F:\DEV\MizFlat\dist\EMFT.exe')
+    x = Win32FileInfo(t)
