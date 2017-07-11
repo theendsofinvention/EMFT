@@ -9,6 +9,7 @@ hypothesis
 mpmath
 natsort
 path.py
+pefile
 pip-tools
 pipdeptree
 polycircles
