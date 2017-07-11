@@ -18,9 +18,9 @@ def test_get_version():
     info = p.get_win32_file_info()
     if os.environ.get('APPVEYOR'):
         # noinspection SpellCheckingInspection
-        assert info.file_version == '6.3.9600.17031 (winblue_gdr.140221-1952)'
+        assert info.file_version == '6.3.9600.18231 (winblue_ltsb.160208-0600)'
         assert info.fixed_version == '6.3.9600.18231'
-        assert info.product_version == '6.3.9600.17031'
+        assert info.product_version == '6.3.9600.18231'
     else:
         assert info.file_version == '6.1.7601.23537 (win7sp1_ldr.160829-0600)'
         assert info.fixed_version == '6.1.7601.23537'
