@@ -45,6 +45,6 @@ requests==2.17.3
 ruamel.yaml==0.15.6
 semver==2.7.7
 simplekml==1.3.0
-sip==4.19.2               # via pyqt5
+sip==4.19.3               # via pyqt5
 six==1.10.0               # via pip-tools
 urllib3==1.21.1
