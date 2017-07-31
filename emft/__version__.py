@@ -13,39 +13,34 @@ def get_gitversion() -> dict:
     """
     Runs the gitversion executable and returns a dictionary of values
 
-    Example "gitversion" output:
+    Example "gitversion" output::
 
-    {
-      "Major":0,
-      "Minor":4,
-      "Patch":4,
-      "PreReleaseTag":"dev.11",
-      "PreReleaseTagWithDash":"-dev.11",
-      "PreReleaseLabel":"dev",
-      "PreReleaseNumber":11,
-      "BuildMetaData":"",
-      "BuildMetaDataPadded":"",
-      "FullBuildMetaData":"Branch.develop.Sha.b22387288a19ac67641fac2711b940c4cab6d021",
-      "MajorMinorPatch":"0.4.4",
-      "SemVer":"0.4.4-dev.11",
-      "LegacySemVer":"0.4.4-dev11",
-      "LegacySemVerPadded":"0.4.4-dev0011",
-      "AssemblySemVer":"0.4.4.0",
-      "FullSemVer":"0.4.4-dev.11",
-      "InformationalVersion":"0.4.4-dev.11+Branch.develop.Sha.b22387288a19ac67641fac2711b940c4cab6d021",
-      "BranchName":"develop",
-      "Sha":"b22387288a19ac67641fac2711b940c4cab6d021",
-      "NuGetVersionV2":"0.4.4-dev0011",
-      "NuGetVersion":"0.4.4-dev0011",
-      "NuGetPreReleaseTagV2":"dev0011",
-      "NuGetPreReleaseTag":"dev0011",
-      "CommitsSinceVersionSource":11,
-      "CommitsSinceVersionSourcePadded":"0011",
-      "CommitDate":"2017-07-18"
-    }
-
-
-    :return: dictionary
+        "Major":0,
+        "Minor":4,
+        "Patch":4,
+        "PreReleaseTag":"dev.11",
+        "PreReleaseTagWithDash":"-dev.11",
+        "PreReleaseLabel":"dev",
+        "PreReleaseNumber":11,
+        "BuildMetaData":"",
+        "BuildMetaDataPadded":"",
+        "FullBuildMetaData":"Branch.develop.Sha.b22387288a19ac67641fac2711b940c4cab6d021",
+        "MajorMinorPatch":"0.4.4",
+        "SemVer":"0.4.4-dev.11",
+        "LegacySemVer":"0.4.4-dev11",
+        "LegacySemVerPadded":"0.4.4-dev0011",
+        "AssemblySemVer":"0.4.4.0",
+        "FullSemVer":"0.4.4-dev.11",
+        "InformationalVersion":"0.4.4-dev.11+Branch.develop.Sha.b22387288a19ac67641fac2711b940c4cab6d021",
+        "BranchName":"develop",
+        "Sha":"b22387288a19ac67641fac2711b940c4cab6d021",
+        "NuGetVersionV2":"0.4.4-dev0011",
+        "NuGetVersion":"0.4.4-dev0011",
+        "NuGetPreReleaseTagV2":"dev0011",
+        "NuGetPreReleaseTag":"dev0011",
+        "CommitsSinceVersionSource":11,
+        "CommitsSinceVersionSourcePadded":"0011",
+        "CommitDate":"2017-07-18"
     """
     # This is a potential security breach, but I'm leaving it as is as it should only be running either from a dev
     # machine or on Appveyor
