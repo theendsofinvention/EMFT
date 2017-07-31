@@ -35,20 +35,21 @@ from emft.__version_frozen__ import __version__, __pep440__  # noqa: E402
 # ones.
 
 # noinspection SpellCheckingInspection
-extensions = ['sphinx.ext.autodoc',
-              'sphinx.ext.napoleon',  # http://www.sphinx-doc.org/en/stable/ext/napoleon.html
-              # 'sphinx.ext.autosectionlabel',
-              # 'sphinx_autodoc_typehints',
-              'sphinx_git',
-              'sphinx.ext.intersphinx',
-              'sphinx.ext.ifconfig',
-              'sphinx.ext.graphviz',
-              'sphinx.ext.viewcode',
-              'sphinx.ext.todo',
-              'sphinxjp.themes.basicstrap',
-              'sphinx.ext.inheritance_diagram',
-              'sphinx_click.ext',
-              ]
+extensions = [
+    'sphinx.ext.autodoc',
+    'sphinx.ext.napoleon',  # http://www.sphinx-doc.org/en/stable/ext/napoleon.html
+    # 'sphinx.ext.autosectionlabel',
+    # 'sphinx_autodoc_typehints',
+    'sphinx_git',
+    'sphinx.ext.intersphinx',
+    'sphinx.ext.ifconfig',
+    'sphinx.ext.graphviz',
+    'sphinx.ext.viewcode',
+    'sphinx.ext.todo',
+    'sphinxjp.themes.basicstrap',
+    'sphinx.ext.inheritance_diagram',
+    'sphinx_click.ext',
+]
 
 intersphinx_mapping = {'python': ('https://docs.python.org/3.6', None)}
 
@@ -68,7 +69,6 @@ master_doc = 'index'
 project = 'EMFT'
 copyright = '2017, 132nd-etcher'
 author = '132nd-etcher'
-
 
 # The version info for the project you're documenting, acts as replacement for
 # |version| and |release|, also used in various other places throughout the
