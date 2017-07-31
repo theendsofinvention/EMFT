@@ -58,6 +58,7 @@ test_requires = [
     'pytest-pep8',
     'pytest-pycharm',
     'pytest-qt',
+    'datadiff',
 ]
 
 dev_requires = [
