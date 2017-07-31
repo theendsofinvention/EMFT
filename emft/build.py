@@ -422,6 +422,8 @@ def pin_version(ctx):
     """
     ensure_module('semantic_version')
 
+    previous_version = ctx.obj['semver']
+
     ctx.obj['version'] = get_gitversion()  # this is needed for later patching
     ctx.obj['semver'] = ctx.obj['version'].get("FullSemVer")
     ctx.obj['pep440'] = get_pep440_version(ctx.obj['semver'])
@@ -431,6 +433,10 @@ def pin_version(ctx):
             f"# coding=utf-8\n"
             f'__version__ = \'{ctx.obj["semver"]}\'\n'
             f'__pep440__ = \'{ctx.obj["pep440"]}\'\n')
+
+    if ctx.obj['semver'] != previous_version:
+        click.secho(f"New Semver: {ctx.obj['semver']}", fg='green')
+        click.secho(f"New PEP440: {ctx.obj['pep440']}", fg='green')
 
 
 @cli.command()
