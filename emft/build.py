@@ -424,7 +424,7 @@ def pin_version(ctx):
 
     ctx.obj['version'] = get_gitversion()  # this is needed for later patching
     ctx.obj['semver'] = ctx.obj['version'].get("FullSemVer")
-    ctx.obj['pep440'] = get_pep440_version(ctx.obj['version'])
+    ctx.obj['pep440'] = get_pep440_version(ctx.obj['semver'])
 
     with open('./emft/__version_frozen__.py', 'w') as version_file:
         version_file.write(
