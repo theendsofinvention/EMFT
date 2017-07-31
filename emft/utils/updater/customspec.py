@@ -12,17 +12,24 @@ LOGGER = make_logger(__name__)
 class CustomSpec(SemanticSpec):
     def filter_channel(self, versions, prerelease: str = Channel.stable):
         LOGGER.debug(f'filtering {len(versions)} versions against {self}')
+        unknown_pre_release_tags = set()
         for version in super(CustomSpec, self).filter(versions):
             assert isinstance(version, CustomVersion)
             if version.prerelease:
                 if not prerelease:
-                    LOGGER.debug(f'skipping pre-release "{version}"')
+                    if 'prerelease' not in unknown_pre_release_tags:
+                        unknown_pre_release_tags.add('prerelease')
+                        LOGGER.debug(f'skipping pre-release "{version}"')
                     continue
                 if version.prerelease[0] in ('PullRequest',):
-                    LOGGER.debug(f'skipping pull-request "{version}"')
+                    if 'pull request' not in unknown_pre_release_tags:
+                        unknown_pre_release_tags.add('pull request')
+                        LOGGER.debug(f'skipping pull-request "{version}"')
                     continue
                 if version.prerelease[0] not in Channel.all:
-                    LOGGER.debug(f'skipping unknown pre-release tag "{version.prerelease[0]}"')
+                    if version.prerelease[0] not in unknown_pre_release_tags:
+                        unknown_pre_release_tags.add(version.prerelease[0])
+                        LOGGER.debug(f'skipping unknown pre-release tag "{version.prerelease[0]}"')
                     continue
                 if version.prerelease[0] < prerelease:
                     LOGGER.debug(f'skipping pre-release "{version}" because it is not on channel "{prerelease}"')
