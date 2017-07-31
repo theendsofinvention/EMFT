@@ -1,8 +1,21 @@
 # coding=utf-8
 import os
+import warnings
 
 import pytest
 
+# noinspection PyUnresolvedReferences
+import src.filter_warnings  # noqa: F401
+
+# Fail on any non-ignored warning
+warnings.filterwarnings('error', category=ResourceWarning, append=True)
+warnings.filterwarnings('error', category=DeprecationWarning, append=True)
+warnings.filterwarnings('error', category=SyntaxWarning, append=True)
+warnings.filterwarnings('error', category=RuntimeWarning, append=True)
+warnings.filterwarnings('error', category=FutureWarning, append=True)
+warnings.filterwarnings('error', category=PendingDeprecationWarning, append=True)
+warnings.filterwarnings('always', category=ImportWarning, append=True)
+warnings.filterwarnings('error', category=UnicodeWarning, append=True)
 
 @pytest.fixture(autouse=True)
 def cleandir(request, tmpdir):
