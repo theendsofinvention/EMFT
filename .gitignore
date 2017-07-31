@@ -9,13 +9,12 @@ __pycache__
 *.debug
 *.spec
 /dist/
+/build/
 coverage.xml
 /test/test_files/*_EMFT.miz
 htmlcov
 *.egg-info/
 /doc/html/
-build/
 .pylint.d/
 __version_frozen__.py
 /~/
-*.exe

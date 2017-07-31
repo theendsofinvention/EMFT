@@ -634,6 +634,15 @@ def patch(ctx):
     ])
 
 
+@cli.command()
+@click.pass_context
+def test_build(ctx):
+    """
+    Runs the embedded tests in the resulting EMFT.exe
+    """
+    do(ctx, ['./dist/emft.exe', '--test'])
+
+
 if __name__ == '__main__':
     _known_executables = {}
     cli(obj={})
