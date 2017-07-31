@@ -12,7 +12,6 @@ class TestDialogProfileEditor:
     @pytest.fixture()
     def valid_dialog(self, qtbot):
         dialog = dialog_profile_editor.DialogProfileEditor()
-        dialog.show()
         dialog._name_le.setText('name')
         dialog._gh_repo_le.setText(
             'https://github.com/132nd-vWing/132nd-Virtual-Wing-Training-Mission-Tblisi'
