@@ -1,5 +1,10 @@
 # coding=utf-8
+"""
+Collections of tools to build EMFT
+"""
 import datetime
+import typing
+import importlib
 import os
 import platform
 import re
@@ -10,24 +15,63 @@ from json import loads
 
 import certifi
 import click
-import semantic_version
+
+# noinspection SpellCheckingInspection
+PYINSTALLER_NEEDED_VERSION = '3.3.dev0+g2fcbe0f'
 
 
-def find_executable(executable: str, path=None):  # noqa: C901
+def ensure_repo():
+    """
+    Makes sure the current working directory is EMFT's Git repository.
+    """
+    if not os.path.exists('.git') or not os.path.exists('emft'):
+        click.secho('emft-build is meant to be ran in EMFT Git repository.\n'
+                    'You can clone the repository by running:\n\n'
+                    '\tgit clone https://github.com/132nd-etcher/EMFT.git\n\n'
+                    'Then cd into it and try again.',
+                    fg='red', err=True)
+        exit(-1)
+
+
+def ensure_module(module_name: str):
+    """
+    Makes sure that a module is importable.
+
+    In case the module cannot be found, print an error and exit.
+
+    Args:
+        module_name: name of the module to look for
+    """
+    try:
+        importlib.import_module(module_name)
+    except ModuleNotFoundError:
+        click.secho(
+            f'Module not found: {module_name}\n'
+            f'Install it manually with: "pip install {module_name}"\n'
+            f'Or install all dependencies with: "pip install -r requirements-dev.txt"',
+            fg='red', err=True)
+        exit(-1)
+
+
+def find_executable(executable: str, path: str = None) -> typing.Union[str, None]:  # noqa: C901
     # noinspection SpellCheckingInspection
     """
     https://gist.github.com/4368898
 
     Public domain code by anatoly techtonik <techtonik@gmail.com>
 
-    AKA Linux `which` and Windows `where`
+    Programmatic equivalent to Linux `which` and Windows `where`
 
     Find if ´executable´ can be run. Looks for it in 'path'
     (string that lists directories separated by 'os.pathsep';
     defaults to os.environ['PATH']). Checks for all executable
     extensions. Returns full path or None if no command is found.
-    """
 
+    Args:
+        executable: executable name to look for
+        path: root path to examine (defaults to system PATH)
+
+    """
     if '_known_executables' in globals():
         global _known_executables
     else:
@@ -70,17 +114,28 @@ def find_executable(executable: str, path=None):  # noqa: C901
                     return f
     else:
         click.secho(f' -> not found', fg='red', err=True)
-        raise FileNotFoundError()
+        return None
 
 
-def do_ex(ctx, cmd, cwd='.'):
-    def _popen_pipes(ctx, cmd_, cwd_):
-        def _always_strings(ctx, env_dict):
+def do_ex(ctx: click.Context, cmd: typing.List[str], cwd: str = '.') -> typing.Tuple[str, str, int]:
+    """
+    Executes a given command
+
+    Args:
+        ctx: Click context
+        cmd: command to run
+        cwd: working directory (defaults to ".")
+
+    Returns: stdout, stderr, exit_code
+
+    """
+    def _popen_pipes(ctx_, cmd_, cwd_):
+        def _always_strings(ctx__, env_dict):
             """
             On Windows and Python 2, environment dictionaries must be strings
             and not unicode.
             """
-            if ctx.obj['is_windows']:
+            if ctx__.obj['is_windows']:
                 env_dict.update(
                     (key, str(value))
                     for (key, value) in env_dict.items()
@@ -93,7 +148,7 @@ def do_ex(ctx, cmd, cwd='.'):
             stderr=subprocess.PIPE,
             cwd=str(cwd_),
             env=_always_strings(
-                ctx,
+                ctx_,
                 dict(
                     os.environ,
                     # try to disable i18n
@@ -104,13 +159,16 @@ def do_ex(ctx, cmd, cwd='.'):
             )
         )
 
-    def _ensure_stripped_str(ctx, str_or_bytes):
+    def _ensure_stripped_str(_, str_or_bytes):
         if isinstance(str_or_bytes, str):
             return '\n'.join(str_or_bytes.strip().splitlines())
         else:
             return '\n'.join(str_or_bytes.decode('utf-8', 'surogate_escape').strip().splitlines())
 
-    cmd.insert(0, find_executable(cmd.pop(0)))
+    exe = find_executable(cmd.pop(0))
+    if not exe:
+        exit(-1)
+    cmd.insert(0, exe)
     click.secho(f'{cmd}', nl=False, fg='magenta')
     p = _popen_pipes(ctx, cmd, cwd)
     out, err = p.communicate()
@@ -118,11 +176,19 @@ def do_ex(ctx, cmd, cwd='.'):
     return _ensure_stripped_str(ctx, out), _ensure_stripped_str(ctx, err), p.returncode
 
 
-def do(ctx, cmd, cwd='.'):
+def do(ctx: click.Context, cmd: typing.List[str], cwd: str = '.') -> str:
+    """
+    Executes a command and returns the result
+
+    Args:
+        ctx: click context
+        cmd: command to execute
+        cwd: working directory (defaults to ".")
+
+    Returns: stdout
+    """
     if not isinstance(cmd, (list, tuple)):
         cmd = shlex.split(cmd)
-
-    # click.secho(f'running: {cmd}', nl=False, fg='magenta')
 
     out, err, ret = do_ex(ctx, cmd, cwd)
     if out:
@@ -130,17 +196,22 @@ def do(ctx, cmd, cwd='.'):
     if err:
         click.secho(f'{err}', fg='red')
     if ret:
+        click.secho(f'command failed: {cmd}', err=True, fg='red')
         exit(ret)
     return out
 
 
 def get_gitversion() -> dict:
-    try:
-        if os.environ.get('APPVEYOR'):
-            exe = find_executable('gitversion', r'C:\ProgramData\chocolatey\bin')
-        else:
-            exe = find_executable('gitversion')
-    except FileNotFoundError:
+    """
+    Uses GitVersion (https://github.com/GitTools/GitVersion) to infer project's current version
+
+    Returns Gitversion JSON output as a dict
+    """
+    if os.environ.get('APPVEYOR'):
+        exe = find_executable('gitversion', r'C:\ProgramData\chocolatey\bin')
+    else:
+        exe = find_executable('gitversion')
+    if not exe:
         click.secho(
             '"gitversion.exe" not been found in your PATH.\n'
             'GitVersion is used to infer the current version from the Git repository.\n'
@@ -156,29 +227,27 @@ def get_gitversion() -> dict:
             '\t\thttps://github.com/GitTools/GitVersion/releases',
             err=True,
         )
-        raise SystemExit()
+        exit(-1)
     return loads(subprocess.getoutput([exe]).rstrip())
 
 
-def get_pep440_version(version) -> str:
-    convert_prereleases = (
-        dict(
-            prerelease='alpha',
-            converts_to='a',
-        ),
-        dict(
-            prerelease='beta',
-            converts_to='b',
-        ),
-        dict(
-            prerelease='exp',
-            converts_to='rc',
-        ),
-        dict(
-            prerelease='patch',
-            converts_to='post',
-        ),
-    )
+def get_pep440_version(version: str) -> str:
+    """
+    Converts a Semver to a PEP440 version
+
+    Args:
+        version: valid Semver string
+
+    Returns: valid PEP440 version
+    """
+    import semantic_version
+
+    convert_prereleases = {
+        'alpha': 'a',
+        'beta': 'b',
+        'exp': 'rc',
+        'patch': 'post',
+    }
 
     semver = semantic_version.Version.coerce(version)
     version_str = f'{semver.major}.{semver.minor}.{semver.patch}'
@@ -189,11 +258,9 @@ def get_pep440_version(version) -> str:
         assert isinstance(prerelease, tuple)
 
         # Convert the pre-release tag to a valid PEP440 tag and strip it
-        for convert_scheme in convert_prereleases:
-            if prerelease[0] in convert_scheme['prerelease']:
-                version_str += convert_scheme['converts_to']
-                prerelease = prerelease[1:]
-                break
+        if prerelease[0] in convert_prereleases:
+            version_str += convert_prereleases[prerelease[0]]
+            prerelease = prerelease[1:]
         else:
             raise ValueError(f'unknown pre-release tag: {version_str.prerelease[0]}')
 
@@ -214,313 +281,359 @@ def get_pep440_version(version) -> str:
     return version_str
 
 
-class Checks:
-    @staticmethod
-    def pylint(ctx):
-        do(ctx, ['pylint'])
+def _write_requirements(ctx: click.Context, packages_list, outfile, prefix_list=None):
+    with open('temp', 'w') as source_file:
+        source_file.write('\n'.join(packages_list))
+    packages, _, ret = do_ex(
+        ctx,
+        [
+            'pip-compile',
+            '--index',
+            '--upgrade',
+            '--annotate',
+            '--no-header',
+            '-n',
+            'temp'
+        ]
+    )
+    os.remove('temp')
+    with open(outfile, 'w') as req_file:
+        if prefix_list:
+            for prefix in prefix_list:
+                req_file.write(f'{prefix}\n')
+        for package in packages.splitlines():
+            req_file.write(f'{package}\n')
 
-    @staticmethod
-    def prospector(ctx):
-        do(ctx, ['prospector'])
 
-    @staticmethod
-    def pytest(ctx):
-        do(ctx, ['pytest'])
+def _install_pyinstaller(ctx: click.Context, force: bool = False):
+    """
+    Installs pyinstaller package from a custom repository
 
-    @staticmethod
-    def flake8(ctx):
-        do(ctx, ['flake8'])
+    The latest official master branch of Pyinstaller does not work with the version of Python I'm using at this time
 
-    @staticmethod
-    def safety(ctx):
-        do(ctx, ['safety', 'check', '--bare'])
+    Args:
+        ctx: lick context (passed automatically by Click)
+        force: uses "pip --upgrade" to force the installation of this specific version of PyInstaller
+    """
+    repo = r'git+https://github.com/132nd-etcher/pyinstaller.git@develop#egg=pyinstaller==3.3.dev0+g2fcbe0f'
+    if force:
+        do(ctx, ['pip', 'install', '--upgrade', repo])
+    else:
+        do(ctx, ['pip', 'install', repo])
 
 
-class HouseKeeping:
-    SRC_FILE = 'temp'
+# noinspection PyUnusedLocal
+def _print_version(ctx: click.Context, param, value):
+    if not value or ctx.resilient_parsing:
+        return
 
-    @classmethod
-    def _write_requirements(cls, ctx, packages_list, outfile, prefix_list=None):
-        with open(cls.SRC_FILE, 'w') as source_file:
-            source_file.write('\n'.join(packages_list))
-        packages, _, ret = do_ex(
-            ctx,
-            [
-                'pip-compile',
-                '--index',
-                '--upgrade',
-                '--annotate',
-                '--no-header',
-                '-n',
-                cls.SRC_FILE
-            ]
-        )
-        os.remove(cls.SRC_FILE)
-        with open(outfile, 'w') as req_file:
-            if prefix_list:
-                for prefix in prefix_list:
-                    req_file.write(f'{prefix}\n')
-            for package in packages.splitlines():
-                req_file.write(f'{package}\n')
+    ensure_repo()
 
-    @classmethod
-    def write_prod(cls, ctx):
+    from emft.__version_frozen__ import __version__, __pep440__
+    click.secho(f"Semver: {__version__}", fg='green')
+    click.secho(f"PEP440: {__pep440__}", fg='green')
+    exit(0)
+
+
+# @click.group(invoke_without_command=True)
+@click.group(chain=True)
+@click.option('-v', '--version',
+              is_flag=True, is_eager=True, expose_value=False, callback=_print_version, default=False,
+              help='Print version and exit')
+@click.pass_context
+def cli(ctx):
+    """
+    Handles all the tasks to build a working EMFT application
+
+    This tool is installed as a setuptools entry point, which means it should be accessible from your terminal once EMFT
+    is installed in develop mode.
+
+    Just type the following in whatever shell you fancy:
+    """
+
+    ensure_repo()
+
+    from emft.__version_frozen__ import __version__, __pep440__
+
+    if not hasattr(ctx, 'obj') or ctx.obj is None:
+        ctx.obj = {}
+
+    ctx.obj['is_windows'] = platform.system() == 'Windows'
+    ctx.obj['semver'] = __version__
+    ctx.obj['pep440'] = __pep440__
+
+    click.secho(f"Semver: {__version__}", fg='green')
+    click.secho(f"PEP440: {__pep440__}", fg='green')
+
+    # if ctx.invoked_subcommand is None:
+    #     Checks.safety(ctx)
+    #     Checks.flake8(ctx)
+    #     Checks.pytest(ctx)
+    #     # Checks.pylint()  # TODO
+    #     # Checks.prospector()  # TODO
+    #     HouseKeeping.compile_qt_resources(ctx)
+    #     HouseKeeping.write_changelog(ctx, commit=True)
+    #     HouseKeeping.write_requirements(ctx)
+    #     Make.install_pyinstaller(ctx)
+    #     Make.freeze(ctx)
+    #     Make.patch_exe(ctx)
+    #     Make.build_doc(ctx)
+
+
+@cli.command()
+@click.option('--prod/--no-prod', default=True, help='Whether or not to write "requirement.txt"')
+@click.option('--test/--no-test', default=True, help='Whether or not to write "requirement-test.txt"')
+@click.option('--dev/--no-dev', default=True, help='Whether or not to write "requirement-dev.txt"')
+@click.pass_context
+def reqs(ctx: click.Context, prod, test, dev):
+    """Write requirements files"""
+    if not find_executable('pip-compile'):
+        click.secho('Missing module "pip-tools".\n'
+                    'Install it manually with: "pip install pip-tools"\n'
+                    'Or install all dependencies with: "pip install -r requirements-dev.txt"',
+                    err=True, fg='red')
+        exit(-1)
+    if prod:
         sys.path.insert(0, os.path.abspath('.'))
         from setup import install_requires
-        cls._write_requirements(
+        _write_requirements(
             ctx,
             packages_list=install_requires,
             outfile='requirements.txt'
         )
         sys.path.pop(0)
-
-    @classmethod
-    def write_test(cls, ctx):
+    if test:
+        """Writes requirements-test.txt"""
         from setup import test_requires
-        cls._write_requirements(
+        _write_requirements(
             ctx,
             packages_list=test_requires,
             outfile='requirements-test.txt',
             prefix_list=['-r requirements.txt']
         )
-
-    @classmethod
-    def write_dev(cls, ctx):
+    if dev:
+        """Writes requirements-dev.txt"""
         from setup import dev_requires
-        cls._write_requirements(
+        _write_requirements(
             ctx,
             packages_list=dev_requires,
             outfile='requirements-dev.txt',
             prefix_list=['-r requirements.txt', '-r requirements-test.txt']
         )
 
-    @classmethod
-    def write_requirements(cls, ctx):
-        cls.write_prod(ctx)
-        cls.write_test(ctx)
-        cls.write_dev(ctx)
 
-    @classmethod
-    def write_changelog(cls, ctx, commit: bool, push: bool = False):
-        changelog = do(ctx, ['gitchangelog', '0.4.1..HEAD'])
-        with open('CHANGELOG.rst', mode='w') as f:
-            f.write(re.sub('(\s*\r\n){2,}', '\r\n', changelog))
-        if commit:
-            do_ex(ctx, ['git', 'add', 'CHANGELOG.rst'])
-            _, _, ret = do_ex(ctx, ['git', 'commit', '-m', 'chg: dev: updated changelog [skip ci]'])
-            if ret == 0 and push:
-                do_ex(ctx, ['git', 'push'])
-
-    @classmethod
-    def compile_qt_resources(cls, ctx):
-        do(ctx, [
-            'pyrcc5',
-            './emft/ui/qt_resource.qrc',
-            '-o', './emft/ui/qt_resource.py',
-        ])
-
-    @classmethod
-    def write_version(cls, ctx):
-        with open('./emft/__version_frozen__.py', 'w') as version_file:
-            version_file.write(
-                f"# coding=utf-8\n"
-                f'__version__ = \'{ctx.obj["semver"]}\'\n'
-                f'__pep440__ = \'{ctx.obj["pep440"]}\'\n')
-
-
-class Make:
-    @classmethod
-    def install_pyinstaller(cls, ctx):
-        do(ctx, ['pip', 'install',
-                 'git+https://github.com/132nd-etcher/pyinstaller.git@develop#egg=pyinstaller==3.3.dev0+g2fcbe0f'])
-
-    @classmethod
-    def freeze(cls, ctx):
-        do(ctx, [
-            sys.executable,
-            '-m', 'PyInstaller',
-            '--log-level=WARN',
-            '--noconfirm', '--onefile', '--clean', '--windowed',
-            '--icon', './emft/ui/app.ico',
-            '--workpath', './build',
-            '--distpath', './dist',
-            '--paths', f'{os.path.join(sys.exec_prefix, "Lib/site-packages/PyQt5/Qt/bin")}',
-            '--add-data', f'{certifi.where()};.',
-            '--name', 'EMFT',
-            './emft/main.py'
-        ])
-
-    @classmethod
-    def patch_exe(cls, ctx):
-        if not find_executable('verpatch'):
-            click.secho(
-                '"verpatch.exe" not been found in your PATH.\n'
-                'Verpatch is used to embed resources like the version after the compilation.\n'
-                'I\'m waiting on PyInstaller to port their own resources patcher to Python 3 so I can remove the '
-                'dependency to this external tool...\n'
-                'In the meanwhile, "verpatch" can be obtained at: https://ddverpatch.codeplex.com/releases',
-                err=True, fg='red'
-            )
-            raise FileNotFoundError()
-        year = datetime.datetime.now().year
-        do(ctx, [
-            'verpatch',
-            './dist/EMFT.exe',
-            '/high',
-            ctx.obj['semver'],
-            '/va',
-            '/pv', ctx.obj['semver'],
-            '/s', 'desc', 'EtchersMissionFilesTools',
-            '/s', 'product', 'EMFT',
-            '/s', 'title', 'EMFT',
-            '/s', 'copyright', f'{year}-132nd-etcher',
-            '/s', 'company', '132nd-etcher,132nd-Entropy,132nd-Neck',
-            '/s', 'SpecialBuild', f'{ctx.obj["version"]["BranchName"]}@{ctx.obj["version"]["Sha"]}',
-            '/s', 'PrivateBuild', f'{ctx.obj["version"]["InformationalVersion"]}.{ctx.obj["version"]["CommitDate"]}',
-            '/langid', '1033',
-        ])
-
-    @classmethod
-    def build_doc(cls, ctx):
-        do(ctx, [
-            'sphinx-build',
-            '-b',
-            'html',
-            'doc',
-            'doc/html'
-        ])
-
-
-@click.group(invoke_without_command=True)
-@click.option('--install/--no-install', default=True)
+@cli.command()
 @click.pass_context
-def cli(ctx, install):
-    if not os.path.exists('.git') or not os.path.exists('emft'):
-        click.secho('emft-build is meant to be ran in EMFT Git repository.\n'
-                    'You can clone the repository by running:\n\n'
-                    '\tgit clone https://github.com/132nd-etcher/EMFT.git\n\n'
-                    'Then cd into it and try again.',
-                    fg='red', err=True)
-        exit(-1)
-    if not hasattr(ctx, 'obj') or ctx.obj is None:
-        ctx.obj = {}
+def pin_version(ctx):
+    """
+    Writes the project's version to "emft/__version_frozen__.py (both Semver and PEP440)
 
-    ctx.obj['is_windows'] = platform.system() == 'Windows'
-    ctx.obj['version'] = get_gitversion()
+    Args:
+        ctx: click context (passed automatically by Click)
+    """
+    ensure_module('semantic_version')
+
+    ctx.obj['version'] = get_gitversion()  # this is needed for later patching
     ctx.obj['semver'] = ctx.obj['version'].get("FullSemVer")
     ctx.obj['pep440'] = get_pep440_version(ctx.obj['semver'])
 
-    click.secho(f"SemVer: {ctx.obj['semver']}", fg='green')
-
-    if not all(
-        (
-            os.path.exists('requirements.txt'),
-            os.path.exists('requirements-dev.txt'),
-            os.path.exists('requirements-test.txt'),
-        )
-    ):
-        HouseKeeping.write_requirements(ctx)
-
-    if install:
-        do(ctx, ['pip', 'install', '-r', 'requirements-dev.txt'])
-    if ctx.invoked_subcommand is None:
-        Checks.safety(ctx)
-        Checks.flake8(ctx)
-        Checks.pytest(ctx)
-        # Checks.pylint()  # TODO
-        # Checks.prospector()  # TODO
-        HouseKeeping.compile_qt_resources(ctx)
-        HouseKeeping.write_changelog(ctx, commit=True)
-        HouseKeeping.write_requirements(ctx)
-        Make.install_pyinstaller(ctx)
-        Make.freeze(ctx)
-        Make.patch_exe(ctx)
-        Make.build_doc(ctx)
+    with open('./emft/__version_frozen__.py', 'w') as version_file:
+        version_file.write(
+            f"# coding=utf-8\n"
+            f'__version__ = \'{ctx.obj["semver"]}\'\n'
+            f'__pep440__ = \'{ctx.obj["pep440"]}\'\n')
 
 
 @cli.command()
-@click.option('--prod/--no-prod', default=True)
-@click.option('--test/--no-test', default=True)
-@click.option('--dev/--no-dev', default=True)
+@click.option('--commit/--no-commit', default=True, help='commit the changes (default: True)')
+@click.option('--push/--no-push', default=False, help='push the changes (default: False)')
 @click.pass_context
-def reqs(ctx, prod, test, dev):
-    if prod:
-        HouseKeeping.write_prod(ctx)
-    if test:
-        HouseKeeping.write_test(ctx)
-    if dev:
-        HouseKeeping.write_dev(ctx)
-
-
-@cli.command()
-@click.pass_context
-def version(ctx):
-    HouseKeeping.write_version(ctx)
-
-
-@cli.command()
-@click.option('--commit/--no-commit', default=True)
-@click.pass_context
-def chglog(ctx, commit):
-    HouseKeeping.write_changelog(ctx, commit)
+def chglog(ctx, commit, push):
+    """Write changelog"""
+    ensure_module('gitchangelog')
+    find_executable('git')
+    """
+    Write the changelog using "gitchangelog" (https://github.com/vaab/gitchangelog)
+    """
+    changelog = do(ctx, ['gitchangelog', '0.4.1..HEAD'])
+    with open('CHANGELOG.rst', mode='w') as f:
+        f.write(re.sub(r'(\s*\r\n){2,}', '\r\n', changelog))
+    if commit:
+        do_ex(ctx, ['git', 'add', 'CHANGELOG.rst'])
+        _, _, ret = do_ex(ctx, ['git', 'commit', '-m', 'chg: dev: updated changelog [skip ci]'])
+        if ret == 0 and push:
+            do_ex(ctx, ['git', 'push'])
 
 
 @cli.command()
 @click.pass_context
 def pyrcc(ctx):
-    HouseKeeping.compile_qt_resources(ctx)
+    """Compiles Qt resources (icons, pictures, ...)  to a usable python script"""
+    if not find_executable('pyrcc5'):
+        click.secho('Unable to find "pyrcc5" executable.\n'
+                    f'Install it manually with: "pip install pyqt5"\n'
+                    f'Or install all dependencies with: "pip install -r requirements-dev.txt"',
+                    err=True, fg='red'
+                    )
+    do(ctx, [
+        'pyrcc5',
+        './emft/ui/qt_resource.qrc',
+        '-o', './emft/ui/qt_resource.py',
+    ])
 
 
 @cli.command()
 @click.pass_context
 def pytest(ctx):
-    Checks.pytest(ctx)
+    """
+    Runs Pytest (https://docs.pytest.org/en/latest/)
+    """
+    ensure_module('pytest')
+    do(ctx, ['pytest'])
 
 
 @cli.command()
 @click.pass_context
 def flake8(ctx):
-    Checks.flake8(ctx)
+    """
+    Runs Flake8 (http://flake8.pycqa.org/en/latest/)
+    """
+    ensure_module('flake8')
+    do(ctx, ['flake8'])
 
 
 @cli.command()
 @click.pass_context
 def prospector(ctx):
-    Checks.prospector(ctx)
+    """
+    Runs Landscape.io's Prospector (https://github.com/landscapeio/prospector)
+
+    This includes flake8 & Pylint
+    """
+    ensure_module('prospector')
+    do(ctx, ['prospector'])
 
 
 @cli.command()
 @click.pass_context
-def pylint(ctx):
-    Checks.pylint(ctx)
+@click.argument('src', type=click.Path(exists=True), default='emft')
+@click.option('-r', '--reports', is_flag=True, help='Display full report')
+@click.option('-f', '--format', 'format_',
+              type=click.Choice(['text', 'parseable', 'colorized', 'json']), default='colorized')
+def pylint(ctx, src, reports, format_):
+    """
+    Analyze a given python SRC (module or package) with Pylint (SRC must exist)
+
+    Default module: "./emft"
+    """
+    ensure_module('pylint')
+    cmd = ['pylint', src, f'--output-format={format_}']
+    if reports:
+        cmd.append('--reports=y')
+    do(ctx, cmd)
 
 
 @cli.command()
 @click.pass_context
 def safety(ctx):
-    Checks.safety(ctx)
+    """
+    Runs Pyup's Safety tool (https://pyup.io/safety/)
+    """
+    ensure_module('safety')
+    do(ctx, ['safety', 'check', '--bare'])
 
 
 @cli.command()
 @click.pass_context
 def doc(ctx):
-    Make.build_doc(ctx)
+    """
+    Builds the documentation using Sphinx (http://www.sphinx-doc.org/en/stable)
+    """
+    do(ctx, [
+        'sphinx-build',
+        '-b',
+        'html',
+        'doc',
+        'doc/html'
+    ])
 
 
 @cli.command()
-@click.option('--install/--no-install', default=True)
+@click.option('--install/--no-install', default=True, help='automatically install custom Pyinstaller version')
+@click.option('--force', is_flag=True, help='force installation of needed version')
 @click.pass_context
-def freeze(ctx, install):
+def freeze(ctx, install: bool, force: bool):
+    """
+    Creates a Win32 executable file from EMFT's source
+    """
     if install:
-        Make.install_pyinstaller(ctx)
-    Make.freeze(ctx)
+        _install_pyinstaller(ctx, force)
+
+    pyinstaller_version, _, _ = do_ex(ctx, [sys.executable, '-m', 'PyInstaller', '--version'])
+    pyinstaller_version = pyinstaller_version.strip()
+
+    click.secho(f'current version of pyinstaller: {pyinstaller_version}', fg='green')
+    # noinspection SpellCheckingInspection
+    if not pyinstaller_version.strip() == PYINSTALLER_NEEDED_VERSION:
+        click.secho('EMFT needs a very specific version of PyInstaller to compile successfully.\n'
+                    'You can force the installation of that version using the command:\n\n'
+                    '\temft-build freeze --force', err=True, fg='red')
+        exit(-1)
+
+    do(ctx, [
+        sys.executable,
+        '-m', 'PyInstaller',
+        '--log-level=WARN',
+        '--noconfirm', '--onefile', '--clean', '--windowed',
+        '--icon', './emft/ui/app.ico',
+        '--workpath', './build',
+        '--distpath', './dist',
+        '--paths', f'{os.path.join(sys.exec_prefix, "Lib/site-packages/PyQt5/Qt/bin")}',
+        '--add-data', f'{certifi.where()};.',
+        '--name', 'EMFT',
+        './emft/main.py'
+    ])
 
 
 @cli.command()
 @click.pass_context
 def patch(ctx):
-    Make.patch_exe(ctx)
+    """
+    Uses "verpatch" (https://ddverpatch.codeplex.com) to write resource information into the PE
+    """
+    if not find_executable('verpatch'):
+        click.secho(
+            '"verpatch.exe" not been found in your PATH.\n'
+            'Verpatch is used to embed resources like the version after the compilation.\n'
+            'I\'m waiting on PyInstaller to port their own resources patcher to Python 3 so I can remove the '
+            'dependency to this external tool...\n'
+            'In the meanwhile, "verpatch" can be obtained at: https://ddverpatch.codeplex.com/releases',
+            err=True, fg='red'
+        )
+        exit(-1)
+
+    if ctx.obj.get('version') is None:
+        ctx.invoke(pin_version)
+
+    year = datetime.datetime.now().year
+    do(ctx, [
+        'verpatch',
+        './dist/EMFT.exe',
+        '/high',
+        ctx.obj['semver'],
+        '/va',
+        '/pv', ctx.obj['semver'],
+        '/s', 'desc', 'EtchersMissionFilesTools',
+        '/s', 'product', 'EMFT',
+        '/s', 'title', 'EMFT',
+        '/s', 'copyright', f'{year}-132nd-etcher',
+        '/s', 'company', '132nd-etcher,132nd-Entropy,132nd-Neck',
+        '/s', 'SpecialBuild', f'{ctx.obj["version"]["BranchName"]}@{ctx.obj["version"]["Sha"]}',
+        '/s', 'PrivateBuild', f'{ctx.obj["version"]["InformationalVersion"]}.{ctx.obj["version"]["CommitDate"]}',
+        '/langid', '1033',
+    ])
 
 
 if __name__ == '__main__':
+    _known_executables = {}
     cli(obj={})
