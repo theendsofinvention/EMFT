@@ -1,7 +1,7 @@
 # coding=utf-8
 
 import os
-from setuptools import setup, find_packages
+from setuptools import setup
 
 
 def read_local_files(*file_paths: str) -> str:
@@ -67,10 +67,15 @@ dev_requires = [
     'gitchangelog',
     'certifi',
     'pip-tools',
+    'sphinx_autodoc_typehints',
+    'sphinx-click',
+    'sphinx-git',
+    'sphinx-rtd-theme',
 ]
 
 setup_requires = [
     'setuptools_scm',
+    'pytest-runner',
 ]
 
 entry_points = '''
