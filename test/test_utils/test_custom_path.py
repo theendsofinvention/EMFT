@@ -44,7 +44,7 @@ def test_get_version():
         p.get_win32_file_info()
 
 
-@given(s=st.one_of(st.text(alphabet=string.ascii_letters, min_size=1)))
+@given(s=st.one_of(st.text(alphabet=string.ascii_letters, min_size=4)))
 def test_create_temp_file(tmpdir, s):
     p = Path(str(tmpdir.join(s)))
     p.write_text('')
