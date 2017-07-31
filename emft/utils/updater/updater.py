@@ -276,6 +276,7 @@ class Updater(Machine):
                 local_file='./update',
                 file_size=size,
                 hexdigest=hexdigest,
+                title=f'Downloading EFMT {self.latest_version.to_short_string()}'
             )
 
         def _download_callback(download_successful):
