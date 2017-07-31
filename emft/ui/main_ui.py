@@ -121,17 +121,6 @@ def start_ui():
 
     global_.MAIN_UI.show()
 
-    def pre_update_hook():
-        if not hasattr(sys, 'frozen'):
-            LOGGER.warning('skipping update on script run')
-            return False
-        else:
-            I.hide()
-            return True
-
-    def cancel_update_hook():
-        I.show()
-
     LOGGER.info('loading adapter: Progress')
     from emft.utils import Progress
     # noinspection PyTypeChecker
