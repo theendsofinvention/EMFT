@@ -32,7 +32,7 @@ class CustomSpec(SemanticSpec):
                         unknown_pre_release_tags.add('pull request')
                         LOGGER.debug(f'skipping pull-request "{version}"')
                     continue
-                if version.prerelease[0] not in Channel.all:
+                if version.prerelease[0] not in Channel.pre_releases_labels:
                     if version.prerelease[0] not in unknown_pre_release_tags:
                         unknown_pre_release_tags.add(version.prerelease[0])
                         LOGGER.debug(f'skipping unknown pre-release tag "{version.prerelease[0]}"')

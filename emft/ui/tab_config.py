@@ -18,14 +18,6 @@ from .tab_config_adapter import TAB_NAME, TabConfigAdapter
 
 LOGGER = make_logger(__name__)
 
-LABEL_TO_CHANNEL = dict(
-    stable=Channel.stable,
-    patches=Channel.patch,
-    rc=Channel.exp,
-    beta=Channel.beta,
-    alpha=Channel.alpha,
-)
-
 
 class TabChildConfig(MainUiTabChild, TabConfigAdapter):
     def tab_clicked(self):
@@ -42,7 +34,7 @@ class TabChildConfig(MainUiTabChild, TabConfigAdapter):
         self.sg = LineEdit(Config().saved_games_path or '', self._on_change_sg, read_only=True)
         self.update_channel_combo = Combo(
             self._on_change_update_channel,
-            ['stable', 'patches', 'rc', 'beta', 'alpha']
+            Channel.labels
         )
 
         self.latest_version = None
@@ -272,7 +264,9 @@ class TabChildConfig(MainUiTabChild, TabConfigAdapter):
         if hasattr(self, 'install_new_version_btn'):
             self.install_new_version_btn.setEnabled(False)
         self.remote_version.set_text_color('black')
-        updater.find_latest_version_on_channel(LABEL_TO_CHANNEL[self.update_channel_combo.currentText()])
+        updater.find_latest_version_on_channel(
+            Channel.LABEL_TO_CHANNEL[self.update_channel_combo.currentText()]
+        )
 
     def _install_latest_version(self):
         if updater.latest_version:

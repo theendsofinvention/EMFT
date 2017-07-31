@@ -5,6 +5,7 @@ from emft.utils.custom_logging import make_logger
 
 from emft.meta import MetaPropertyWithDefault, MetaGUIDPropertyWithDefault
 from emft.reorder.cfg_values import ReorderConfigValues
+from emft.utils.updater.channel import Channel
 
 LOGGER = make_logger(__name__)
 
@@ -50,9 +51,9 @@ class ConfigValues(ReorderConfigValues):
         return value
 
     # noinspection PyPep8Naming
-    @MetaPropertyWithDefault('', str)
+    @MetaPropertyWithDefault('stable', str)
     def update_channel(self, value: str):
-        if value not in ['', 'alpha', 'beta', 'exp', 'patch']:
+        if value not in Channel.labels:
             raise ValueError('unknown update channel: {}'.format(value))
         return value
 
