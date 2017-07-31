@@ -218,7 +218,7 @@ class SLTP:
                     if self.ch != end:
                         s += '\\'
                 s += self.ch
-        print(ERRORS['unexp_end_string'])
+        raise SLTPParsingError(ERRORS['unexp_end_string'])
 
     # noinspection PyMissingOrEmptyDocstring
     def object(self):  # noqa C901
@@ -274,7 +274,7 @@ class SLTP:
                         o[idx] = k
                         idx += 1
                         k = ''
-        print(ERRORS['unexp_end_table'])  # Bad exit here
+        raise SLTPParsingError(ERRORS['unexp_end_table'])  # Bad exit here
 
     # noinspection PyMissingOrEmptyDocstring
     def word(self):
@@ -304,33 +304,28 @@ class SLTP:
             return _n
 
         n = ''
-        try:
-            if self.ch == '-':
-                n += next_digit(ERRORS['mfnumber_minus'])
-            n += self.digit()
-            if n == '0' and self.ch in ['x', 'X']:
+        if self.ch == '-':
+            n += next_digit(ERRORS['mfnumber_minus'])
+        n += self.digit()
+        if n == '0' and self.ch in ['x', 'X']:
+            n += self.ch
+            self.next_chr()
+            n += self.hex()
+        else:
+            if self.ch and self.ch == '.':
+                n += next_digit(ERRORS['mfnumber_dec_point'])
+                n += self.digit()
+            if self.ch and self.ch in ['e', 'E']:
                 n += self.ch
                 self.next_chr()
-                n += self.hex()
-            else:
-                if self.ch and self.ch == '.':
-                    n += next_digit(ERRORS['mfnumber_dec_point'])
-                    n += self.digit()
-                if self.ch and self.ch in ['e', 'E']:
-                    n += self.ch
-                    self.next_chr()
-                    if not self.ch or self.ch not in ('+', '-'):
-                        raise SLTPParsingError(ERRORS['mfnumber_sci'])
-                    n += next_digit(ERRORS['mfnumber_sci'])
-                    n += self.digit()
-        except SLTPParsingError as e:
-            print(e)
-            return 0
+                if not self.ch or self.ch not in ('+', '-'):
+                    raise SLTPParsingError(ERRORS['mfnumber_sci'])
+                n += next_digit(ERRORS['mfnumber_sci'])
+                n += self.digit()
         try:
             return int(n, 0)
         except ValueError:
-            pass
-        return mpmath.mpf(n)
+            return mpmath.mpf(n)
 
     # noinspection PyMissingOrEmptyDocstring
     def digit(self):

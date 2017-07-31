@@ -1,3 +1,3 @@
 # coding=utf-8
 
-from .sltp import SLTP
+from .sltp import SLTP, SLTPParsingError
