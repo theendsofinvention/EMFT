@@ -1,6 +1,7 @@
 # coding=utf-8
 
 import os
+
 from setuptools import setup
 
 
@@ -22,6 +23,7 @@ def read_local_files(*file_paths: str) -> str:
 
     return '\n' + '\n\n'.join(map(_read_single_file, file_paths))
 
+
 # noinspection SpellCheckingInspection
 install_requires = [
     'semantic_version',
@@ -35,7 +37,7 @@ install_requires = [
     'path.py',
     'pefile',
     'polycircles',
-    'PyQt5',
+    'pyqt5',
     'raven',
     'requests',
     'ruamel.yaml',
