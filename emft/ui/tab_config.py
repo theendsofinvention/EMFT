@@ -267,7 +267,6 @@ class TabChildConfig(MainUiTabChild, TabConfigAdapter):
 
     def _on_change_update_channel(self, *_):
         Config().update_channel = self.update_channel_combo.currentText()
-        self.remote_version.setText('')
 
     def _check_for_new_version(self):
         if hasattr(self, 'install_new_version_btn'):
