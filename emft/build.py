@@ -1,3 +1,4 @@
+# coding=utf-8
 import datetime
 import os
 import platform
@@ -10,8 +11,6 @@ from json import loads
 import certifi
 import click
 import semantic_version
-
-from setup import install_requires, dev_requires, test_requires
 
 
 def find_executable(executable: str, path=None):  # noqa: C901
@@ -40,11 +39,11 @@ def find_executable(executable: str, path=None):  # noqa: C901
     if executable in _known_executables:
         return _known_executables[executable]
 
-    click.secho(f'looking for executable: {executable}', fg='blue', nl=False)
+    click.secho(f'looking for executable: {executable}', fg='green', nl=False)
 
     executable_path = os.path.abspath(os.path.join(sys.exec_prefix, 'Scripts', executable))
     if os.path.exists(executable_path):
-        click.secho(f' -> {click.format_filename(executable_path)}', fg='blue')
+        click.secho(f' -> {click.format_filename(executable_path)}', fg='green')
         _known_executables[executable] = executable_path
         return executable_path
 
@@ -59,14 +58,14 @@ def find_executable(executable: str, path=None):  # noqa: C901
     for ext in ext_list:
         exec_name = executable + ext
         if os.path.isfile(exec_name):
-            click.secho(f' -> {click.format_filename(exec_name)}', fg='blue')
+            click.secho(f' -> {click.format_filename(exec_name)}', fg='green')
             _known_executables[executable] = exec_name
             return exec_name
         else:
             for p in paths:
                 f = os.path.join(p, exec_name)
                 if os.path.isfile(f):
-                    click.secho(f' -> {click.format_filename(f)}', fg='blue')
+                    click.secho(f' -> {click.format_filename(f)}', fg='green')
                     _known_executables[executable] = f
                     return f
     else:
@@ -74,14 +73,14 @@ def find_executable(executable: str, path=None):  # noqa: C901
         raise FileNotFoundError()
 
 
-def do_ex(cmd, cwd='.'):
-    def _popen_pipes(cmd_, cwd_):
-        def _always_strings(env_dict):
+def do_ex(ctx, cmd, cwd='.'):
+    def _popen_pipes(ctx, cmd_, cwd_):
+        def _always_strings(ctx, env_dict):
             """
             On Windows and Python 2, environment dictionaries must be strings
             and not unicode.
             """
-            if IS_WINDOWS:
+            if ctx.obj['is_windows']:
                 env_dict.update(
                     (key, str(value))
                     for (key, value) in env_dict.items()
@@ -93,16 +92,19 @@ def do_ex(cmd, cwd='.'):
             stdout=subprocess.PIPE,
             stderr=subprocess.PIPE,
             cwd=str(cwd_),
-            env=_always_strings(dict(
-                os.environ,
-                # try to disable i18n
-                LC_ALL='C',
-                LANGUAGE='',
-                HGPLAIN='1',
-            ))
+            env=_always_strings(
+                ctx,
+                dict(
+                    os.environ,
+                    # try to disable i18n
+                    LC_ALL='C',
+                    LANGUAGE='',
+                    HGPLAIN='1',
+                )
+            )
         )
 
-    def _ensure_stripped_str(str_or_bytes):
+    def _ensure_stripped_str(ctx, str_or_bytes):
         if isinstance(str_or_bytes, str):
             return '\n'.join(str_or_bytes.strip().splitlines())
         else:
@@ -110,19 +112,19 @@ def do_ex(cmd, cwd='.'):
 
     cmd.insert(0, find_executable(cmd.pop(0)))
     click.secho(f'{cmd}', nl=False, fg='magenta')
-    p = _popen_pipes(cmd, cwd)
+    p = _popen_pipes(ctx, cmd, cwd)
     out, err = p.communicate()
     click.secho(f' -> {p.returncode}', fg='magenta')
-    return _ensure_stripped_str(out), _ensure_stripped_str(err), p.returncode
+    return _ensure_stripped_str(ctx, out), _ensure_stripped_str(ctx, err), p.returncode
 
 
-def do(cmd, cwd='.'):
+def do(ctx, cmd, cwd='.'):
     if not isinstance(cmd, (list, tuple)):
         cmd = shlex.split(cmd)
 
     # click.secho(f'running: {cmd}', nl=False, fg='magenta')
 
-    out, err, ret = do_ex(cmd, cwd)
+    out, err, ret = do_ex(ctx, cmd, cwd)
     if out:
         click.secho(f'{out}', fg='cyan')
     if err:
@@ -158,7 +160,7 @@ def get_gitversion() -> dict:
     return loads(subprocess.getoutput([exe]).rstrip())
 
 
-def get_pep440_version() -> str:
+def get_pep440_version(version) -> str:
     convert_prereleases = (
         dict(
             prerelease='alpha',
@@ -178,7 +180,7 @@ def get_pep440_version() -> str:
         ),
     )
 
-    semver = semantic_version.Version.coerce(__version__.get('FullSemVer'))
+    semver = semantic_version.Version.coerce(version)
     version_str = f'{semver.major}.{semver.minor}.{semver.patch}'
     prerelease = semver.prerelease
 
@@ -214,42 +216,45 @@ def get_pep440_version() -> str:
 
 class Checks:
     @staticmethod
-    def pylint(**kwargs):
-        do(['pylint'])
+    def pylint(ctx):
+        do(ctx, ['pylint'])
 
     @staticmethod
-    def prospector():
-        do(['prospector'])
+    def prospector(ctx):
+        do(ctx, ['prospector'])
 
     @staticmethod
-    def pytest():
-        do(['pytest'])
+    def pytest(ctx):
+        do(ctx, ['pytest'])
 
     @staticmethod
-    def flake8():
-        do(['flake8'])
+    def flake8(ctx):
+        do(ctx, ['flake8'])
 
     @staticmethod
-    def safety():
-        do(['safety', 'check', '--bare'])
+    def safety(ctx):
+        do(ctx, ['safety', 'check', '--bare'])
 
 
 class HouseKeeping:
     SRC_FILE = 'temp'
 
     @classmethod
-    def _write_requirements(cls, packages_list, outfile, prefix_list=None):
+    def _write_requirements(cls, ctx, packages_list, outfile, prefix_list=None):
         with open(cls.SRC_FILE, 'w') as source_file:
             source_file.write('\n'.join(packages_list))
-        packages, _, ret = do_ex([
-            'pip-compile',
-            '--index',
-            '--upgrade',
-            '--annotate',
-            '--no-header',
-            '-n',
-            cls.SRC_FILE
-        ])
+        packages, _, ret = do_ex(
+            ctx,
+            [
+                'pip-compile',
+                '--index',
+                '--upgrade',
+                '--annotate',
+                '--no-header',
+                '-n',
+                cls.SRC_FILE
+            ]
+        )
         os.remove(cls.SRC_FILE)
         with open(outfile, 'w') as req_file:
             if prefix_list:
@@ -259,71 +264,79 @@ class HouseKeeping:
                 req_file.write(f'{package}\n')
 
     @classmethod
-    def write_prod(cls):
+    def write_prod(cls, ctx):
+        sys.path.insert(0, os.path.abspath('.'))
+        from setup import install_requires
         cls._write_requirements(
+            ctx,
             packages_list=install_requires,
             outfile='requirements.txt'
         )
+        sys.path.pop(0)
 
     @classmethod
-    def write_test(cls):
+    def write_test(cls, ctx):
+        from setup import test_requires
         cls._write_requirements(
+            ctx,
             packages_list=test_requires,
             outfile='requirements-test.txt',
             prefix_list=['-r requirements.txt']
         )
 
     @classmethod
-    def write_dev(cls):
+    def write_dev(cls, ctx):
+        from setup import dev_requires
         cls._write_requirements(
+            ctx,
             packages_list=dev_requires,
             outfile='requirements-dev.txt',
             prefix_list=['-r requirements.txt', '-r requirements-test.txt']
         )
 
     @classmethod
-    def write_requirements(cls):
-        cls.write_prod()
-        cls.write_test()
-        cls.write_dev()
+    def write_requirements(cls, ctx):
+        cls.write_prod(ctx)
+        cls.write_test(ctx)
+        cls.write_dev(ctx)
 
     @classmethod
-    def write_changelog(cls, commit: bool, push: bool = False):
-        changelog = do(['gitchangelog', '0.4.1..HEAD'])
+    def write_changelog(cls, ctx, commit: bool, push: bool = False):
+        changelog = do(ctx, ['gitchangelog', '0.4.1..HEAD'])
         with open('CHANGELOG.rst', mode='w') as f:
             f.write(re.sub('(\s*\r\n){2,}', '\r\n', changelog))
         if commit:
-            do_ex(['git', 'add', 'CHANGELOG.rst'])
-            _, _, ret = do_ex(['git', 'commit', '-m', 'chg: dev: updated changelog [skip ci]'])
+            do_ex(ctx, ['git', 'add', 'CHANGELOG.rst'])
+            _, _, ret = do_ex(ctx, ['git', 'commit', '-m', 'chg: dev: updated changelog [skip ci]'])
             if ret == 0 and push:
-                do_ex(['git', 'push'])
+                do_ex(ctx, ['git', 'push'])
 
     @classmethod
-    def compile_qt_resources(cls):
-        do([
+    def compile_qt_resources(cls, ctx):
+        do(ctx, [
             'pyrcc5',
             './emft/ui/qt_resource.qrc',
             '-o', './emft/ui/qt_resource.py',
         ])
 
     @classmethod
-    def write_version(cls):
+    def write_version(cls, ctx):
         with open('./emft/__version_frozen__.py', 'w') as version_file:
             version_file.write(
                 f"# coding=utf-8\n"
-                f"__version__ = '{__semver__}'\n"
-                f"__pep440__ = '{get_pep440_version()}'\n")
+                f'__version__ = \'{ctx.obj["semver"]}\'\n'
+                f'__pep440__ = \'{ctx.obj["pep440"]}\'\n')
 
 
 class Make:
     @classmethod
-    def install_pyinstaller(cls):
-        do(['pip', 'install',
-            'git+https://github.com/132nd-etcher/pyinstaller.git@develop#egg=pyinstaller==3.3.dev0+g2fcbe0f'])
+    def install_pyinstaller(cls, ctx):
+        do(ctx, ['pip', 'install',
+                 'git+https://github.com/132nd-etcher/pyinstaller.git@develop#egg=pyinstaller==3.3.dev0+g2fcbe0f'])
 
     @classmethod
-    def freeze(cls):
-        do([
+    def freeze(cls, ctx):
+        do(ctx, [
             sys.executable,
             '-m', 'PyInstaller',
             '--log-level=WARN',
@@ -338,7 +351,7 @@ class Make:
         ])
 
     @classmethod
-    def patch_exe(cls):
+    def patch_exe(cls, ctx):
         if not find_executable('verpatch'):
             click.secho(
                 '"verpatch.exe" not been found in your PATH.\n'
@@ -350,26 +363,26 @@ class Make:
             )
             raise FileNotFoundError()
         year = datetime.datetime.now().year
-        do([
+        do(ctx, [
             'verpatch',
             './dist/EMFT.exe',
             '/high',
-            __version__['FullSemVer'],
+            ctx.obj['semver'],
             '/va',
-            '/pv', __version__['FullSemVer'],
+            '/pv', ctx.obj['semver'],
             '/s', 'desc', 'EtchersMissionFilesTools',
             '/s', 'product', 'EMFT',
             '/s', 'title', 'EMFT',
             '/s', 'copyright', f'{year}-132nd-etcher',
             '/s', 'company', '132nd-etcher,132nd-Entropy,132nd-Neck',
-            '/s', 'SpecialBuild', f'{__version__["BranchName"]}@{__version__["Sha"]}',
-            '/s', 'PrivateBuild', f'{__version__["InformationalVersion"]}.{__version__["CommitDate"]}',
+            '/s', 'SpecialBuild', f'{ctx.obj["version"]["BranchName"]}@{ctx.obj["version"]["Sha"]}',
+            '/s', 'PrivateBuild', f'{ctx.obj["version"]["InformationalVersion"]}.{ctx.obj["version"]["CommitDate"]}',
             '/langid', '1033',
         ])
 
     @classmethod
-    def build_doc(cls):
-        do([
+    def build_doc(cls, ctx):
+        do(ctx, [
             'sphinx-build',
             '-b',
             'html',
@@ -382,21 +395,47 @@ class Make:
 @click.option('--install/--no-install', default=True)
 @click.pass_context
 def cli(ctx, install):
+    if not os.path.exists('.git') or not os.path.exists('emft'):
+        click.secho('emft-build is meant to be ran in EMFT Git repository.\n'
+                    'You can clone the repository by running:\n\n'
+                    '\tgit clone https://github.com/132nd-etcher/EMFT.git\n\n'
+                    'Then cd into it and try again.',
+                    fg='red', err=True)
+        exit(-1)
+    if not hasattr(ctx, 'obj') or ctx.obj is None:
+        ctx.obj = {}
+
+    ctx.obj['is_windows'] = platform.system() == 'Windows'
+    ctx.obj['version'] = get_gitversion()
+    ctx.obj['semver'] = ctx.obj['version'].get("FullSemVer")
+    ctx.obj['pep440'] = get_pep440_version(ctx.obj['semver'])
+
+    click.secho(f"SemVer: {ctx.obj['semver']}", fg='green')
+
+    if not all(
+        (
+            os.path.exists('requirements.txt'),
+            os.path.exists('requirements-dev.txt'),
+            os.path.exists('requirements-test.txt'),
+        )
+    ):
+        HouseKeeping.write_requirements(ctx)
+
     if install:
-        do(['pip', 'install', '-r', 'requirements-dev.txt'])
+        do(ctx, ['pip', 'install', '-r', 'requirements-dev.txt'])
     if ctx.invoked_subcommand is None:
-        Checks.safety()
-        Checks.flake8()
-        Checks.pytest()
+        Checks.safety(ctx)
+        Checks.flake8(ctx)
+        Checks.pytest(ctx)
         # Checks.pylint()  # TODO
         # Checks.prospector()  # TODO
-        HouseKeeping.compile_qt_resources()
-        HouseKeeping.write_changelog(commit=True)
-        HouseKeeping.write_requirements()
-        Make.install_pyinstaller()
-        Make.freeze()
-        Make.patch_exe()
-        Make.build_doc()
+        HouseKeeping.compile_qt_resources(ctx)
+        HouseKeeping.write_changelog(ctx, commit=True)
+        HouseKeeping.write_requirements(ctx)
+        Make.install_pyinstaller(ctx)
+        Make.freeze(ctx)
+        Make.patch_exe(ctx)
+        Make.build_doc(ctx)
 
 
 @cli.command()
@@ -406,66 +445,66 @@ def cli(ctx, install):
 @click.pass_context
 def reqs(ctx, prod, test, dev):
     if prod:
-        HouseKeeping.write_prod()
+        HouseKeeping.write_prod(ctx)
     if test:
-        HouseKeeping.write_test()
+        HouseKeeping.write_test(ctx)
     if dev:
-        HouseKeeping.write_dev()
+        HouseKeeping.write_dev(ctx)
 
 
 @cli.command()
 @click.pass_context
 def version(ctx):
-    HouseKeeping.write_version()
+    HouseKeeping.write_version(ctx)
 
 
 @cli.command()
 @click.option('--commit/--no-commit', default=True)
 @click.pass_context
 def chglog(ctx, commit):
-    HouseKeeping.write_changelog(commit)
+    HouseKeeping.write_changelog(ctx, commit)
 
 
 @cli.command()
 @click.pass_context
 def pyrcc(ctx):
-    HouseKeeping.compile_qt_resources()
+    HouseKeeping.compile_qt_resources(ctx)
 
 
 @cli.command()
 @click.pass_context
 def pytest(ctx):
-    Checks.pytest()
+    Checks.pytest(ctx)
 
 
 @cli.command()
 @click.pass_context
 def flake8(ctx):
-    Checks.flake8()
+    Checks.flake8(ctx)
 
 
 @cli.command()
 @click.pass_context
 def prospector(ctx):
-    Checks.prospector()
+    Checks.prospector(ctx)
 
 
 @cli.command()
 @click.pass_context
 def pylint(ctx):
-    Checks.pylint()
+    Checks.pylint(ctx)
 
 
 @cli.command()
 @click.pass_context
 def safety(ctx):
-    Checks.safety()
+    Checks.safety(ctx)
 
 
 @cli.command()
 @click.pass_context
 def doc(ctx):
-    Make.build_doc()
+    Make.build_doc(ctx)
 
 
 @cli.command()
@@ -473,22 +512,15 @@ def doc(ctx):
 @click.pass_context
 def freeze(ctx, install):
     if install:
-        Make.install_pyinstaller()
-    Make.freeze()
+        Make.install_pyinstaller(ctx)
+    Make.freeze(ctx)
 
 
 @cli.command()
 @click.pass_context
 def patch(ctx):
-    Make.patch_exe()
+    Make.patch_exe(ctx)
 
 
 if __name__ == '__main__':
-    IS_WINDOWS = platform.system() == 'Windows'
-
-    __version__ = get_gitversion()
-    __semver__ = __version__.get("FullSemVer")
-    __pep440__ = get_pep440_version()
-    click.secho(f'SemVer: {__semver__}', fg='blue')
-
     cli(obj={})
