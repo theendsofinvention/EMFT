@@ -16,6 +16,7 @@ Welcome to EMFT's documentation!
     build
     version
     format_test
+    modules
 
 .. include README.rst
 

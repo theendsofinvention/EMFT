@@ -538,6 +538,15 @@ def doc(ctx):
     Builds the documentation using Sphinx (http://www.sphinx-doc.org/en/stable)
     """
     do(ctx, [
+        'sphinx-apidoc',
+        'emft',
+        '-o', 'doc',
+        '-H', 'EMFT API',
+        '-A', '132nd-etcher',
+        '-V', f'{ctx.obj["semver"]}\n({ctx.obj["pep440"]})',
+        '-P', '-f',
+    ])
+    do(ctx, [
         'sphinx-build',
         '-b',
         'html',
