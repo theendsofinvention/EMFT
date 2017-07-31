@@ -105,7 +105,7 @@ class GHAnonymousSession(requests.Session, metaclass=Singleton):
 
         return self.__parse_resp()
 
-    def _get_json(self, **kwargs) -> requests.models.Response:
+    def _get_json(self, **kwargs) -> dict:
 
         req = self._get(**kwargs)
 
