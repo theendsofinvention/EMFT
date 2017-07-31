@@ -306,18 +306,6 @@ class TestGHAnonymousSession:
         repo = repos['unittests']
         assert isinstance(repo, GHRepo)
 
-    def test_latest_release(self):
-        try:
-            latest = GHAnonymousSession().get_latest_release('132nd-etcher', 'unittests')
-        except RateLimitationError:
-            return
-        assert isinstance(latest, GHRelease)
-        assert latest.author.login == '132nd-etcher'
-        assert not latest.prerelease
-        assert latest.name == 'Final-release 1'
-        assert latest.tag_name == '0.0.1.0'
-        assert 'README.rst' in latest.assets
-
     def test_new_gh_session(self, monkeypatch):
         try:
             monkeypatch.delenv('GH_TOKEN')
