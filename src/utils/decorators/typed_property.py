@@ -6,9 +6,9 @@ import typing
 
 class _TypedProperty:
     """
-    Actual descriptor object created during MetaProperty.__call___ below.
+    Actual descriptor object created during TypedProperty.__call___ below.
 
-    Accessing a _MetaProperty from the META class itself (SomeMeta._MetaProperty) gives access to the object itself,
+    Accessing a _MetaProperty from the META class itself (SomeMeta._TypedProperty) gives access to the object itself,
     with "default", "type", "__doc__", "key" and "func".
 
     """
