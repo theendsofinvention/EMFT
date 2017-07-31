@@ -7,11 +7,13 @@ import pytest
 import requests
 from httmock import response, urlmatch, with_httmock
 
-from emft.utils.custom_path import Path
+from emft.utils import Path, make_logger, Singleton
 from emft.utils.gh import GHAnonymousSession, GHSessionError, NotFoundError, RateLimitationError, GithubAPIError, \
     GHAllAssets, GHRelease, GHRepo, GHRepoList, GHUser, GHSession, GHAuthorization, GHApp, GHPermissions, GHMailList, \
     GHMail
-from emft.utils.singleton import Singleton
+
+
+LOGGER = make_logger(__name__)
 
 
 def test_build_req():
@@ -79,6 +81,7 @@ def mock_gh_api(url, request):
     assert isinstance(request, requests.models.PreparedRequest)
     fail = check_fail(url, request)
     if not fail == 'ok':
+        LOGGER.error(f'failing with {fail}')
         return fail
     if fail is None:
         return None
@@ -300,6 +303,11 @@ class TestGHAnonymousSession:
             repos = GHAnonymousSession().list_user_repos('easitest')
         except RateLimitationError:
             return
+        except GithubAPIError as exc:
+            if 'Github API seems to be down' in exc.msg:
+                pytest.xfail('Github API is down =/')
+                return
+            raise
         assert isinstance(repos, GHRepoList)
         assert 'unittests' in repos
         assert 'some_repo' not in repos
@@ -320,6 +328,11 @@ class TestGHAnonymousSession:
             usr = GHAnonymousSession().get_user('132nd-etcher')
         except RateLimitationError:
             return
+        except GithubAPIError as exc:
+            if 'Github API seems to be down' in exc.msg:
+                pytest.xfail('Github API is down =/')
+                return
+            raise
         assert isinstance(usr, GHUser)
         assert usr.id == 21277151
         assert usr.type == 'User'
