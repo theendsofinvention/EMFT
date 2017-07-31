@@ -93,11 +93,6 @@ class ManageRemoteVersions:
                 if not box_question(ui_parent, 'Local file already exists; do you want to overwrite?'):
                     return
 
-            Progress.start(
-                'Downloading {}'.format(latest.download_url.split('/').pop()),
-                label=latest.remote_file_name
-            )
-
             ManageRemoteVersions._POOL.queue_task(
                 downloader.download,
                 kwargs=dict(
