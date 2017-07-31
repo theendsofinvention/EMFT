@@ -179,7 +179,7 @@ class TestMizBasics:
         miz.unzip()
         miz._decode()
 
-    @pytest.mark.skipif(SKIP_LONG_TESTS, reason='skipping long tests')
+    @pytest.mark.long
     def test_large_decode(self, LARGE_FILE):
         miz = Miz(LARGE_FILE)
         miz.unzip()
@@ -195,7 +195,7 @@ class TestMizBasics:
             miz.mission.weather.cloud_density = 4
             assert not miz.mission.d == miz2.mission.d
 
-    @pytest.mark.skipif(SKIP_LONG_TESTS, reason='skipping long tests')
+    @pytest.mark.long
     def test_large_zip(self, LARGE_FILE):
         with Miz(LARGE_FILE, keep_temp_dir=True) as miz:
             out_file = miz.zip()
@@ -580,8 +580,8 @@ class TestMizValues:
                 for _ in miz.mission.blue_coa.get_units_from_category(invalid_category):
                     pass
         with Miz('./test/test_files/all_objects.miz') as miz:
-            for unit in miz.mission.blue_coa.units:
-                print(unit.group_category)
+            # for unit in miz.mission.blue_coa.units:
+            #     print(unit.group_category)
             for category in ('ship', 'plane', 'helicopter', 'vehicle'):
                 l = 0
                 for unit in miz.mission.blue_coa.get_units_from_category(category):
