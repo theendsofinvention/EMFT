@@ -4,11 +4,10 @@ from queue import Queue
 from PyQt5.QtCore import Qt
 from PyQt5.QtGui import QIcon, QKeySequence
 from PyQt5.QtWidgets import QMainWindow
-from src.utils import make_logger, nice_exit
+from src.utils import make_logger
 
 # noinspection PyProtectedMember
 from src import global_
-from src.cfg import Config
 from src.ui.base import TabWidget
 from src.ui.main_ui_tab_widget import MainUiTabChild
 from .base import Shortcut, VLayout, Widget
@@ -74,13 +73,13 @@ class MainUi(QMainWindow, MainUiMixins):
     def exit(code=0):
         if global_.QT_APP:
             global_.QT_APP.exit(code)
-        nice_exit(code)
 
     def closeEvent(self, event):  # noqa: N802
         self.exit()
 
 
-def start_ui(test=False):
+def start_ui():
+
     from PyQt5.QtWidgets import QApplication
     import sys
     LOGGER.info('starting application')
@@ -144,4 +143,3 @@ def start_ui(test=False):
     updater.look_for_new_version(auto_update=True)
 
     LOGGER.info('starting GUI')
-    sys.exit(global_.QT_APP.exec())
