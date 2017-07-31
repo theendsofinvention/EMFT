@@ -3,8 +3,6 @@
 import os
 import webbrowser
 
-from src.utils import Path, Version, AVRelease, make_logger
-
 from src import global_
 from src.__version__ import __version__
 from src.cfg import Config
@@ -14,15 +12,25 @@ from src.ui.base import VLayout, PushButton, GroupBox, LineEdit, Label, VSpacer,
 from src.ui.main_ui_tab_widget import MainUiTabChild
 from src.ui.main_ui_interface import I
 from src.updater import updater
+from src.utils import Path, make_logger
+from src.utils.updater import CustomVersion, Updater, Channel
 from .tab_config_adapter import TAB_NAME, TabConfigAdapter
 
 LOGGER = make_logger(__name__)
 
+LABEL_TO_CHANNEL = dict(
+    stable=Channel.stable,
+    patches=Channel.patch,
+    rc=Channel.exp,
+    beta=Channel.beta,
+    alpha=Channel.alpha,
+)
+
 
 class TabChildConfig(MainUiTabChild, TabConfigAdapter):
-
     def tab_clicked(self):
-        self._check_for_new_version()
+        # if updater.is_ready:
+        #     self._check_for_new_version()
         self._sg_scan()
 
     @property
@@ -32,9 +40,12 @@ class TabChildConfig(MainUiTabChild, TabConfigAdapter):
     def __init__(self, parent=None):
         MainUiTabChild.__init__(self, parent=parent)
         self.sg = LineEdit(Config().saved_games_path or '', self._on_change_sg, read_only=True)
-        self.update_channel_combo = Combo(self._on_change_update_channel, ['stable', 'rc', 'dev'])
+        self.update_channel_combo = Combo(
+            self._on_change_update_channel,
+            ['stable', 'patches', 'rc', 'beta', 'alpha']
+        )
 
-        self.latest_release = None
+        self.latest_version = None
 
         self.remote_version = Label('')
         self.update_channel_combo.set_index_from_text(Config().update_channel)
@@ -48,53 +59,70 @@ class TabChildConfig(MainUiTabChild, TabConfigAdapter):
                 [
                     Label('During the initial testing phase of this application, auto-update cannot be turned off.\n'
                           'You can, however, elect to participate in early testing, or stick to the most stable'
-                          ' versions only.'),
+                          ' versions only.\n\n'
+                          'If you want, you can use this tab to "force" the installation of an older version.'),
                     20,
                     GridLayout(
                         [
                             [
                                 Label('Active update channel'),
                                 self.update_channel_combo,
-                                self.update_scan_btn,
+                            ],
+                            [
                                 HSpacer(),
+                                self.update_scan_btn,
+                            ],
+                            [
+                                HSpacer(),
+                                GridLayout(
+                                    [
+                                        [
+                                            HSpacer(),
+                                            (Label('stable:'), {'align': 'r'}),
+                                            Label('tested releases and patches'),
+                                        ],
+                                        [
+                                            HSpacer(),
+                                            (Label('patches:'), {'align': 'r'}),
+                                            Label('testing version of upcoming hotfixes'),
+                                        ],
+                                        [
+                                            HSpacer(),
+                                            (Label('rc:'), {'align': 'r'}),
+                                            Label('releases candidates (tagged "exp")'),
+                                        ],
+                                        [
+                                            HSpacer(),
+                                            (Label('beta:'), {'align': 'r'}),
+                                            Label('development branch'),
+                                        ],
+                                        [
+                                            HSpacer(),
+                                            (Label('alpha:'), {'align': 'r'}),
+                                            Label('unstable versions'),
+                                        ],
+                                    ],
+                                ),
+                            ],
+                            [
                                 Label('Current version'),
                                 Label(__version__),
-                                self.show_changelog_btn,
-                                HSpacer(),
                             ],
                             [
-                                HSpacer(),
-                                (Label('stable:'), {'align': 'r'}),
-                                Label('tested releases'),
-                                HSpacer(),
                                 Label('Remote version'),
                                 self.remote_version,
+                            ],
+                            [
+                                HSpacer(),
                                 self.install_new_version_btn,
-                                HSpacer(),
                             ],
                             [
                                 HSpacer(),
-                                (Label('rc:'), {'align': 'r'}),
-                                Label('releases candidates'),
-                                HSpacer(),
-                                HSpacer(),
-                                HSpacer(),
-                                HSpacer(),
-                                HSpacer(),
-                            ],
-                            [
-                                HSpacer(),
-                                (Label('dev:'), {'align': 'r'}),
-                                Label('experimental versions'),
-                                HSpacer(),
-                                HSpacer(),
-                                HSpacer(),
-                                HSpacer(),
-                                HSpacer(),
+                                self.show_changelog_btn,
                             ],
                         ],
                         [0, 0, 0, 25, 0, 0, 0, 50]
-                    )
+                    ),
                 ]
             )
         )
@@ -175,7 +203,10 @@ class TabChildConfig(MainUiTabChild, TabConfigAdapter):
             )
         )
 
-        self.install_new_version_btn.setVisible(False)
+        self.install_new_version_btn.setEnabled(False)
+        Updater.latest_version.add_watcher(self._display_new_version)
+        Updater.is_ready.add_watcher(self._updater_ready_to_check)
+        self.update_scan_btn.setEnabled(updater.is_ready)
 
     def _custom_dcs_install_set(self):
         LOGGER.debug('setting custom DCS install')
@@ -198,6 +229,24 @@ class TabChildConfig(MainUiTabChild, TabConfigAdapter):
     def _show_changelog():
         webbrowser.open_new_tab(global_.LINK_CHANGELOG)
 
+    def _updater_ready_to_check(self, value: bool):
+        self.update_scan_btn.setEnabled(value)
+
+    def _display_new_version(self, latest_version: CustomVersion):
+        """
+        Shows the latest version found by the updater
+        """
+        if latest_version:
+            app_version = CustomVersion(global_.APP_VERSION)
+            self.latest_version = latest_version
+            self.remote_version.setText(latest_version.to_short_string())
+            if app_version < self.latest_version:
+                self.remote_version.set_text_color('green')
+            if app_version != self.latest_version:
+                self.install_new_version_btn.setEnabled(True)
+        else:
+            self.remote_version.setText('no new version found')
+
     def config_tab_update_dcs_installs(self):
         self.remote_version.set_text_color('black')
         for x in ['stable', 'beta', 'alpha', 'custom']:
@@ -213,39 +262,29 @@ class TabChildConfig(MainUiTabChild, TabConfigAdapter):
         self.update_channel_combo.set_index_from_text(Config().update_channel)
         self.custom_dcs_install_install_remove.setEnabled(bool(Config().dcs_custom_install_path))
 
-    def config_tab_update_latest_release(self, latest_release: AVRelease):
-        if latest_release:
-            app_version = Version(global_.APP_VERSION)
-            self.latest_release = latest_release
-            self.remote_version.setText(latest_release.version.version_str)
-            if app_version < self.latest_release.version:
-                self.remote_version.set_text_color('green')
-            if app_version != self.latest_release.version:
-                self.install_new_version_btn.setVisible(True)
-
     def _on_change_sg(self, *_):
         Config().saved_games_path = str(Path(self.sg.text()).abspath())
 
     def _on_change_update_channel(self, *_):
         Config().update_channel = self.update_channel_combo.currentText()
         self.remote_version.setText('')
-        self._check_for_new_version()
 
     def _check_for_new_version(self):
         if hasattr(self, 'install_new_version_btn'):
-            self.install_new_version_btn.setVisible(False)
+            self.install_new_version_btn.setEnabled(False)
         self.remote_version.set_text_color('black')
-        self.remote_version.setText('Probing ...')
-        updater.get_latest_release(
-            channel=Config().update_channel,
-            branch=Version(global_.APP_VERSION),
-            success_callback=I.config_tab_update_latest_release,
-        )
+        updater.find_latest_version_on_channel(LABEL_TO_CHANNEL[self.update_channel_combo.currentText()])
 
     def _install_latest_version(self):
-        if self.latest_release:
-            logger.debug('installing release: {}'.format(self.latest_release.version))
-            updater.download_and_install_release(self.latest_release, 'emft.exe')
+        if updater.latest_version:
+            LOGGER.debug('installing release: {}'.format(self.latest_version))
+            if updater.latest_version < CustomVersion(__version__):
+                I.confirm(
+                    text='You are update to install an older version of EMFT.\n\nAre you sure?',
+                    follow_up_on_yes=updater.install_latest_version
+                )
+            else:
+                updater.install_latest_version()
         else:
             LOGGER.error('no release to install')
             # self.updater.install_latest_remote()

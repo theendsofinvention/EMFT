@@ -52,7 +52,7 @@ class ConfigValues(ReorderConfigValues):
     # noinspection PyPep8Naming
     @MetaPropertyWithDefault('stable', str)
     def update_channel(self, value: str):
-        if value not in ['stable', 'rc', 'dev', 'beta', 'alpha']:
+        if value not in ['stable', 'patches', 'rc', 'beta', 'alpha']:
             raise ValueError('unknown update channel: {}'.format(value))
         return value
 

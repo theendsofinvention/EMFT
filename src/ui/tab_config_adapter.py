@@ -12,8 +12,3 @@ class TabConfigAdapter:
     @abc.abstractmethod
     def config_tab_update_dcs_installs(self, *args, **kwargs):
         """"""
-
-    @MainUiTabMethod(TAB_NAME)
-    @abc.abstractmethod
-    def config_tab_update_latest_release(self, *args, **kwargs):
-        """"""

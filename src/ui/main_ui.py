@@ -140,29 +140,8 @@ def start_ui(test=False):
 
     LOGGER.info('loading module: updater')
     from src.updater import updater
-    updater.find_and_install_latest_release(
-        current_version=global_.APP_VERSION,
-        executable_path='emft.exe',
-        channel=Config().update_channel,
-        cancel_update_hook=cancel_update_hook,
-        pre_update_hook=pre_update_hook,
-    )
 
-    if test:
-        logger.critical('RUNNING IN TEST MODE')
-        import time
-        import src.sentry.sentry
-        from src.utils import ThreadPool, nice_exit
-        src.sentry.sentry.CRASH = True
-
-        def test_hook():
-            logger.critical('TEST MODE: waiting 10 seconds')
-            time.sleep(10)
-            logger.critical('TEST MODE: end of timer')
-            nice_exit()
-
-        pool = ThreadPool(1, 'test', _daemon=True)
-        pool.queue_task(test_hook)
+    updater.look_for_new_version(auto_update=True)
 
     LOGGER.info('starting GUI')
     sys.exit(global_.QT_APP.exec())
