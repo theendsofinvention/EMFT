@@ -57,6 +57,6 @@ try:
             with OpenKey(a_reg, r"SOFTWARE\Microsoft\Cryptography", access=KEY_READ | KEY_WOW64_64KEY) as aKey:
                 MACHINE_GUID = QueryValueEx(aKey, "MachineGuid")[0]
         except FileNotFoundError:
-            MACHINE_UID = False
+            MACHINE_GUID = ''
 except ImportError:
-    MACHINE_UID = False
+    MACHINE_GUID = ''
