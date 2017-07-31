@@ -27,8 +27,8 @@ class AVSession(requests.Session):
 
     def build_req(self, *args):
 
-        # if not args:
-        #     raise ValueError('request is empty')
+        if not args:
+            raise ValueError('request is empty')
 
         for x in args:
             if not isinstance(x, str):
@@ -98,7 +98,7 @@ class AVSession(requests.Session):
         :return: AVHistory object
         """
 
-        self.build_req('projects', av_user_name, av_project_name, 'history', '?recordsNumber={}'.format(build_count))
+        self.build_req('projects', av_user_name, av_project_name, 'history?recordsNumber={}'.format(build_count))
 
         return AVHistory(self._get_json())
 

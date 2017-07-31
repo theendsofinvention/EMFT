@@ -7,4 +7,3 @@ from .av_job import AVAllJobs, AVJob
 from .av_last_build import AVLastBuild
 from .av_nu_get_feed import AVNuGetFeed
 from .av_project import AVProject
-from .av_version import AVVersion

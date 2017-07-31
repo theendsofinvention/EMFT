@@ -1,10 +1,10 @@
 # coding=utf-8
 
 import typing
+from requests.utils import quote as quote_url
 
 from src.utils.custom_session import JSONObject, json_property
 from .av_job import AVAllJobs
-from .av_version import AVVersion
 
 
 # flake8: noqa
@@ -22,9 +22,13 @@ class AVBuild(JSONObject):
     def buildNumber(self):
         """"""
 
-    @property
+    @json_property
     def version(self):
-        return AVVersion(self.json['version'])
+        """"""
+
+    @property
+    def url_safe_version(self):
+        return quote_url(self.version, safe='')
 
     @json_property
     def message(self):
@@ -92,7 +96,7 @@ class AVAllBuilds(JSONObject):
         for x in self.json:
             yield AVBuild(x)
 
-    def successful_only(self) -> typing.Generator[AVBuild, None, None]:
+    def successful_only(self) -> typing.Iterator[AVBuild]:
         for x in self:
             if x.status == 'success':
                 yield x

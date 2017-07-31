@@ -41,7 +41,7 @@ class ManageRemoteVersions:
         RemoteVersion.LATEST_REMOTE_VERSION = None
         build = ManageRemoteVersions._get_build(branch)
         if build:
-            LOGGER.debug(f'latest build found on Appveyor: {build.build.version.raw_version_str}')
+            LOGGER.debug(f'latest build found on Appveyor: {build.build.version}')
             jobs = build.build.jobs.successful_only()
             if not jobs:
                 raise RuntimeError('something')
@@ -51,7 +51,7 @@ class ManageRemoteVersions:
                 raise RuntimeError('another something')
             artifact = artifacts[0]
             RemoteVersion.LATEST_REMOTE_VERSION = AVProbeResult(
-                version=build.build.version.raw_version_str,
+                version=build.build.version,
                 branch=build.build.branch,
                 download_url=f'https://ci.appveyor.com/api/buildjobs/{job.jobId}/artifacts/{artifact.fileName}',
                 remote_file_size=artifact.size,
