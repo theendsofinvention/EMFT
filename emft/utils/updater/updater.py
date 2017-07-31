@@ -98,7 +98,7 @@ class Updater(Machine):
 
         self._auto_update = False
         self._current_version = CustomVersion(current_version)
-        self._spec = CustomSpec(f'>{str(self._current_version.to_spec())}')
+        self._spec = CustomSpec(f'>={str(self._current_version.to_spec())}')
         self._local_executable = local_executable
         self._hexdigest = None
         self._av_builds = dict()
@@ -157,7 +157,15 @@ class Updater(Machine):
         return result
 
     def _should_auto_update(self, event: EventData) -> bool:
-        result = bool(self._has_new_version(event) and self._auto_update)
+        result = True
+        if not self._auto_update:
+            result = False
+        if not self._has_new_version(event):
+            LOGGER.debug('skipping auto-update: no new version')
+            result = False
+        elif not self.latest_version > self.current_version:
+            LOGGER.debug('skipping auto-update: no newer version found')
+            result = False
         LOGGER.debug(f'from {event.event.name}: {result}')
         return result
 
