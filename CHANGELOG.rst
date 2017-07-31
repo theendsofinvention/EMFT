@@ -3,36 +3,14 @@
 
 Changes
 ~~~~~~~
-- Removed discovery of DCS installation at startup. [132nd-etcher]
-
-  Looking for DCS installations was a huge time sink due to pefile looking up the version in the executable.
-  This will later go to a separate thread.
+- Dve: reqs: update reqs. [132nd-etcher]
 
 Fix
 ~~~
-- Fixed log tab not filtering new log records. [132nd-etcher]
-
-  Closes #93
-  [Finishes #149335845]
-- Fixed bug in log tab when changing log level. [132nd-etcher]
-
-  [Delivers #149058247]
+- Fix bug in log tab: new records are now filtered. [132nd-etcher]
 
 Other
 ~~~~~
-- Just keep rolling. [132nd-etcher]
-- All the build. [132nd-etcher]
-- Fuck it. [132nd-etcher]
-- Gotta test on AV now. [132nd-etcher]
-- Gotta test on AV now. [132nd-etcher]
-- Gotta test on AV now. [132nd-etcher]
-- Gotta test on AV now. [132nd-etcher]
-- Gotta test on AV now. [132nd-etcher]
-- Gotta test on AV now. [132nd-etcher]
-- Gotta test on AV now. [132nd-etcher]
-- Flake 8 fixes. [132nd-etcher]
-- Sanity commit. [132nd-etcher]
-- Switch README to rst format. [132nd-etcher]
 - Use pefile instead of win32api to infer executable file version (#82)
   [132nd-etcher]
 
