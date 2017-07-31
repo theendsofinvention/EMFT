@@ -547,7 +547,8 @@ def doc(ctx):
         '-H', 'EMFT API',
         '-A', '132nd-etcher',
         '-V', f'{ctx.obj["semver"]}\n({ctx.obj["pep440"]})',
-        '-P', '-f',
+        # '-P',
+        '-f',
     ])
     do(ctx, [
         'sphinx-build',
