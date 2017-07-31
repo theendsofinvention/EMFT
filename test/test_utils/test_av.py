@@ -52,7 +52,7 @@ def get_file_path(url):
     if '/user/' in url.path:
         file_path = url.netloc + url.path.replace('/user/', '/user/{}/'.format(current_user)) + '.json'
     else:
-        file_path = url.netloc + url.path + '.json'
+        file_path = url.netloc + url.path.replace('%2B', '+') + '.json'
     if not os.path.exists(file_path):
         file_path = 'test/test_utils/{}'.format(file_path)
     if not os.path.exists(file_path):

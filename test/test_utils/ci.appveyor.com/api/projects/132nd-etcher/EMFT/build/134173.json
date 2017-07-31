@@ -1,0 +1,67 @@
+{
+  "project": {
+    "projectId": 38907,
+    "accountId": 2,
+    "accountName": "appvyr",
+    "builds": [
+    ],
+    "name": "nuget-test",
+    "slug": "nuget-test",
+    "repositoryType": "gitHub",
+    "repositoryScm": "git",
+    "repositoryName": "FeodorFitsner/nuget-test",
+    "repositoryBranch": "master",
+    "isPrivate": false,
+    "skipBranchesWithoutAppveyorYml": false,
+    "nuGetFeed": {
+      "id": "nuget-test-23spw2w",
+      "name": "Project nuget-test",
+      "publishingEnabled": false,
+      "created": "2014-07-19T10:23:05.5160273+00:00"
+    },
+    "securityDescriptor": {
+    },
+    "created": "2014-07-19T10:23:03.8005134+00:00",
+    "updated": "2014-08-01T05:25:15.4119745+00:00"
+  },
+  "build": {
+    "buildId": 134173,
+    "jobs": [
+      {
+        "jobId": "9r2qufuu8",
+        "name": "",
+        "allowFailure": false,
+        "messagesCount": 0,
+        "compilationMessagesCount": 0,
+        "compilationErrorsCount": 0,
+        "compilationWarningsCount": 0,
+        "testsCount": 0,
+        "passedTestsCount": 0,
+        "failedTestsCount": 0,
+        "artifactsCount": 0,
+        "status": "success",
+        "started": "2014-08-14T05:41:49.1061831+00:00",
+        "finished": "2014-08-14T05:42:45.1102797+00:00",
+        "created": "2014-08-14T05:39:27.3902557+00:00",
+        "updated": "2014-08-14T05:42:45.477213+00:00"
+      }
+    ],
+    "buildNumber": 45,
+    "version": "1.0.45",
+    "message": "AssemblyInfo patching",
+    "branch": "master",
+    "commitId": "85da1fb810ae89744abad83e75c13483dd740258",
+    "authorName": "Feodor Fitsner",
+    "authorUsername": "FeodorFitsner",
+    "committerName": "Feodor Fitsner",
+    "committerUsername": "FeodorFitsner",
+    "committed": "2014-07-03T07:56:15+00:00",
+    "messages": [
+    ],
+    "status": "success",
+    "started": "2014-08-14T05:41:49.1686804+00:00",
+    "finished": "2014-08-14T05:42:45.5709599+00:00",
+    "created": "2014-08-14T05:39:26.2946368+00:00",
+    "updated": "2014-08-14T05:42:45.5709599+00:00"
+  }
+}
