@@ -1,5 +1,7 @@
 # coding=utf-8
 import os
+import sys
+import traceback
 import warnings
 
 import pytest
@@ -16,6 +18,25 @@ warnings.filterwarnings('error', category=FutureWarning, append=True)
 warnings.filterwarnings('error', category=PendingDeprecationWarning, append=True)
 warnings.filterwarnings('always', category=ImportWarning, append=True)
 warnings.filterwarnings('error', category=UnicodeWarning, append=True)
+
+
+def pytest_configure(config):
+    sys._called_from_test = True
+
+
+def pytest_unconfigure(config):
+    # noinspection PyUnresolvedReferences
+    del sys._called_from_test
+
+
+@pytest.fixture(autouse=True)
+def catch_exceptions_in_threads():
+    yield
+    from src.utils.threadpool import test_exc
+    if test_exc:
+        print(f'TRACEBACK:\n{"".join([x for x in traceback.format_tb(test_exc[2])])}')
+        raise test_exc[0](test_exc[1])
+
 
 @pytest.fixture(autouse=True)
 def cleandir(request, tmpdir):

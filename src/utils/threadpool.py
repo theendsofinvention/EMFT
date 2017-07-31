@@ -19,6 +19,7 @@ from src.utils.custom_logging import make_logger
 LOGGER = make_logger(__name__)
 
 SENTRY = None
+test_exc = None
 
 
 def register_sentry(sentry_client_instance):
@@ -236,6 +237,11 @@ class ThreadPoolThread(threading.Thread):
             _thread.interrupt_main()
         except:
             import sys
+
+            if hasattr(sys, '_called_from_test'):
+                global test_exc
+                test_exc = sys.exc_info()
+
             LOGGER.error(
                 'caught error in worker thread:'
                 '\ncmd: {} args: {} kwargs: {}'
