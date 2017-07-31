@@ -1,273 +1,494 @@
-# coding=utf-8
-"""
-Runs a process in an external thread and logs the output to a standard Python logger
-"""
+import datetime
 import os
+import platform
 import re
+import shlex
 import subprocess
 import sys
-import threading
 from json import loads
 
 import certifi
 import click
+import semantic_version
 
-from src import global_
-from src.utils.custom_logging import DEBUG, make_logger
-from src.utils.custom_path import Path
-
-logger = make_logger(__name__)
-logger.setLevel(DEBUG)
-
-requirements = []
+from setup import install_requires, dev_requires, test_requires
 
 
-# noinspection PyPep8Naming
-class __LogPipe(threading.Thread):
-    def __init__(self, logger_, level):
-        threading.Thread.__init__(self)
-        self.daemon = True
-        self.level = level
-        self.logger = logger_
-        self.fdRead, self.fdWrite = os.pipe()
-        self.pipeReader = os.fdopen(self.fdRead)
-        self.start()
-
-    def fileno(self):
-        return self.fdWrite
-
-    def run(self):
-        for line in iter(self.pipeReader.readline, ''):
-            self.logger.error(line.strip('\n'))
-
-        self.pipeReader.close()
-
-    def close(self):
-        os.close(self.fdWrite)
-
-
-def run_piped_process(args, logger_, level=DEBUG, cwd=None, env=None, exe=None):
+def find_executable(executable: str, path=None):  # noqa: C901
+    # noinspection SpellCheckingInspection
     """
-    Runs a standard process and pipes its output to a Python logger
-    :param exe: executable
-    :param env: working dir
-    :param args: process and arguments ias a list
-    :param logger_: logger to send data to
-    :param level: logging level, defaults to DEBUG
-    :param cwd: working dir to spawn the process in (defaults to current)
+    https://gist.github.com/4368898
+
+    Public domain code by anatoly techtonik <techtonik@gmail.com>
+
+    AKA Linux `which` and Windows `where`
+
+    Find if ´executable´ can be run. Looks for it in 'path'
+    (string that lists directories separated by 'os.pathsep';
+    defaults to os.environ['PATH']). Checks for all executable
+    extensions. Returns full path or None if no command is found.
     """
-    log_pipe = __LogPipe(logger_, level)
 
-    logger_.info('running: {} {} (in {})'.format(exe, ' '.join(args), cwd))
-    with subprocess.Popen(args, stdout=log_pipe, stderr=log_pipe, cwd=cwd, env=env, executable=exe) as p:
-        p.communicate()
-        if p.returncode != 0:
-            logger_.error('return code: {}'.format(p.returncode))
-            raise RuntimeError('command failed: {}'.format(args))
-        log_pipe.close()
+    if '_known_executables' in globals():
+        global _known_executables
+    else:
+        _known_executables = {}
 
+    if not executable.endswith('.exe'):
+        executable = f'{executable}.exe'
 
-def patch_exe(path_to_exe: str or Path,
-              version: str,
-              app_name: str,
-              wkdir: str or Path,
-              build_: str):
-    path_to_exe = Path(path_to_exe)
-    wkdir = Path(wkdir)
+    if executable in _known_executables:
+        return _known_executables[executable]
 
-    logger.info('patch exe: start')
-    app_name = app_name
+    click.secho(f'looking for executable: {executable}', fg='blue', nl=False)
 
-    if not path_to_exe.exists():
-        raise FileNotFoundError(path_to_exe)
-    if not wkdir.exists():
-        raise FileNotFoundError(wkdir)
+    executable_path = os.path.abspath(os.path.join(sys.exec_prefix, 'Scripts', executable))
+    if os.path.exists(executable_path):
+        click.secho(f' -> {click.format_filename(executable_path)}', fg='blue')
+        _known_executables[executable] = executable_path
+        return executable_path
 
-    logger.debug('short name: {}'.format(app_name))
-    logger.debug('version: {}'.format(version))
-    logger.debug('patching: {}'.format(path_to_exe.abspath()))
-
-    cmd = [
-        'verpatch',
-        path_to_exe,
-        '/high',
-        version,
-        '/va',
-        '/pv', version,
-        '/s', 'product', app_name,
-        '/s', 'copyright', '2017 etcher',
-        '/s', 'company', 'etcher',
-        '/s', 'build', str(build_),
-        '/s', 'PrivateBuild', str(build_),
-        '/langid', '1033',
-    ]
-    run_piped_process(cmd, logger_=logger, cwd=wkdir)
+    if path is None:
+        path = os.environ['PATH']
+    paths = path.split(os.pathsep)
+    ext_list = ['']
+    path_ext = os.environ['PATHEXT'].lower().split(os.pathsep)
+    (base, ext) = os.path.splitext(executable)
+    if ext.lower() not in path_ext:
+        ext_list = path_ext
+    for ext in ext_list:
+        exec_name = executable + ext
+        if os.path.isfile(exec_name):
+            click.secho(f' -> {click.format_filename(exec_name)}', fg='blue')
+            _known_executables[executable] = exec_name
+            return exec_name
+        else:
+            for p in paths:
+                f = os.path.join(p, exec_name)
+                if os.path.isfile(f):
+                    click.secho(f' -> {click.format_filename(f)}', fg='blue')
+                    _known_executables[executable] = f
+                    return f
+    else:
+        click.secho(f' -> not found', fg='red', err=True)
+        raise FileNotFoundError()
 
 
-def _compile_qt_resources(env):
-    logger.info('building UI resource files')
-    run_piped_process(
-        args=[
-            os.path.join(env, r'scripts\pyrcc5.exe'),
+def do_ex(cmd, cwd='.'):
+    def _popen_pipes(cmd_, cwd_):
+        def _always_strings(env_dict):
+            """
+            On Windows and Python 2, environment dictionaries must be strings
+            and not unicode.
+            """
+            if IS_WINDOWS:
+                env_dict.update(
+                    (key, str(value))
+                    for (key, value) in env_dict.items()
+                )
+            return env_dict
+
+        return subprocess.Popen(
+            cmd_,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+            cwd=str(cwd_),
+            env=_always_strings(dict(
+                os.environ,
+                # try to disable i18n
+                LC_ALL='C',
+                LANGUAGE='',
+                HGPLAIN='1',
+            ))
+        )
+
+    def _ensure_stripped_str(str_or_bytes):
+        if isinstance(str_or_bytes, str):
+            return '\n'.join(str_or_bytes.strip().splitlines())
+        else:
+            return '\n'.join(str_or_bytes.decode('utf-8', 'surogate_escape').strip().splitlines())
+
+    cmd.insert(0, find_executable(cmd.pop(0)))
+    click.secho(f'{cmd}', nl=False, fg='magenta')
+    p = _popen_pipes(cmd, cwd)
+    out, err = p.communicate()
+    click.secho(f' -> {p.returncode}', fg='magenta')
+    return _ensure_stripped_str(out), _ensure_stripped_str(err), p.returncode
+
+
+def do(cmd, cwd='.'):
+    if not isinstance(cmd, (list, tuple)):
+        cmd = shlex.split(cmd)
+
+    # click.secho(f'running: {cmd}', nl=False, fg='magenta')
+
+    out, err, ret = do_ex(cmd, cwd)
+    if out:
+        click.secho(f'{out}', fg='cyan')
+    if err:
+        click.secho(f'{err}', fg='red')
+    if ret:
+        exit(ret)
+    return out
+
+
+def get_gitversion() -> dict:
+    try:
+        if os.environ.get('APPVEYOR'):
+            exe = find_executable('gitversion', r'C:\ProgramData\chocolatey\bin')
+        else:
+            exe = find_executable('gitversion')
+    except FileNotFoundError:
+        click.secho(
+            '"gitversion.exe" not been found in your PATH.\n'
+            'GitVersion is used to infer the current version from the Git repository.\n'
+            'setuptools_scm plans on switching to using the Semver scheme in the future; when that happens, '
+            'I\'ll remove the dependency to GitVersion.\n'
+            'In the meantime, GitVersion can be obtained via Chocolatey (recommended): '
+            'https://chocolatey.org/packages/GitVersion.Portable\n'
+            'If you already have chocolatey installed, you can simply run the following command (as admin):\n\n'
+            '\t\t"choco install gitversion.portable -pre -y"\n\n'
+            'If you\'re not comfortable using the command line, there is a GUI tool for Chocolatey available at:\n\n'
+            '\t\thttps://github.com/chocolatey/ChocolateyGUI/releases\n\n'
+            'Or you can install directly from :\n\n'
+            '\t\thttps://github.com/GitTools/GitVersion/releases',
+            err=True,
+        )
+        raise SystemExit()
+    return loads(subprocess.getoutput([exe]).rstrip())
+
+
+def get_pep440_version() -> str:
+    convert_prereleases = (
+        dict(
+            prerelease='alpha',
+            converts_to='a',
+        ),
+        dict(
+            prerelease='beta',
+            converts_to='b',
+        ),
+        dict(
+            prerelease='exp',
+            converts_to='rc',
+        ),
+        dict(
+            prerelease='patch',
+            converts_to='post',
+        ),
+    )
+
+    semver = semantic_version.Version.coerce(__version__.get('FullSemVer'))
+    version_str = f'{semver.major}.{semver.minor}.{semver.patch}'
+    prerelease = semver.prerelease
+
+    # Pre-release
+    if prerelease:
+        assert isinstance(prerelease, tuple)
+
+        # Convert the pre-release tag to a valid PEP440 tag and strip it
+        for convert_scheme in convert_prereleases:
+            if prerelease[0] in convert_scheme['prerelease']:
+                version_str += convert_scheme['converts_to']
+                prerelease = prerelease[1:]
+                break
+        else:
+            raise ValueError(f'unknown pre-release tag: {version_str.prerelease[0]}')
+
+        # If there is a distance to the last tag, add a ".dev[distance]" suffix
+        if re.match(r'[\d]+', prerelease[-1]):
+            version_str += f'{prerelease[-1]}'
+            # prerelease = prerelease[:-1]
+
+    # Regular release
+    else:
+        version_str = f'{version_str.major}.{version_str.minor}.{version_str.patch}'
+
+    # Add SemVer, Sha and last commit date to the build tag
+    # local_version = re.sub(r'[^a-zA-Z0-9\.]', '.', __version__.get('FullSemVer'))
+    # commit_date = re.sub(r'-0', '.', __version__.get('CommitDate'))
+    # version += f'+{local_version}.{__version__.get("Sha")}.{commit_date}'.replace('-', '.')
+
+    return version_str
+
+
+class Checks:
+    @staticmethod
+    def pylint(**kwargs):
+        do(['pylint'])
+
+    @staticmethod
+    def prospector():
+        do(['prospector'])
+
+    @staticmethod
+    def pytest():
+        do(['pytest'])
+
+    @staticmethod
+    def flake8():
+        do(['flake8'])
+
+    @staticmethod
+    def safety():
+        do(['safety', 'check', '--bare'])
+
+
+class HouseKeeping:
+    SRC_FILE = 'temp'
+
+    @classmethod
+    def _write_requirements(cls, packages_list, outfile, prefix_list=None):
+        with open(cls.SRC_FILE, 'w') as source_file:
+            source_file.write('\n'.join(packages_list))
+        packages, _, ret = do_ex([
+            'pip-compile',
+            '--index',
+            '--upgrade',
+            '--annotate',
+            '--no-header',
+            '-n',
+            cls.SRC_FILE
+        ])
+        os.remove(cls.SRC_FILE)
+        with open(outfile, 'w') as req_file:
+            if prefix_list:
+                for prefix in prefix_list:
+                    req_file.write(f'{prefix}\n')
+            for package in packages.splitlines():
+                req_file.write(f'{package}\n')
+
+    @classmethod
+    def write_prod(cls):
+        cls._write_requirements(
+            packages_list=install_requires,
+            outfile='requirements.txt'
+        )
+
+    @classmethod
+    def write_test(cls):
+        cls._write_requirements(
+            packages_list=test_requires,
+            outfile='requirements-test.txt',
+            prefix_list=['-r requirements.txt']
+        )
+
+    @classmethod
+    def write_dev(cls):
+        cls._write_requirements(
+            packages_list=dev_requires,
+            outfile='requirements-dev.txt',
+            prefix_list=['-r requirements.txt', '-r requirements-test.txt']
+        )
+
+    @classmethod
+    def write_requirements(cls):
+        cls.write_prod()
+        cls.write_test()
+        cls.write_dev()
+
+    @classmethod
+    def write_changelog(cls, commit: bool, push: bool = False):
+        changelog = do(['gitchangelog', '0.4.1..HEAD'])
+        with open('CHANGELOG.rst', mode='w') as f:
+            f.write(re.sub('(\s*\r\n){2,}', '\r\n', changelog))
+        if commit:
+            do_ex(['git', 'add', 'CHANGELOG.rst'])
+            _, _, ret = do_ex(['git', 'commit', '-m', 'chg: dev: updated changelog [skip ci]'])
+            if ret == 0 and push:
+                do_ex(['git', 'push'])
+
+    @classmethod
+    def compile_qt_resources(cls):
+        do([
+            'pyrcc5',
             './src/ui/qt_resource.qrc',
-            '-o',
-            './src/ui/qt_resource.py'
-        ],
-        logger_=logger,
-    )
+            '-o', './src/ui/qt_resource.py',
+        ])
+
+    @classmethod
+    def write_version(cls):
+        with open('./src/__version_frozen__.py', 'w') as version_file:
+            version_file.write(
+                f"# coding=utf-8\n"
+                f"__version__ = '{__semver__}'\n"
+                f"__pep440__ = '{get_pep440_version()}'\n")
 
 
-def pre_build(env):
-    _compile_qt_resources(env)
+class Make:
+    @classmethod
+    def install_pyinstaller(cls):
+        do(['pip', 'install',
+            'git+https://github.com/132nd-etcher/pyinstaller.git@develop#egg=pyinstaller==3.3.dev0+g2fcbe0f'])
+
+    @classmethod
+    def freeze(cls):
+        do([
+            sys.executable,
+            '-m', 'PyInstaller',
+            '--log-level=WARN',
+            '--noconfirm', '--onefile', '--clean', '--windowed',
+            '--icon', './src/ui/app.ico',
+            '--workpath', './build',
+            '--distpath', './dist',
+            '--paths', f'{os.path.join(sys.exec_prefix, "Lib/site-packages/PyQt5/Qt/bin")}',
+            '--add-data', f'{certifi.where()};.',
+            '--name', 'EMFT',
+            './src/main.py'
+        ])
+
+    @classmethod
+    def patch_exe(cls):
+        if not find_executable('verpatch'):
+            click.secho(
+                '"verpatch.exe" not been found in your PATH.\n'
+                'Verpatch is used to embed resources like the version after the compilation.\n'
+                'I\'m waiting on PyInstaller to port their own resources patcher to Python 3 so I can remove the '
+                'dependency to this external tool...\n'
+                'In the meanwhile, "verpatch" can be obtained at: https://ddverpatch.codeplex.com/releases',
+                err=True, fg='red'
+            )
+            raise FileNotFoundError()
+        year = datetime.datetime.now().year
+        do([
+            'verpatch',
+            './dist/EMFT.exe',
+            '/high',
+            __version__['FullSemVer'],
+            '/va',
+            '/pv', __version__['FullSemVer'],
+            '/s', 'desc', 'EtchersMissionFilesTools',
+            '/s', 'product', 'EMFT',
+            '/s', 'title', 'EMFT',
+            '/s', 'copyright', f'{year}-132nd-etcher',
+            '/s', 'company', '132nd-etcher,132nd-Entropy,132nd-Neck',
+            '/s', 'SpecialBuild', f'{__version__["BranchName"]}@{__version__["Sha"]}',
+            '/s', 'PrivateBuild', f'{__version__["InformationalVersion"]}.{__version__["CommitDate"]}',
+            '/langid', '1033',
+        ])
+
+    @classmethod
+    def build_doc(cls):
+        do([
+            'sphinx-build',
+            '-b',
+            'html',
+            'doc',
+            'doc/html'
+        ])
 
 
-def build(env):
-    if sys.version_info[1] == 6:
-        logger.warning('running Python 3.6, installing dev version of PyInstaller')
-        install_pyinstaller_for_py36(env)
-    logger.info('reading GitVersion output')
-    version = loads(subprocess.check_output(['gitversion'], cwd='.').decode().rstrip())
-    logger.debug('gitversion says: {}'.format(version))
-    logger.info('compiling packed executable')
-    run_piped_process([
-        os.path.join(env, 'python.exe'),
-        '-m', 'PyInstaller',
-        '--noconfirm',
-        '--onefile',
-        '--clean',
-        '--icon', './src/ui/app.ico',
-        '--workpath', './build',
-        '--paths', os.path.join(env, r'Lib\site-packages\PyQt5\Qt\bin'),
-        '--log-level=WARN',
-        '--add-data', '{};{}'.format(certifi.where(), '.'),
-        '--name', global_.APP_SHORT_NAME,
-        '--distpath', './dist',
-        '--windowed',
-        './src/main.py',
-    ], logger_=logger, cwd='.')
-    logger.info('patching exe resources')
-    patch_exe(
-        path_to_exe=Path('./dist/EMFT.exe'),
-        version=version.get('SemVer'),
-        app_name=global_.APP_SHORT_NAME,
-        wkdir=Path('.'),
-        build_=version.get('InformationalVersion'),
-    )
-
-    logger.info('all done')
+@click.group(invoke_without_command=True)
+@click.option('--install/--no-install', default=True)
+@click.pass_context
+def cli(ctx, install):
+    if install:
+        do(['pip', 'install', '-r', 'requirements-dev.txt'])
+    if ctx.invoked_subcommand is None:
+        Checks.safety()
+        Checks.flake8()
+        Checks.pytest()
+        # Checks.pylint()  # TODO
+        # Checks.prospector()  # TODO
+        HouseKeeping.compile_qt_resources()
+        HouseKeeping.write_changelog(commit=True)
+        HouseKeeping.write_requirements()
+        Make.install_pyinstaller()
+        Make.freeze()
+        Make.patch_exe()
+        Make.build_doc()
 
 
-def get_installed_packages(env):
-    global requirements
-    if requirements is None:
-        requirements = subprocess.Popen(
-            [os.path.join(env, 'scripts/pip.exe'), 'freeze'],
-            stdout=subprocess.PIPE
-        ).stdout.read().decode('utf8')
-        requirements = requirements.rstrip()
-        requirements = requirements.replace('\r\n', '\n')
-        # requirements = requirements.replace(r'PyInstaller==3.3.dev0+gb78bfe5',
-        #                                     r'git+https://github.com/132nd-etcher/pyinstaller.git#egg=PyInstaller')
-        requirements = re.sub(r'SLTP==\d+.\d+.\d+.*\n?', r'', requirements)
-        requirements = re.sub(r'utils==\d+.\d+.\d+.*\n?', r'', requirements)
-        requirements.strip()
-    return requirements
+@cli.command()
+@click.option('--prod/--no-prod', default=True)
+@click.option('--test/--no-test', default=True)
+@click.option('--dev/--no-dev', default=True)
+@click.pass_context
+def reqs(ctx, prod, test, dev):
+    if prod:
+        HouseKeeping.write_prod()
+    if test:
+        HouseKeeping.write_test()
+    if dev:
+        HouseKeeping.write_dev()
 
 
-# def _write_requirements_in():
-#     Path('requirements.in').write_lines(x.split('==')[0] for x in requirements.split('\n'))
+@cli.command()
+@click.pass_context
+def version(ctx):
+    HouseKeeping.write_version()
 
 
-def _compile_requirements(env, upgrade=False):
-    args = [os.path.join(env, 'scripts/pip-compile.exe')]
-
-    if upgrade:
-        args.append('--upgrade')
-
-    logger.debug('\n' + subprocess.Popen(
-        args,
-        stdout=subprocess.PIPE
-    ).stdout.read().decode('utf8'))
-
-    req_file = Path('requirements.txt')
-    req_file.write_lines([x for x in req_file.lines() if not x.startswith('#')])
+@cli.command()
+@click.option('--commit/--no-commit', default=True)
+@click.pass_context
+def chglog(ctx, commit):
+    HouseKeeping.write_changelog(commit)
 
 
-def sync_requirements(env):
-    logger.debug('\n' + subprocess.Popen(
-        [os.path.join(env, 'scripts/pip-sync.exe')],
-        stdout=subprocess.PIPE
-    ).stdout.read().decode('utf8'))
+@cli.command()
+@click.pass_context
+def pyrcc(ctx):
+    HouseKeeping.compile_qt_resources()
 
 
-def build_requirements(env):
-    # FIXME: re-make installed package check
-    _compile_requirements(env)
+@cli.command()
+@click.pass_context
+def pytest(ctx):
+    Checks.pytest()
 
 
-def update_requirements(env):
-    _compile_requirements(env, upgrade=True)
-    sync_requirements(env)
+@cli.command()
+@click.pass_context
+def flake8(ctx):
+    Checks.flake8()
 
 
-def generate_changelog(env):
-    logger.debug('building changelog')
-    changelog = subprocess.Popen(
-        [os.path.join(env, 'scripts/gitchangelog.exe'), '0.4.1..HEAD'],
-        stdout=subprocess.PIPE
-    ).stdout.read().decode('utf8')
-    with open('CHANGELOG.rst', mode='w') as f:
-        f.write(changelog)
+@cli.command()
+@click.pass_context
+def prospector(ctx):
+    Checks.prospector()
 
 
-def install_local_dependencies(_):
-    import pip
-    pip.main(['install', '-U', '--upgrade-strategy', 'only-if-needed', 'git+file://f:/dev/utils@develop'])
-    pip.main(['install', '-U', '--upgrade-strategy', 'only-if-needed', 'git+file://f:/dev/sltp@develop'])
+@cli.command()
+@click.pass_context
+def pylint(ctx):
+    Checks.pylint()
 
 
-def install_pyinstaller_for_py36(_):
-    import pip
-    pip.main(
-        [
-            'install',
-            'git+https://github.com/132nd-etcher/pyinstaller.git@develop#egg=PyInstaller'
-        ]
-    )
+@cli.command()
+@click.pass_context
+def safety(ctx):
+    Checks.safety()
 
 
-@click.command()
-@click.argument('env', type=click.Path(exists=True, file_okay=False, dir_okay=True, readable=True))
-@click.option('-p', '--pre', is_flag=True, help='Pre build only')
-@click.option('-l', '--local-develop',
-              is_flag=True, help='Only install local repositories from develop branch')
-@click.option('-r', '--req', is_flag=True, help='Req build only')
-@click.option('-c', '--cha', is_flag=True, help='Changelog build only')
-@click.option('-u', '--update-req', is_flag=True, help='Update all requirements')
-@click.option('-s', '--sync_req', is_flag=True, help='Sync requirements')
-def main(env, pre, req, cha, local_develop, update_req, sync_req):
-    if sys.version_info[0] < 3:
-        raise RuntimeError('nope.')
-    if sync_req:
-        sync_requirements(env)
-        return
-    if update_req:
-        update_requirements(env)
-        return
-    if local_develop:
-        install_local_dependencies(env)
-        return
-    if cha:
-        generate_changelog(env)
-        return
-    if req:
-        build_requirements(env)
-        return
-    pre_build(env)
-    if pre:
-        exit(0)
-    build(env)
+@cli.command()
+@click.pass_context
+def doc(ctx):
+    Make.build_doc()
+
+
+@cli.command()
+@click.option('--install/--no-install', default=True)
+@click.pass_context
+def freeze(ctx, install):
+    if install:
+        Make.install_pyinstaller()
+    Make.freeze()
+
+
+@cli.command()
+@click.pass_context
+def patch(ctx):
+    Make.patch_exe()
 
 
 if __name__ == '__main__':
-    main()
+    IS_WINDOWS = platform.system() == 'Windows'
+
+    __version__ = get_gitversion()
+    __semver__ = __version__.get("FullSemVer")
+    __pep440__ = get_pep440_version()
+    click.secho(f'SemVer: {__semver__}', fg='blue')
+
+    cli(obj={})
