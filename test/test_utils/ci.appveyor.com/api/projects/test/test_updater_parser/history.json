@@ -1,0 +1,100 @@
+{
+  "builds": [
+    {
+      "buildId": 9643244,
+      "version": "0.4.3+Branch.master.Sha.17155c897241f9a9c97108a8fcf6122ac789bd34.277",
+      "branch": "master",
+      "status": "success"
+    },
+    {
+      "buildId": 9643244,
+      "version": "0.4.4-patch.1+Branch.master.Sha.17155c897241f9a9c97108a8fcf6122ac789bd34.277",
+      "branch": "master",
+      "status": "success"
+    },
+    {
+      "buildId": 9643244,
+      "version": "0.5.0-exp.1+Branch.develop.Sha.00f729ecac19ef6fd89a4b865a86907fedd7bf1b.276",
+      "branch": "master",
+      "status": "success"
+    },
+    {
+      "buildId": 9643244,
+      "version": "0.5.0-exp.2+Branch.develop.Sha.00f729ecac19ef6fd89a4b865a86907fedd7bf1b.276",
+      "branch": "master",
+      "status": "success"
+    },
+    {
+      "buildId": 9643244,
+      "version": "0.5.0-exp.3+Branch.develop.Sha.00f729ecac19ef6fd89a4b865a86907fedd7bf1b.276",
+      "branch": "master",
+      "status": "success"
+    },
+    {
+      "buildId": 9643244,
+      "version": "0.5.0-beta.2+Branch.develop.Sha.00f729ecac19ef6fd89a4b865a86907fedd7bf1b.276",
+      "branch": "master",
+      "status": "success"
+    },
+    {
+      "buildId": 9643244,
+      "version": "1.5.0-PullRequest.CARIBOU.2+Branch.develop.Sha.00f729ecac19ef6fd89a4b865a86907fedd7bf1b.276",
+      "branch": "master",
+      "status": "success"
+    },
+    {
+      "buildId": 9643244,
+      "version": "0.6.0-beta.2+Branch.develop.Sha.00f729ecac19ef6fd89a4b865a86907fedd7bf1b.276",
+      "branch": "master",
+      "status": "success"
+    },
+    {
+      "buildId": 9643244,
+      "version": "0.6.0-beta.1+Branch.develop.Sha.00f729ecac19ef6fd89a4b865a86907fedd7bf1b.276",
+      "branch": "master",
+      "status": "success"
+    },
+    {
+      "buildId": 9643244,
+      "version": "0.7.0-alpha.1+Branch.develop.Sha.00f729ecac19ef6fd89a4b865a86907fedd7bf1b.276",
+      "branch": "master",
+      "status": "success"
+    },
+    {
+      "buildId": 9643244,
+      "version": "0.7.0-alpha.1+Branch.develop.Sha.00f729ecac19ef6fd89a4b865a86907fedd7bf1b.276",
+      "branch": "master",
+      "status": "success"
+    },
+    {
+      "buildId": 9643244,
+      "version": "0.7.0-alpha.2+Branch.develop.Sha.00f729ecac19ef6fd89a4b865a86907fedd7bf1b.276",
+      "branch": "master",
+      "status": "success"
+    },
+    {
+      "buildId": 9643244,
+      "version": "0.7.0-alpha.3+Branch.develop.Sha.00f729ecac19ef6fd89a4b865a86907fedd7bf1b.276",
+      "branch": "master",
+      "status": "success"
+    },
+    {
+      "buildId": 9643244,
+      "version": "pending.275",
+      "branch": "master",
+      "status": "success"
+    },
+    {
+      "buildId": 9643244,
+      "version": "1.4.3--148568267.1+6.Branch.#148568267.Sha.7ff73118e8dc0290daa5c361a08506fd69363877.273",
+      "branch": "master",
+      "status": "success"
+    },
+    {
+      "buildId": 9643244,
+      "version": "pending.276",
+      "branch": "master",
+      "status": "fail"
+    }
+  ]
+}
