@@ -91,9 +91,9 @@ def start_ui():
     from src.reorder.ui.tab_reorder import TabChildReorder
     global_.MAIN_UI.add_tab(TabChildReorder(main_ui))
 
-    logger.info('loading module: dcs_installs')
-    from src.misc.fs import dcs_installs
-    dcs_installs.discover_dcs_installations()
+    # logger.info('loading module: dcs_installs')
+    # from src.misc.fs import dcs_installs
+    # dcs_installs.discover_dcs_installations()
 
     LOGGER.info('loading tab: skins')
     from src.ui.tab_skins import TabChildSkins
