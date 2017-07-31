@@ -81,7 +81,6 @@ class MainUi(QMainWindow, MainUiMixins):
 def start_ui(show: bool = True):
 
     from PyQt5.QtWidgets import QApplication
-    import sys
     LOGGER.info('starting application')
     global_.QT_APP = QApplication([])
     main_ui = MainUi()
