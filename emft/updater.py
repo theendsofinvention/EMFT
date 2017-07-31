@@ -2,11 +2,12 @@
 
 from emft.__version__ import __version__
 from emft.utils.updater import Updater
+from emft.cfg import Config
 
 updater = Updater(
     current_version=__version__,
     av_user='132nd-etcher',
     av_repo='EMFT',
     local_executable='emft.exe',
-    channel='alpha',
+    channel=Config().update_channel,
 )
