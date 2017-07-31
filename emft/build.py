@@ -72,49 +72,35 @@ def find_executable(executable: str, path: str = None) -> typing.Union[str, None
         path: root path to examine (defaults to system PATH)
 
     """
-    if '_known_executables' in globals():
-        global _known_executables
-    else:
-        _known_executables = {}
 
     if not executable.endswith('.exe'):
         executable = f'{executable}.exe'
 
-    if executable in _known_executables:
-        return _known_executables[executable]
+    if executable in find_executable.known_executables:  # type: ignore
+        return find_executable.known_executables[executable]  # type: ignore
 
     click.secho(f'looking for executable: {executable}', fg='green', nl=False)
 
-    executable_path = os.path.abspath(os.path.join(sys.exec_prefix, 'Scripts', executable))
-    if os.path.exists(executable_path):
-        click.secho(f' -> {click.format_filename(executable_path)}', fg='green')
-        _known_executables[executable] = executable_path
-        return executable_path
-
     if path is None:
         path = os.environ['PATH']
-    paths = path.split(os.pathsep)
-    ext_list = ['']
-    path_ext = os.environ['PATHEXT'].lower().split(os.pathsep)
-    (base, ext) = os.path.splitext(executable)
-    if ext.lower() not in path_ext:
-        ext_list = path_ext
-    for ext in ext_list:
-        exec_name = executable + ext
-        if os.path.isfile(exec_name):
-            click.secho(f' -> {click.format_filename(exec_name)}', fg='green')
-            _known_executables[executable] = exec_name
-            return exec_name
-        else:
-            for p in paths:
-                f = os.path.join(p, exec_name)
-                if os.path.isfile(f):
-                    click.secho(f' -> {click.format_filename(f)}', fg='green')
-                    _known_executables[executable] = f
-                    return f
+    paths = [os.path.abspath(os.path.join(sys.exec_prefix, 'Scripts'))] + path.split(os.pathsep)
+    if os.path.isfile(executable):
+        executable_path = os.path.abspath(executable)
     else:
-        click.secho(f' -> not found', fg='red', err=True)
-        return None
+        for path_ in paths:
+            executable_path = os.path.join(path_, executable)
+            if os.path.isfile(executable_path):
+                break
+        else:
+            click.secho(f' -> not found', fg='red', err=True)
+            return None
+
+    find_executable.known_executables[executable] = executable_path  # type: ignore
+    click.secho(f' -> {click.format_filename(executable_path)}', fg='green')
+    return executable_path
+
+
+find_executable.known_executables = {}  # type: ignore
 
 
 def do_ex(ctx: click.Context, cmd: typing.List[str], cwd: str = '.') -> typing.Tuple[str, str, int]:
@@ -644,5 +630,4 @@ def test_build(ctx):
 
 
 if __name__ == '__main__':
-    _known_executables = {}
     cli(obj={})
