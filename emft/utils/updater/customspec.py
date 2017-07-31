@@ -14,7 +14,7 @@ LOGGER = make_logger(__name__)
 class CustomSpec(SemanticSpec):
     def filter_channel(
         self,
-        versions: typing.List[CustomVersion],
+        versions: typing.Set[CustomVersion],
         prerelease: str = Channel.stable
     ):
         LOGGER.debug(f'filtering {len(versions)} versions against {self}')
@@ -44,7 +44,7 @@ class CustomSpec(SemanticSpec):
 
     def select_channel(
         self,
-        versions: typing.List[CustomVersion],
+        versions: typing.Set[CustomVersion],
         channel: str = Channel.stable
     ) -> typing.Union[CustomVersion, None]:
         """
