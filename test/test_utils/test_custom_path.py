@@ -36,9 +36,9 @@ def test_get_version():
     assert info.special_build is None
     assert info.trademark is None
     with pytest.raises(FileNotFoundError):
-        Path('c:\explorer.exe').get_win32_file_info()
+        Path(r'c:\explorer.exe').get_win32_file_info()
     with pytest.raises(TypeError):
-        Path('c:\windows').get_win32_file_info()
+        Path(r'c:\windows').get_win32_file_info()
     with pytest.raises(ValueError):
         p = Path(__file__)
         p.get_win32_file_info()

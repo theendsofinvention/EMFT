@@ -52,8 +52,8 @@ class SLTP:
         self.len = 0
         self.depth = 0
         self.qual = None
-        self.space = re.compile('\s', re.M)
-        self.alnum = re.compile('\w', re.M)
+        self.space = re.compile(r'\s', re.M)
+        self.alnum = re.compile(r'\w', re.M)
         self.line_end = re.compile(r'^(?P<intro>[ \t]*\})(?P<comment> -- end of \[.*\]),$')
         self.newline = '\n'
         self.tab = '\t'
