@@ -248,7 +248,7 @@ def get_pep440_version(version: str) -> str:
             version_str += convert_prereleases[prerelease[0]]
             prerelease = prerelease[1:]
         else:
-            raise ValueError(f'unknown pre-release tag: {version_str.prerelease[0]}')
+            raise ValueError(f'unknown pre-release tag: {prerelease[0]}')
 
         # If there is a distance to the last tag, add a ".dev[distance]" suffix
         if re.match(r'[\d]+', prerelease[-1]):
