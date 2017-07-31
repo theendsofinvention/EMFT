@@ -574,7 +574,7 @@ def freeze(ctx, install: bool, force: bool):
 
     click.secho(f'current version of pyinstaller: {pyinstaller_version}', fg='green')
     # noinspection SpellCheckingInspection
-    if not pyinstaller_version.strip() == PYINSTALLER_NEEDED_VERSION:
+    if not pyinstaller_version.strip() in (PYINSTALLER_NEEDED_VERSION, f'{PYINSTALLER_NEEDED_VERSION}0'):
         click.secho('EMFT needs a very specific version of PyInstaller to compile successfully.\n'
                     'You can force the installation of that version using the command:\n\n'
                     '\temft-build freeze --force', err=True, fg='red')
