@@ -3,8 +3,8 @@
 import pytest
 from unittest.mock import MagicMock
 
-from src.utils import WatchedProperty
-from src.utils.decorators.watched_property import _WatchedProperty
+from emft.utils import WatchedProperty
+from emft.utils.decorators.watched_property import _WatchedProperty
 
 
 class Dummy:

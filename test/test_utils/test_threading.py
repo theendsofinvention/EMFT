@@ -5,7 +5,7 @@ import time
 import pytest
 from hypothesis import strategies as st, given, example
 
-from src.utils.threadpool import ThreadPool
+from emft.utils.threadpool import ThreadPool
 
 
 def sleep(t=0.1):

@@ -7,11 +7,11 @@ from time import sleep
 from zipfile import BadZipFile
 
 import pytest
-from src.utils import Path
+from emft.utils import Path
 
-from src.global_ import ENCODING
-from src.miz.mission import Mission, Country, Group, BaseUnit, FlyingUnit, EPOCH_DELTA, Coalition
-from src.miz.miz import Miz as Miz
+from emft.global_ import ENCODING
+from emft.miz.mission import Mission, Country, Group, BaseUnit, FlyingUnit, EPOCH_DELTA, Coalition
+from emft.miz.miz import Miz as Miz
 
 if os.path.exists('./test_files'):
     BASE_PATH = './test_files'

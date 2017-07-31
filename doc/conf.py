@@ -22,7 +22,7 @@ import sys
 
 sys.path.insert(0, os.path.abspath('..'))
 
-from src.__version_frozen__ import __version__, __pep440__  # noqa: E402
+from emft.__version_frozen__ import __version__, __pep440__  # noqa: E402
 
 # -- General configuration ------------------------------------------------
 

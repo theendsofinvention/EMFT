@@ -75,8 +75,8 @@ setup_requires = [
 
 entry_points = '''
 [console_scripts]
-emft=src.main:main
-emft-build=build:cli
+emft=emft.main:main
+emft-build=emft.build:cli
 '''
 
 if __name__ == '__main__':
@@ -90,9 +90,9 @@ if __name__ == '__main__':
         download_url=r'https://github.com/132nd-etcher/EMFT/releases',
         description='Set of tools for the DCS mission builder',
         license='GPLv3',
-        py_modules=['src'],
+        py_modules=['emft'],
         long_description=read_local_files('README.rst', 'CHANGELOG.rst'),
-        packages=['src'],
+        packages=['emft'],
         include_package_data=True,
         install_requires=install_requires,
         entry_points=entry_points,

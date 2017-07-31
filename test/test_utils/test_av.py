@@ -7,8 +7,8 @@ import pytest
 import requests
 from httmock import response, urlmatch, HTTMock
 
-from src.utils import Path
-from src.utils.av import AVSession
+from emft.utils import Path
+from emft.utils.av import AVSession
 
 ENDPOINT = r'(.*\.)?ci\.appveyor\.com$'
 HEADERS = {'content-type': 'application/json'}

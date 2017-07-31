@@ -2,9 +2,9 @@
 
 import pytest
 import os
-from src.miz.miz import Miz
-from src.miz.mission import Mission
-from src.utils import Path
+from emft.miz.miz import Miz
+from emft.miz.mission import Mission
+from emft.utils import Path
 
 if os.path.exists('./test_files'):
     BASE_PATH = './test_files'

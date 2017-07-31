@@ -4,7 +4,7 @@ import os
 
 import pytest
 
-from src.sltp import SLTP
+from emft.sltp import SLTP
 
 TEST_FILES_DIR = './test/test_files/sltp'
 TEST_FILES_DIR_LONG = './test/test_files/sltp_long'

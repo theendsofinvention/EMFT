@@ -13,8 +13,8 @@ autodetect: true
 ignore-paths:
     - test
 ignore-patterns:
-    - src/dummy_miz.py
-    - src/ui/qt_resource.py
+    - emft/dummy_miz.py
+    - emft/ui/qt_resource.py
 python-targets:
     - 3
 pyroma:

@@ -2,7 +2,7 @@
 
 import pytest
 
-from src.utils.updater import CustomVersion
+from emft.utils.updater import CustomVersion
 
 VALID_VERSION_STRINGS = ['0.1.0', '0.1.1', '0.2.0', '0.3.1']
 INVALID_VERSION_STRINGS = ['0.1', '0.1.1.0', '0.2.text', 'A.3.1']

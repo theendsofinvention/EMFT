@@ -7,11 +7,11 @@ import pytest
 import requests
 from httmock import response, urlmatch, with_httmock
 
-from src.utils.custom_path import Path
-from src.utils.gh import GHAnonymousSession, GHSessionError, NotFoundError, RateLimitationError, GithubAPIError, \
+from emft.utils.custom_path import Path
+from emft.utils.gh import GHAnonymousSession, GHSessionError, NotFoundError, RateLimitationError, GithubAPIError, \
     GHAllAssets, GHRelease, GHRepo, GHRepoList, GHUser, GHSession, GHAuthorization, GHApp, GHPermissions, GHMailList, \
     GHMail
-from src.utils.singleton import Singleton
+from emft.utils.singleton import Singleton
 
 
 def test_build_req():

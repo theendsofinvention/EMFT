@@ -6,7 +6,7 @@ import subprocess
 import pytest
 from hypothesis import strategies as st, given
 
-from src.utils.custom_path import Path
+from emft.utils.custom_path import Path
 
 
 def test_get_version():

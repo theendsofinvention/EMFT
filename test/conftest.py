@@ -7,7 +7,7 @@ import warnings
 import pytest
 
 # noinspection PyUnresolvedReferences
-import src.filter_warnings  # noqa: F401
+import emft.filter_warnings  # noqa: F401
 
 # Fail on any non-ignored warning
 warnings.filterwarnings('error', category=ResourceWarning, append=True)
@@ -32,7 +32,7 @@ def pytest_unconfigure(config):
 @pytest.fixture(autouse=True)
 def catch_exceptions_in_threads():
     yield
-    from src.utils.threadpool import test_exc
+    from emft.utils.threadpool import test_exc
     if test_exc:
         print(f'TRACEBACK:\n{"".join([x for x in traceback.format_tb(test_exc[2])])}')
         raise test_exc[0](test_exc[1])
@@ -54,6 +54,6 @@ def reset_progress(request):
     if 'noresetprogress' in request.keywords:
         yield
     else:
-        from src.utils.progress import Progress
+        from emft.utils.progress import Progress
         Progress.done()
         yield

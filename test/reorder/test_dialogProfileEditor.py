@@ -4,7 +4,7 @@ from unittest import mock
 
 import pytest
 
-from src.reorder.ui import dialog_profile_editor
+from emft.reorder.ui import dialog_profile_editor
 
 
 class TestDialogProfileEditor:

@@ -1,8 +1,8 @@
 # coding=utf-8
 import pytest
 
-from src.utils import Downloader, create_temp_file
-from src.utils.downloader import get_hash
+from emft.utils import Downloader, create_temp_file
+from emft.utils.downloader import get_hash
 
 SMALL = r'http://download.thinkbroadband.com/1MB.zip'
 NOPE = r'http://download.thinkbroadband.com/nope.zip'

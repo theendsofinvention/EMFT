@@ -5,7 +5,7 @@ from logging import Logger, Handler, LogRecord, disable, ERROR, NOTSET
 
 import pytest
 
-from src.utils.custom_logging import make_logger, Logged
+from emft.utils.custom_logging import make_logger, Logged
 
 
 class DummyHandler(Handler):

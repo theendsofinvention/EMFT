@@ -2,9 +2,9 @@ import os
 
 import pytest
 
-from src.reorder.finder import FindOutputFolder
-from src.reorder.service.manage_output_folders import ManageOutputFolders
-from src.reorder.value import OutputFolder
+from emft.reorder.finder import FindOutputFolder
+from emft.reorder.service.manage_output_folders import ManageOutputFolders
+from emft.reorder.value import OutputFolder
 
 
 # coding=utf-8

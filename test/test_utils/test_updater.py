@@ -4,9 +4,9 @@ import pytest
 import transitions
 from httmock import with_httmock
 
-from src.utils.av import AVHistory, AVBuild
-from src.utils import make_logger
-from src.utils.updater import Updater, CustomVersion, Channel
+from emft.utils.av import AVHistory, AVBuild
+from emft.utils import make_logger
+from emft.utils.updater import Updater, CustomVersion, Channel
 from test.test_utils.test_av import mock_av_api
 
 DEFAULT_PARAMS = {
@@ -67,7 +67,7 @@ def test_init():
 
 
 def test_collection_av_get_history(qtbot, mocker):
-    av_session = mocker.patch('src.utils.updater.updater.AVSession', spec=True)
+    av_session = mocker.patch('emft.utils.updater.updater.AVSession', spec=True)
     u = Updater(**DEFAULT_PARAMS)
     assert u.state == 'initial'
     u.look_for_new_version(auto_update=False)
@@ -82,7 +82,7 @@ def test_collection_av_get_history(qtbot, mocker):
 
 
 def test_collection_reset_values(qtbot, mocker):
-    av_session = mocker.patch('src.utils.updater.updater.AVSession', spec=True)
+    av_session = mocker.patch('emft.utils.updater.updater.AVSession', spec=True)
     u = Updater(**DEFAULT_PARAMS)
     assert u.state == 'initial'
     reset_mock = mocker.spy(u, '_reset_internal_values')
@@ -94,7 +94,7 @@ def test_collection_reset_values(qtbot, mocker):
 
 
 def test_collection_auto_update_value(qtbot, mocker):
-    av_session = mocker.patch('src.utils.updater.updater.AVSession', spec=True)
+    av_session = mocker.patch('emft.utils.updater.updater.AVSession', spec=True)
     u = Updater(**DEFAULT_PARAMS)
     assert u.state == 'initial'
     u.look_for_new_version()
@@ -121,7 +121,7 @@ def test_finalize_event_error(mocker, caplog):
         assert isinstance(event, transitions.EventData)
         raise ValueError('uh oh!')
 
-    mocker.patch('src.utils.updater.updater.AVSession', spec=True)
+    mocker.patch('emft.utils.updater.updater.AVSession', spec=True)
     u = Updater(**DEFAULT_PARAMS)
     u.dummy_raise = dummy_raise
     u.add_states('failed')
@@ -135,7 +135,7 @@ def test_finalize_event_no_error(mocker, caplog):
     def dummy_pass(event):
         assert isinstance(event, transitions.EventData)
 
-    mocker.patch('src.utils.updater.updater.AVSession', spec=True)
+    mocker.patch('emft.utils.updater.updater.AVSession', spec=True)
     u = Updater(**DEFAULT_PARAMS)
     u.dummy_pass = dummy_pass
     u.add_states('passed')
@@ -154,7 +154,7 @@ def test_finalize_event_no_error(mocker, caplog):
         )])
 def test_collection_with_result(av_builds, expected_keys, qtbot, mocker):
     av_session = mocker.patch(
-        'src.utils.updater.updater.AVSession.get_history',
+        'emft.utils.updater.updater.AVSession.get_history',
         spec=True,
         return_value=DummyAVHistory([dict(version=build[0], status=build[1]) for build in av_builds])
     )
@@ -183,7 +183,7 @@ def test_collection_with_result(av_builds, expected_keys, qtbot, mocker):
     ]
 )
 def test_parsing(channel, expected_version, qtbot, mocker, caplog):
-    from src.utils.updater.updater import AVSession
+    from emft.utils.updater.updater import AVSession
     get_build_by_version_mock = mocker.spy(AVSession, 'get_build_by_version')
     u = Updater(DEFAULT_PARAMS['current_version'], 'test', 'test_updater_parser', 'emft.exe', channel)
     reset_mock = mocker.spy(u, '_reset_internal_values')

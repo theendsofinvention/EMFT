@@ -2,7 +2,7 @@
 
 import pytest
 
-from src.utils.updater import CustomSpec, CustomVersion, Channel
+from emft.utils.updater import CustomSpec, CustomVersion, Channel
 
 VERSIONS = list(
     CustomVersion(version) for version in [
