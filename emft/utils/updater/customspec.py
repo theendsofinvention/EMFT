@@ -1,4 +1,6 @@
 # coding=utf-8
+import typing
+
 from semantic_version import Spec as SemanticSpec
 
 from emft.utils import make_logger
@@ -10,7 +12,11 @@ LOGGER = make_logger(__name__)
 
 
 class CustomSpec(SemanticSpec):
-    def filter_channel(self, versions, prerelease: str = Channel.stable):
+    def filter_channel(
+        self,
+        versions: typing.List[CustomVersion],
+        prerelease: str = Channel.stable
+    ):
         LOGGER.debug(f'filtering {len(versions)} versions against {self}')
         unknown_pre_release_tags = set()
         for version in super(CustomSpec, self).filter(versions):
@@ -36,7 +42,21 @@ class CustomSpec(SemanticSpec):
                     continue
             yield version
 
-    def select_channel(self, versions, channel: str = Channel.stable):
+    def select_channel(
+        self,
+        versions: typing.List[CustomVersion],
+        channel: str = Channel.stable
+    ) -> typing.Union[CustomVersion, None]:
+        """
+        Selects the latest version, equals or higher than "channel"
+
+        Args:
+            versions: versions to select from
+            channel: member of :class:`Channel`
+
+        Returns: latest version or None
+
+        """
         LOGGER.debug(f'selecting latest version amongst {len(versions)}')
         options = list(self.filter_channel(versions, channel))
         if options:
