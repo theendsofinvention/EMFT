@@ -75,7 +75,7 @@ class Meta(AbstractMeta):
         return self._data.get(key, None)
 
     def __repr__(self):
-        # FIXME: remove when opting out of OrderedDict
+        # TODO: remove when opting out of OrderedDict
         # noinspection PyArgumentList
         return '{!s}({!s})'.format(
             self.__class__.__name__,

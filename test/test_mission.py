@@ -792,7 +792,7 @@ class TestMizValues:
             radio1.set_frequency(1, 30.0)
             assert not radio1 == radio3
 
-    def test_radios_generator(self):  # FIXME
+    def test_radios_generator(self):  # TODO
         with Miz(r'./test/test_files/radios.miz') as miz:
             unit = miz.mission.get_unit_by_id(6)
             # noinspection PyUnusedLocal

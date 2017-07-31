@@ -165,7 +165,7 @@ class GHSession(GHAnonymousSession, metaclass=Singleton):
         self.build_req('repos', user, repo, 'pulls')
         self._post(json=json)
 
-    # FIXME this is just for the lulz
+    # TODO this is just for the lulz
     def create_status(
             self,
             repo: str,
