@@ -57,7 +57,7 @@ class CustomSpec(SemanticSpec):
         Returns: latest version or None
 
         """
-        LOGGER.debug(f'selecting latest version amongst {len(versions)}')
+        LOGGER.debug(f'selecting latest version amongst {len(versions)}; active channel: {str(channel)}')
         options = list(self.filter_channel(versions, channel))
         if options:
             latest = max(options)
