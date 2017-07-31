@@ -66,3 +66,4 @@ build.py API
 
 .. automodule:: emft.build
     :members:
+    :noindex:
