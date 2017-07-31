@@ -193,7 +193,7 @@ class GHAnonymousSession(requests.Session, metaclass=Singleton):
 
         auth_list = []
 
-        def __add_auth(json):
+        def __add_auth(json):  # noqa N802
             nonlocal auth_list
             for x in json:
                 auth_list.append(GHAuthorization(x))

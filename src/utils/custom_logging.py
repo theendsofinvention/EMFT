@@ -62,7 +62,7 @@ class Logged:
         self.logger = make_logger(self.__class__.__name__)
 
 
-def __setup_logger(
+def __setup_logger(  # noqa: N802
         logger_name='__main__',
         log_file_path=None,
         fh_level=logging.DEBUG,

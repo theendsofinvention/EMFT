@@ -9,7 +9,7 @@ class Singleton(abc.ABCMeta):
 
     _instances = {}
 
-    def __call__(cls, *args, **kwargs):
+    def __call__(cls, *args, **kwargs):  # noqa: N805
         if cls.__name__ not in cls._instances:
             cls._instances[cls.__name__] = super(Singleton, cls).__call__(*args, **kwargs)
 

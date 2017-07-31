@@ -12,7 +12,7 @@ class _MetaSingleton(abc.ABCMeta):
 
     _instances = {}
 
-    def __call__(cls, file: str or Path, init_d: dict = None):
+    def __call__(cls, file: str or Path, init_d: dict = None):  # noqa: N805
         if isinstance(file, str):
             file = Path(file)
         elif isinstance(file, Path):

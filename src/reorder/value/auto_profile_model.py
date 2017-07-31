@@ -18,6 +18,6 @@ class AutoProfileModel(QStandardItemModel):
     def __init__(self, parent=None):
         QStandardItemModel.__init__(self, parent)
 
-    def appendRow(self, output_folder_name: str):
+    def appendRow(self, output_folder_name: str):  # noqa: N802
         item = QStandardItem(output_folder_name)
         super(AutoProfileModel, self).appendRow(item)

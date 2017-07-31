@@ -7,6 +7,7 @@ from .av_job import AVAllJobs
 from .av_version import AVVersion
 
 
+# flake8: noqa
 # noinspection PyPep8Naming
 class AVBuild(JSONObject):
     @json_property

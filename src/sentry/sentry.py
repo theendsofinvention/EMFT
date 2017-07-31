@@ -52,7 +52,7 @@ class Sentry(raven.Client, metaclass=Singleton):
     def add_crumb(message, category, level):
         raven.breadcrumbs.record(message=message, category=category, level=level)
 
-    def captureMessage(self, message, **kwargs):
+    def captureMessage(self, message, **kwargs):  # noqa: N802
         self.set_context()
         if not global_.FROZEN:
             LOGGER.warning(f'message would have been sent: {message}')
@@ -66,7 +66,7 @@ class Sentry(raven.Client, metaclass=Singleton):
             SENTRY.extra_context({context_name: context_provider.get_context()})
         super(Sentry, self).captureMessage(message, **kwargs)
 
-    def captureException(self, exc_info=None, **kwargs):
+    def captureException(self, exc_info=None, **kwargs):  # noqa: N802
         self.set_context()
         if not global_.FROZEN:
             LOGGER.error('crash report would have been sent')

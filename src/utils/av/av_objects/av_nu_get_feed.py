@@ -2,7 +2,7 @@
 
 from src.utils.custom_session import JSONObject, json_property
 
-
+# flake8: noqa
 # noinspection PyPep8Naming
 class AVNuGetFeed(JSONObject):
     @json_property

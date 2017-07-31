@@ -76,7 +76,7 @@ class MainUi(QMainWindow, MainUiMixins):
             global_.QT_APP.exit(code)
         nice_exit(code)
 
-    def closeEvent(self, event):
+    def closeEvent(self, event):  # noqa: N802
         self.exit()
 
 

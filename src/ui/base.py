@@ -42,7 +42,7 @@ class Dialog(QDialog):
 class Expandable:
     # noinspection PyPep8Naming
     @abc.abstractmethod
-    def setSizePolicy(self, w, h):
+    def setSizePolicy(self, w, h):  # noqa: N802
         pass
 
     def h_expand(self):
@@ -87,22 +87,22 @@ class _WithChildren:
 
     # noinspection PyPep8Naming
     @abc.abstractmethod
-    def addLayout(self, layout: QBoxLayout):
+    def addLayout(self, layout: QBoxLayout):  # noqa: N802
         """"""
 
     # noinspection PyPep8Naming
     @abc.abstractmethod
-    def addWidget(self, widget: QWidget):
+    def addWidget(self, widget: QWidget):  # noqa: N802
         """"""
 
     # noinspection PyPep8Naming
     @abc.abstractmethod
-    def addSpacerItem(self, spacer: QSpacerItem):
+    def addSpacerItem(self, spacer: QSpacerItem):  # noqa: N802
         """"""
 
     # noinspection PyPep8Naming
     @abc.abstractmethod
-    def addSpacing(self, spacer: int):
+    def addSpacing(self, spacer: int):  # noqa: N802
         """"""
 
 
@@ -424,14 +424,14 @@ class MenuBar(QMenuBar):
 class _TableViewWithRowContextMenu:
     # noinspection PyPep8Naming
     @abc.abstractmethod
-    def selectionModel(self):
+    def selectionModel(self):  # noqa: N802
         """"""
 
     def __init__(self, menu=None):
         self._menu = menu
 
     # noinspection PyPep8Naming
-    def contextMenuEvent(self, event):
+    def contextMenuEvent(self, event):  # noqa: N802
         LOGGER.debug('in')
         if self._menu:
             LOGGER.debug('menu')
@@ -462,7 +462,7 @@ class TableView(QTableView):
         self.setSortingEnabled(True)
         self.verticalHeader().hide()
 
-    def setModel(self, model: QAbstractItemModel):
+    def setModel(self, model: QAbstractItemModel):  # noqa: N802
         if isinstance(model, TableEditableModel):
             for i, delegate in enumerate(model.delegates):
                 if delegate:
@@ -488,7 +488,7 @@ class TableProxy(QSortFilterProxyModel):
     def sort(self, p_int, order=None):
         super(TableProxy, self).sort(p_int, order)
 
-    def filterAcceptsRow(self, row: int, index: QModelIndex):
+    def filterAcceptsRow(self, row: int, index: QModelIndex):  # noqa: N802
         if self._filter:
             model = self.sourceModel()
             for column, filter_ in enumerate(self._filter):
@@ -541,10 +541,10 @@ class TableModel(QAbstractTableModel):
         self.endResetModel()
         self.sort(0, Qt.AscendingOrder)
 
-    def rowCount(self, parent=None, *args, **kwargs):
+    def rowCount(self, parent=None, *args, **kwargs):  # noqa: N802
         return len(self._data)
 
-    def columnCount(self, parent=None, *args, **kwargs):
+    def columnCount(self, parent=None, *args, **kwargs):  # noqa: N802
         return len(self._header_data)
 
     @staticmethod
@@ -582,7 +582,7 @@ class TableModel(QAbstractTableModel):
                     return self._default_align
         return QVariant()
 
-    def headerData(self, col, orientation=Qt.Horizontal, role=Qt.DisplayRole):
+    def headerData(self, col, orientation=Qt.Horizontal, role=Qt.DisplayRole):  # noqa: N802
         if role == Qt.DisplayRole:
             if orientation == Qt.Horizontal:
                 return self._header_data[col]
@@ -596,10 +596,10 @@ class TableEditableModel(TableModel):
             QStyledItemDelegate.__init__(self, parent)
             self._regex = validation_regex
 
-        def displayText(self, value, locale):
+        def displayText(self, value, locale):  # noqa: N802
             return str(value)
 
-        def createEditor(self, parent: QWidget, style: QStyleOptionViewItem, index: QModelIndex):
+        def createEditor(self, parent: QWidget, style: QStyleOptionViewItem, index: QModelIndex):  # noqa: N802
             editor = QLineEdit(parent)
             if self._regex:
                 validator = QRegExpValidator(editor)
@@ -608,10 +608,10 @@ class TableEditableModel(TableModel):
             editor.setText(str(index.data(Qt.DisplayRole)))
             return editor
 
-        def setEditorData(self, editor: QLineEdit, index: QModelIndex):
+        def setEditorData(self, editor: QLineEdit, index: QModelIndex):  # noqa: N802
             editor.setText(index.data(Qt.DisplayRole))
 
-        def setModelData(self, editor: QLineEdit, model: QAbstractItemModel, index: QModelIndex):
+        def setModelData(self, editor: QLineEdit, model: QAbstractItemModel, index: QModelIndex):  # noqa: N802
             model.setData(index, editor.text())
 
     class FloatDelegate(QStyledItemDelegate):
@@ -621,10 +621,10 @@ class TableEditableModel(TableModel):
             self._min = min_value
             self._max = max_value
 
-        def displayText(self, value, locale):
+        def displayText(self, value, locale):  # noqa: N802
             return '{:07.3f}'.format(float(value))
 
-        def createEditor(self, parent: QWidget, style: QStyleOptionViewItem, index: QModelIndex):
+        def createEditor(self, parent: QWidget, style: QStyleOptionViewItem, index: QModelIndex):  # noqa: N802
             editor = QDoubleSpinBox(parent)
             editor.setMinimum(self._min)
             editor.setMaximum(self._max)
@@ -632,10 +632,10 @@ class TableEditableModel(TableModel):
             editor.setValue(float(index.data(Qt.DisplayRole)))
             return editor
 
-        def setEditorData(self, editor: QDoubleSpinBox, index: QModelIndex):
+        def setEditorData(self, editor: QDoubleSpinBox, index: QModelIndex):  # noqa: N802
             editor.setValue(float(index.data(Qt.DisplayRole)))
 
-        def setModelData(self, editor: QDoubleSpinBox, model: QAbstractItemModel, index: QModelIndex):
+        def setModelData(self, editor: QDoubleSpinBox, model: QAbstractItemModel, index: QModelIndex):  # noqa: N802
             editor.interpretText()
             model.setData(index, editor.value())
 
@@ -664,7 +664,7 @@ class TableEditableModel(TableModel):
             return super(TableEditableModel, self).data(index)
         return super(TableEditableModel, self).data(index, role)
 
-    def setData(self, index: QModelIndex, value, role=Qt.EditRole):
+    def setData(self, index: QModelIndex, value, role=Qt.EditRole):  # noqa: N802
         if index.isValid():
             self._data[index.row()][index.column()] = value
             # noinspection PyUnresolvedReferences
@@ -807,7 +807,7 @@ class TabWidget(QTabWidget):
         raise KeyError('tab "{}" not found'.format(tab_title))
 
     # noinspection PyMethodOverriding
-    def addTab(self, tab: 'TabChild'):
+    def addTab(self, tab: 'TabChild'):  # noqa: N802
         self._tabs.append(tab)
         super(TabWidget, self).addTab(tab, tab.tab_title)
 

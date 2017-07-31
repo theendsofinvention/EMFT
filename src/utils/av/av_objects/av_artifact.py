@@ -4,6 +4,7 @@ import urllib.parse
 from src.utils.custom_session import JSONObject, json_property
 
 
+# flake8: noqa
 class AVArtifact(JSONObject):
     @json_property
     def type(self):

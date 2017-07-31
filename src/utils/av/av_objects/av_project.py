@@ -4,6 +4,7 @@ from src.utils.custom_session import JSONObject, json_property
 from .av_nu_get_feed import AVNuGetFeed
 
 
+# flake8: noqa
 # noinspection PyPep8Naming
 class AVProject(JSONObject):
     @json_property
