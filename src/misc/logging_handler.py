@@ -97,12 +97,28 @@ class PersistentLoggingFollower(logging.Formatter):
         return _sanitize_level(level)
 
     @staticmethod
-    def filter_records(
+    def filter_record(
+            record,
             minimum_level=logging.NOTSET,
             msg_filter: str or None = None,
             module_filter: str or None = None,
             thread_filter: str or None = None,
     ):
+        records = Records([record])
+        records \
+            .filter_by_level(minimum_level) \
+            .filter_by_message(msg_filter) \
+            .filter_by_module(module_filter) \
+            .filter_by_thread(thread_filter)
+        return len(records) > 0
+
+    @staticmethod
+    def filter_records(
+            minimum_level=logging.NOTSET,
+            msg_filter: str or None = None,
+            module_filter: str or None = None,
+            thread_filter: str or None = None,
+    ) -> typing.Iterator[logging.LogRecord]:
         records = Records(persistent_logging_handler.records)
         records\
             .filter_by_level(minimum_level)\

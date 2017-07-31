@@ -96,13 +96,17 @@ class TabChildLog(MainUiTabChild, PersistentLoggingFollower, TabLogAdapter):
         return self.combo.currentText()
 
     @property
-    def records(self) -> typing.Generator[logging.LogRecord, None, None]:
-        return self.filter_records(
+    def filters(self):
+        return dict(
             minimum_level=self.min_lvl,
             msg_filter=self.filter_line_edit_msg.text(),
             module_filter=self.filter_line_edit_module.text(),
             thread_filter=self.filter_line_edit_thread.text()
         )
+
+    @property
+    def records(self) -> typing.Iterator[logging.LogRecord]:
+        return self.filter_records(**self.filters)
 
     def _redraw(self):
         self._clean()
@@ -110,7 +114,7 @@ class TabChildLog(MainUiTabChild, PersistentLoggingFollower, TabLogAdapter):
             self.handle_record(record)
 
     def handle_record(self, record: logging.LogRecord):
-        if record.levelno >= self._sanitize_level(self.min_lvl):
+        if self.filter_record(record, **self.filters):
             I.tab_log_write(self.format(record), str(self.colors[record.levelname]))
 
     def tab_log_write(self, msg, color='#000000', bold=False):
@@ -119,8 +123,13 @@ class TabChildLog(MainUiTabChild, PersistentLoggingFollower, TabLogAdapter):
             msg = '<b>{}</b>'.format(msg)
         self.log_text.appendHtml(msg)
 
-    def combo_changed(self, new_value):
-        Config().log_level = new_value
+    def combo_changed(self, _):
+        """
+        Updates current log level and forces a re-draw of the text widget.
+
+        (automatically fires the user activates the log level selection combo)
+        """
+        Config().log_level = self.combo.currentText()
         self._redraw()
 
     def _send(self):
