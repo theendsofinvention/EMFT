@@ -85,7 +85,8 @@ before_build:
   - set PATH=c:\projects\verpatch;%PATH%
 
 build_script:
-  - "%PYTHON%/python.exe build.py"
+  - cmd: pip install -e .
+  - cmd: emft-build
 
 after_build:
   - cmd: move dist\emft.exe emft.exe
