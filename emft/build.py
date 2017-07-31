@@ -3,14 +3,13 @@
 Collections of tools to build EMFT
 """
 import datetime
-import typing
 import importlib
 import os
-import platform
 import re
 import shlex
 import subprocess
 import sys
+import typing
 from json import loads
 
 import certifi
@@ -115,17 +114,17 @@ def do_ex(ctx: click.Context, cmd: typing.List[str], cwd: str = '.') -> typing.T
     Returns: stdout, stderr, exit_code
 
     """
+
     def _popen_pipes(ctx_, cmd_, cwd_):
         def _always_strings(ctx__, env_dict):
             """
             On Windows and Python 2, environment dictionaries must be strings
             and not unicode.
             """
-            if ctx__.obj['is_windows']:
-                env_dict.update(
-                    (key, str(value))
-                    for (key, value) in env_dict.items()
-                )
+            env_dict.update(
+                (key, str(value))
+                for (key, value) in env_dict.items()
+            )
             return env_dict
 
         return subprocess.Popen(
@@ -308,6 +307,21 @@ def _install_pyinstaller(ctx: click.Context, force: bool = False):
         do(ctx, ['pip', 'install', repo])
 
 
+def _get_version(ctx: click.Context):
+    if not hasattr(ctx, 'obj') or ctx.obj is None:
+        ctx.obj = {}
+
+    try:
+        from emft.__version_frozen__ import __version__, __pep440__
+        ctx.obj['semver'] = __version__
+        ctx.obj['pep440'] = __pep440__
+    except ModuleNotFoundError:
+        ctx.invoke(pin_version)
+
+    click.secho(f"Semver: {ctx.obj['semver']}", fg='green')
+    click.secho(f"PEP440: {ctx.obj['pep440']}", fg='green')
+
+
 # noinspection PyUnusedLocal
 def _print_version(ctx: click.Context, param, value):
     if not value or ctx.resilient_parsing:
@@ -315,9 +329,7 @@ def _print_version(ctx: click.Context, param, value):
 
     ensure_repo()
 
-    from emft.__version_frozen__ import __version__, __pep440__
-    click.secho(f"Semver: {__version__}", fg='green')
-    click.secho(f"PEP440: {__pep440__}", fg='green')
+    _get_version(ctx)
     exit(0)
 
 
@@ -339,17 +351,7 @@ def cli(ctx):
 
     ensure_repo()
 
-    from emft.__version_frozen__ import __version__, __pep440__
-
-    if not hasattr(ctx, 'obj') or ctx.obj is None:
-        ctx.obj = {}
-
-    ctx.obj['is_windows'] = platform.system() == 'Windows'
-    ctx.obj['semver'] = __version__
-    ctx.obj['pep440'] = __pep440__
-
-    click.secho(f"Semver: {__version__}", fg='green')
-    click.secho(f"PEP440: {__pep440__}", fg='green')
+    _get_version(ctx)
 
     # if ctx.invoked_subcommand is None:
     #     Checks.safety(ctx)
