@@ -41,7 +41,7 @@ extensions = ['sphinx.ext.autodoc',
               'sphinx.ext.viewcode',
               'sphinx.ext.githubpages',
               'sphinx.ext.todo',
-              'sphinxjp.themes.basicstrap',
+              # 'sphinxjp.themes.basicstrap',
               'sphinx_click.ext',
               ]
 

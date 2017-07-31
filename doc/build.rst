@@ -33,7 +33,7 @@ EMFT is meant to be compiled as a single Win32 portable executable file.
     In the meanwhile, "verpatch" can be obtained at: https://ddverpatch.codeplex.com/releases
 
 
-.. click:: build:cli
+.. click:: emft.build:cli
     :prog: hello-world
     :show-nested:
 

@@ -26,9 +26,8 @@ GitVersion_ is used to infer the current version from the Git repository.
     :scale: 50 %
     :alt: EMFT versionning scheme
 
-    EMFT versionning scheme
+    EMFT versionning scheme (click the picture for larger scale)
 
-(click the picture for larger scale)
 
 .. _SemVer: http://semver.org/
 .. _GitVersion: https://github.com/GitTools/GitVersion
