@@ -70,7 +70,7 @@ dev_requires = [
     'sphinx_autodoc_typehints',
     'sphinx-click',
     'sphinx-git',
-    'sphinx-rtd-theme',
+    'sphinxjp.themes.basicstrap',
 ]
 
 setup_requires = [

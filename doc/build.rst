@@ -1,78 +1,68 @@
-Documentation for build.py
-==========================
-
-
-
 Building EMFT
--------------
+=============
+
+.. contents::
+
+Installing EMFT as developer
+----------------------------
+
+To install EMFT, you'll first need to clone the repository::
+
+    git clone https://github.com/132nd-etcher/EMFT.git
+
+Then, make *SURE* your virtualenv is active, and install with::
+
+    pip install -e .
+
+Compiling EMFT
+--------------
+
+.. important:: EMFT only compiles on a Windows platform, and against Python 3.6 or newer.
 
 EMFT is meant to be compiled as a single Win32 portable executable file.
 
-.. attention:: You will need to manually install two helper application to fully build EMFT
+To facilitate the building process, it is self-contained in the ``emft/build.py`` python script.
 
+The script is installed as an executable when you install EMFT and available as ``emft-build``, which I'll explain
+below.
 
-``gitversion.exe``
+Helper applications
++++++++++++++++++++
 
-    GitVersion is used to infer the current version from the Git repository.
+.. tip:: You will need to manually install these two applications if you want to build EMFT locally
 
-    setuptools_scm plans on switching to using the Semver scheme in the future; when that happens,
-    I\'ll remove the dependency to GitVersion.
+gitversion.exe
+**************
 
-    In the meanwhile, GitVersion can be obtained via Chocolatey (recommended):
-    https://chocolatey.org/packages/GitVersion.Portable
+GitVersion is used to infer the current version from the Git repository.
 
-    Or directly from: https://github.com/GitTools/GitVersion/releases
+``setuptools_scm`` plans on switching to using the Semver scheme in the future; when that happens,
+I\'ll remove the dependency to GitVersion.
 
-``verpatch.exe``
+In the meanwhile, GitVersion can be obtained via Chocolatey (recommended):
+https://chocolatey.org/packages/GitVersion.Portable
 
-    Verpatch is used to embed resources like the version after the compilation.
+Or directly from: https://github.com/GitTools/GitVersion/releases
 
-    I\'m waiting on PyInstaller to fix their own resources patcher so I can remove the dependency to
-    this external tool...
+verpatch
+********
 
-    In the meanwhile, "verpatch" can be obtained at: https://ddverpatch.codeplex.com/releases
+Verpatch is used to embed resources like the version after the compilation.
 
+I\'m waiting on ``pyinstaller`` to fix their own resources patcher so I can remove the dependency to
+this external tool...
+
+In the meanwhile, Verpatch can be obtained at: https://ddverpatch.codeplex.com/releases
+
+The emft-build tool
+-------------------
 
 .. click:: emft.build:cli
-    :prog: hello-world
+    :prog: emft-build
     :show-nested:
 
-The whole compilation processed is handled by the ``setup.py`` script.
+build.py API
+++++++++++++
 
-.. code-block:: python
-
-   python setup.py [command] [options]
-
-Conventions:
-
-:Command name:
-
-
-
-    :Command: Command line to start the tool
-
-    :Description: Description of what the tool does
-
-    :Depends on: Other commands the tool relies on
-
-
-
-                Those other commands will be run *before* the tool, in the order indicated
-
-    :Options: Available options for the tool
-
-
-
-        The available commands are:
-
-:pylint:
-
-    :Command: ``python setup.py pylint``
-    :Description: runs pylint against the source
-
-    :Depends on:
-
-        #. install_check_dependencies
-
-.. automodule:: setup
+.. automodule:: emft.build
     :members:
