@@ -1,10 +1,6 @@
 (unreleased)
 ------------
 
-Changes
-~~~~~~~
-- Dve: reqs: update reqs. [132nd-etcher]
-
 Fix
 ~~~
 - Fix bug in log tab: new records are now filtered. [132nd-etcher]
