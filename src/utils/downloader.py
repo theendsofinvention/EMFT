@@ -188,7 +188,7 @@ class Downloader:
                 LOGGER.debug('Exception in callback: %s', ph.__name__)
                 LOGGER.debug(err, exc_info=True)
 
-    def _download_to_memory(self):
+    def download_to_memory(self):
 
         data = self._create_response()
 
@@ -253,7 +253,7 @@ class Downloader:
     def download(self):
 
         LOGGER.debug('downloading to memory')
-        self._download_to_memory()
+        self.download_to_memory()
 
         check = self._check_hash()
 
