@@ -10,7 +10,7 @@ import urllib3
 from src.utils.custom_logging import make_logger
 from src.utils.threadpool import ThreadPool
 
-logger = make_logger(__name__)
+LOGGER = make_logger(__name__)
 
 
 def get_hash(data, method: str = 'md5'):
@@ -24,7 +24,7 @@ def get_hash(data, method: str = 'md5'):
         raise RuntimeError('cannot find method "{}" in hashlib'.format(method))
     else:
         hash_ = func(data).hexdigest()
-        logger.debug('hash for binary data: %s', hash_)
+        LOGGER.debug('hash for binary data: %s', hash_)
 
         return hash_
 
@@ -71,23 +71,23 @@ class Downloader:
     def _check_hash(self):
 
         if self.hexdigest is None:
-            logger.debug('no hash to verify')
+            LOGGER.debug('no hash to verify')
             return None
 
         if self.file_binary_data is None:
-            logger.debug('cannot verify file hash')
+            LOGGER.debug('cannot verify file hash')
             return False
 
-        logger.debug('checking file hash')
-        logger.debug('update hash: %s', self.hexdigest)
+        LOGGER.debug('checking file hash')
+        LOGGER.debug('update hash: %s', self.hexdigest)
 
         file_hash = get_hash(self.file_binary_data, self.hash_method)
 
         if file_hash == self.hexdigest:
-            logger.debug('file hash verified')
+            LOGGER.debug('file hash verified')
             return True
 
-        logger.debug('cannot verify file hash')
+        LOGGER.debug('cannot verify file hash')
         return False
 
     @staticmethod
@@ -128,7 +128,7 @@ class Downloader:
         if content_length is not None:
             content_length = int(content_length)
 
-        logger.debug('Got content length of: %s', content_length)
+        LOGGER.debug('Got content length of: %s', content_length)
 
         return content_length
 
@@ -153,7 +153,7 @@ class Downloader:
 
     def _create_response(self):
         data = None
-        logger.debug('Url for request: %s', self.url)
+        LOGGER.debug('Url for request: %s', self.url)
 
         try:
             data = self.http_pool.urlopen('GET', self.url,
@@ -161,18 +161,18 @@ class Downloader:
                                           retries=self.max_download_retries)
 
         except urllib3.exceptions.SSLError:
-            logger.debug('SSL cert not verified')
+            LOGGER.debug('SSL cert not verified')
 
         except urllib3.exceptions.MaxRetryError:
-            logger.debug('MaxRetryError')
+            LOGGER.debug('MaxRetryError')
 
         except Exception as e:
-            logger.debug(str(e), exc_info=True)
+            LOGGER.debug(str(e), exc_info=True)
 
         if data is not None:
-            logger.debug('resource URL: %s', self.url)
+            LOGGER.debug('resource URL: %s', self.url)
         else:
-            logger.debug('could not create resource URL.')
+            LOGGER.debug('could not create resource URL.')
         return data
 
     # Calling all progress hooks
@@ -185,8 +185,8 @@ class Downloader:
                 ph(data)
 
             except Exception as err:
-                logger.debug('Exception in callback: %s', ph.__name__)
-                logger.debug(err, exc_info=True)
+                LOGGER.debug('Exception in callback: %s', ph.__name__)
+                LOGGER.debug(err, exc_info=True)
 
     def _download_to_memory(self):
 
@@ -198,8 +198,8 @@ class Downloader:
         self.content_length = self._get_content_length(data)
 
         if self.content_length is None:
-            logger.debug('content-Length not in headers')
-            logger.debug('callbacks will not show time left '
+            LOGGER.debug('content-Length not in headers')
+            LOGGER.debug('callbacks will not show time left '
                          'or percent downloaded.')
 
         received_data = 0
@@ -221,7 +221,7 @@ class Downloader:
                 break
 
             self.block_size = self._best_block_size(end_block - start_block, len(block))
-            logger.debug('Block size: %s', self.block_size)
+            LOGGER.debug('Block size: %s', self.block_size)
             self.file_binary_data += block
 
             received_data += len(block)
@@ -248,17 +248,17 @@ class Downloader:
                   'time': '00:00'}
 
         self._call_progress_hooks(status)
-        logger.debug('Download Complete')
+        LOGGER.debug('Download Complete')
 
     def download(self):
 
-        logger.debug('downloading to memory')
+        LOGGER.debug('downloading to memory')
         self._download_to_memory()
 
         check = self._check_hash()
 
         if check is True or check is None:
-            logger.debug('writing to file')
+            LOGGER.debug('writing to file')
             self._write_to_file()
             return True
 

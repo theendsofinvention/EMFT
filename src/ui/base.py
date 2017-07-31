@@ -27,7 +27,7 @@ BOTTOM_MARGIN = 0
 
 DEFAULT_MARGINS = (LEFT_MARGIN, TOP_MARGIN, RIGHT_MARGIN, BOTTOM_MARGIN)
 
-logger = make_logger(__name__)
+LOGGER = make_logger(__name__)
 
 
 class Dialog(QDialog):
@@ -327,7 +327,7 @@ class Combo(QComboBox):
             try:
                 self.set_index_from_text(current)
             except ValueError:
-                logger.warning('value "{}" has been deleted'.format(current))
+                LOGGER.warning('value "{}" has been deleted'.format(current))
         # self.blockSignals(False)
 
 
@@ -432,12 +432,12 @@ class _TableViewWithRowContextMenu:
 
     # noinspection PyPep8Naming
     def contextMenuEvent(self, event):
-        logger.debug('in')
+        LOGGER.debug('in')
         if self._menu:
-            logger.debug('menu')
+            LOGGER.debug('menu')
             if self.selectionModel().selection().indexes():
                 selected_rows = set()
-                logger.debug('indexes')
+                LOGGER.debug('indexes')
                 for i in self.selectionModel().selection().indexes():
                     selected_rows.add(i.row())
 

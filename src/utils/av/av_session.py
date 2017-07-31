@@ -7,7 +7,7 @@ from .av_objects.av_artifact import AllAVArtifacts
 from .av_objects.av_history import AVHistory
 from .av_objects.av_last_build import AVLastBuild
 
-logger = make_logger(__name__)
+LOGGER = make_logger(__name__)
 
 
 class AVSession(requests.Session):
@@ -40,9 +40,9 @@ class AVSession(requests.Session):
 
     def __parse_resp_error(self):
 
-        logger.error(self.req)
-        logger.error(self.resp)
-        logger.error(self.__resp.reason)
+        LOGGER.error(self.req)
+        LOGGER.error(self.resp)
+        LOGGER.error(self.__resp.reason)
 
         raise Exception('request failed')
 
@@ -54,13 +54,13 @@ class AVSession(requests.Session):
         if not self.__resp.ok:
             self.__parse_resp_error()
 
-        logger.debug(self.__resp.reason)
+        LOGGER.debug(self.__resp.reason)
 
         return self.__resp
 
     def _get(self, **kwargs) -> requests.models.Response:
 
-        logger.debug(self.req)
+        LOGGER.debug(self.req)
 
         self.__resp = super(AVSession, self).get(self.req, **kwargs)
 

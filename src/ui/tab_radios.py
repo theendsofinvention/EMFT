@@ -10,7 +10,7 @@ from src.ui.base import VLayout, Label, TabWidget, TabChild, TableView, TableEdi
 from src.ui.main_ui_tab_widget import MainUiTabChild
 from .tab_radios_adapter import TAB_NAME, TabRadiosAdapter
 
-logger = make_logger(__name__)
+LOGGER = make_logger(__name__)
 
 
 class _RadioEditTab(TabChild):

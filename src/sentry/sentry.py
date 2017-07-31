@@ -14,7 +14,7 @@ from src.__version__ import __version__
 from src.sentry.sentry_context_provider import ISentryContextProvider
 from src.utils import Singleton, make_logger, nice_exit
 
-logger = make_logger(__name__)
+LOGGER = make_logger(__name__)
 
 CRASH = False
 
@@ -28,7 +28,7 @@ class Sentry(raven.Client, metaclass=Singleton):
             '59825849c3884a52a0244e7f1c30260b@sentry.io/135324?ca_certs={}'.format(certifi.where()),
             release=__version__
         )
-        logger.info('Sentry is ready')
+        LOGGER.info('Sentry is ready')
 
     def set_context(self):
         self.tags_context(
@@ -45,7 +45,7 @@ class Sentry(raven.Client, metaclass=Singleton):
 
     def register_context(self, context_name: str, context_provider: ISentryContextProvider):
         """Registers a context to be read when a crash occurs; obj must implement get_context()"""
-        logger.debug('registering context with Sentry: {}'.format(context_name))
+        LOGGER.debug('registering context with Sentry: {}'.format(context_name))
         self.registered_contexts[context_name] = context_provider
 
     @staticmethod
@@ -55,7 +55,7 @@ class Sentry(raven.Client, metaclass=Singleton):
     def captureMessage(self, message, **kwargs):
         self.set_context()
         if not global_.FROZEN:
-            logger.warning(f'message would have been sent: {message}')
+            LOGGER.warning(f'message would have been sent: {message}')
             return
         if kwargs.get('data') is None:
             kwargs['data'] = {}
@@ -69,10 +69,10 @@ class Sentry(raven.Client, metaclass=Singleton):
     def captureException(self, exc_info=None, **kwargs):
         self.set_context()
         if not global_.FROZEN:
-            logger.error('crash report would have been sent')
+            LOGGER.error('crash report would have been sent')
             return
 
-        logger.debug('capturing exception')
+        LOGGER.debug('capturing exception')
         for k, context_provider in self.registered_contexts.items():
             assert isinstance(context_provider, ISentryContextProvider)
             SENTRY.extra_context({k: context_provider.get_context()})
@@ -82,9 +82,9 @@ class Sentry(raven.Client, metaclass=Singleton):
             nice_exit(-1)
 
 
-logger.info('SENTRY: initializing')
+LOGGER.info('SENTRY: initializing')
 SENTRY = Sentry()
-logger.info('SENTRY: initialized')
+LOGGER.info('SENTRY: initialized')
 
 
 # noinspection PyUnusedLocal

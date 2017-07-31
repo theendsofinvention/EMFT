@@ -11,7 +11,7 @@ from src.ui.base import VLayout, Combo, HLayout, Label, HSpacer, TableModel, Tab
 from src.ui.main_ui_tab_widget import MainUiTabChild
 from .tab_skins_adapter import TAB_NAME, TabSkinsAdapter
 
-logger = make_logger(__name__)
+LOGGER = make_logger(__name__)
 
 RE_MOUNT_LINE = re.compile(r'^mount_vfs_texture_path\("(?P<path>.*)"\)\n$')
 RE_LOAD_MODEL_LINE = re.compile(r'^LoadModel\("(?P<path>.*)"\)$')

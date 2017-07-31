@@ -7,7 +7,7 @@ from src.reorder.value import AutoProfileModelContainer, BranchesModelContainer
 from src.ui.base import VLayout, Label, Widget, PushButton, GridLayout, Combo, HSpacer
 from src.utils import make_logger
 
-logger = make_logger(__name__)
+LOGGER = make_logger(__name__)
 
 
 class WidgetAutoReorder(Widget):

@@ -8,7 +8,7 @@ from src.reorder.value.output_folder_model import OutputFoldersModelContainer
 from src.ui.base import VLayout, Label, Widget, LineEdit, PushButton, HLayout, GridLayout, Combo, HSpacer
 from src.utils import Path, make_logger
 
-logger = make_logger(__name__)
+LOGGER = make_logger(__name__)
 
 
 class WidgetManualReorder(Widget):

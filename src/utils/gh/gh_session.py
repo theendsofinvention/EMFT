@@ -8,7 +8,7 @@ from .gh_objects.gh_mail import GHMail, GHMailList
 from .gh_objects.gh_repo import GHRepoList, GHRepo
 from .gh_objects.gh_user import GHUser
 
-logger = make_logger(__name__)
+LOGGER = make_logger(__name__)
 
 
 # TODO: https://github.com/github/choosealicense.com/tree/gh-pages/_licenses
@@ -29,28 +29,28 @@ class GHSession(GHAnonymousSession, metaclass=Singleton):
 
         if token is None:
 
-            logger.debug('no token given, trying local environment')
+            LOGGER.debug('no token given, trying local environment')
 
             import os
             token = os.environ.get('GH_TOKEN', None)
 
             if token:
-                logger.debug('GH token found in local environment')
+                LOGGER.debug('GH token found in local environment')
             else:
-                logger.debug('no GH token found in local environment')
+                LOGGER.debug('no GH token found in local environment')
 
         self.authenticate(token)
 
         if self.user is False:
-            logger.error('Token was invalidated; please create a new one')
+            LOGGER.error('Token was invalidated; please create a new one')
         elif self.user is None:
-            logger.info('No user')
+            LOGGER.info('No user')
         else:
-            logger.info('authenticated as: {}'.format(self.user))
+            LOGGER.info('authenticated as: {}'.format(self.user))
 
     def authenticate(self, token):
         if token is None:
-            logger.debug('no token, staying anonymous')
+            LOGGER.debug('no token, staying anonymous')
             self.user = None
         else:
             self.headers.update(

@@ -4,7 +4,7 @@ from src.reorder.finder import FindProfile, FindRemoteVersion, FindOutputFolder
 from src.ui.main_ui_interface import I
 from src.utils import ThreadPool, make_logger, Path
 
-logger = make_logger(__name__)
+LOGGER = make_logger(__name__)
 
 
 class ReorderMiz:
@@ -32,7 +32,7 @@ class ReorderMiz:
             if not output_folder.exists():
                 error = f'output folder does not exist:\n\n{miz_file.abspath()}'
         if error:
-            logger.error(error)
+            LOGGER.error(error)
             I().error(error.replace(':', ':\n\n').capitalize())
             return
         ReorderMiz.reorder_miz_file(
@@ -56,7 +56,7 @@ class ReorderMiz:
         if not local_file.isfile() or not local_file.basename().endswith('miz'):
             error = f'please select a valid miz file'
         if error:
-            logger.error(error)
+            LOGGER.error(error)
             I().error(error.capitalize())
             return
         ReorderMiz.reorder_miz_file(

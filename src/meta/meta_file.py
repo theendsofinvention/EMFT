@@ -8,7 +8,7 @@ from ruamel.yaml import load as yload, resolver, add_constructor, add_represente
 from src.meta.meta import Meta
 from src.utils import make_logger, Path
 
-logger = make_logger(__name__)
+LOGGER = make_logger(__name__)
 
 _yaml_mapping = resolver.BaseResolver.DEFAULT_MAPPING_TAG
 
@@ -74,10 +74,10 @@ class MetaFile(Meta):
             self.write()
 
     def debug(self, txt: str):
-        logger.debug('{}: {}'.format(self.path.abspath(), txt))
+        LOGGER.debug('{}: {}'.format(self.path.abspath(), txt))
 
     def exception(self, txt: str):
-        logger.debug('{}: {}'.format(self.path.abspath(), txt))
+        LOGGER.debug('{}: {}'.format(self.path.abspath(), txt))
 
     @property
     def path(self) -> Path:
@@ -104,13 +104,13 @@ class MetaFile(Meta):
         while self.data['meta_version'] < self.meta_version:
             current_version = self.data['meta_version']
             next_version = self.data['meta_version'] + 1
-            logger.debug('upgrading meta from version "{}"'.format(current_version))
+            LOGGER.debug('upgrading meta from version "{}"'.format(current_version))
 
             if not self.meta_version_upgrade(current_version):
                 raise RuntimeError('failed to upgrade metadata to version "{}"'.format(next_version))
 
             else:
-                logger.debug('successfully upgraded meta to version "{}"'.format(next_version))
+                LOGGER.debug('successfully upgraded meta to version "{}"'.format(next_version))
                 meta_updated = True
 
             self.data['meta_version'] = next_version

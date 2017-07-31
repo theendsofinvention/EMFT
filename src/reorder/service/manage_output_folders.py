@@ -5,7 +5,7 @@ from src.reorder.finder import FindOutputFolder
 from src.reorder.value import OutputFolder, OutputFolders, OutputFoldersModelContainer
 from src.utils import Path, make_logger
 
-logger = make_logger(__name__)
+LOGGER = make_logger(__name__)
 
 
 class ManageOutputFolders:
@@ -22,12 +22,12 @@ class ManageOutputFolders:
 
     @staticmethod
     def _set_combo_model():
-        logger.debug('resetting combo model')
+        LOGGER.debug('resetting combo model')
         model = OutputFoldersModelContainer().model
         model.beginResetModel()
         model.clear()
         for output_folder_name in sorted(OutputFolders().keys()):
-            logger.debug(f'adding folder {output_folder_name}')
+            LOGGER.debug(f'adding folder {output_folder_name}')
             model.appendRow(output_folder_name)
         model.endResetModel()
 
@@ -57,7 +57,7 @@ class ManageOutputFolders:
             FindOutputFolder.get_by_path(path)
         except FileNotFoundError:
             # All is fine, the path is not registered yet
-            logger.debug(f'adding output folder: {name} - "{path.abspath()}"')
+            LOGGER.debug(f'adding output folder: {name} - "{path.abspath()}"')
             output_folder = OutputFolder(path.abspath())
             OutputFolders()[name] = output_folder
             ManageOutputFolders._set_combo_model()
@@ -100,10 +100,10 @@ class ManageOutputFolders:
         try:
             output_folder = FindOutputFolder().get_by_name(name)
         except ValueError:
-            logger.exception(f'output folder not found: {name}')
+            LOGGER.exception(f'output folder not found: {name}')
         else:
             OutputFolders.ACTIVE_OUTPUT_FOLDER = output_folder
             OutputFolders.ACTIVE_OUTPUT_FOLDER_NAME = name
             ManageOutputFolders.write_output_folders_to_config()
             ManageOutputFolders.notify_watchers()
-            logger.debug(f'output folder has changed to {name}')
+            LOGGER.debug(f'output folder has changed to {name}')

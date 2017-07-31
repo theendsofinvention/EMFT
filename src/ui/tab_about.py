@@ -6,7 +6,7 @@ from src import global_
 from src.ui.base import VLayout, Label, HSpacer, GridLayout, VSpacer
 from src.ui.main_ui_tab_widget import MainUiTabChild
 
-logger = make_logger(__name__)
+LOGGER = make_logger(__name__)
 
 
 class TabChildAbout(MainUiTabChild):

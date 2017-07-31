@@ -7,7 +7,7 @@ from src.reorder.value import AutoProfile, AutoProfiles, AutoProfileModelContain
 from src.reorder.finder import FindProfile
 from src.utils import Path, make_logger
 
-logger = make_logger(__name__)
+LOGGER = make_logger(__name__)
 
 
 class ManageProfiles:
@@ -24,12 +24,12 @@ class ManageProfiles:
 
     @staticmethod
     def _set_combo_model():
-        logger.debug('resetting combo model')
+        LOGGER.debug('resetting combo model')
         model = AutoProfileModelContainer().model
         model.beginResetModel()
         model.clear()
         for name in AutoProfiles().keys():
-            logger.debug(f'adding profile {name}')
+            LOGGER.debug(f'adding profile {name}')
             model.appendRow(name)
         model.endResetModel()
 
@@ -88,7 +88,7 @@ class ManageProfiles:
         ConvertUrl.convert_gh_url(profile.gh_repo)
         ConvertUrl.convert_av_url(profile.av_repo)
 
-        logger.debug(f'adding profile: {name}')
+        LOGGER.debug(f'adding profile: {name}')
         AutoProfiles()[name] = profile
         ManageProfiles._set_combo_model()
         ManageProfiles.write_profiles_to_config()

@@ -10,7 +10,7 @@ from src import global_
 from src.meta import MetaFile
 from .values import ConfigValues
 
-logger = make_logger(__name__)
+LOGGER = make_logger(__name__)
 
 
 class Config(MetaFile, ConfigValues, metaclass=Singleton):
@@ -74,7 +74,7 @@ class Config(MetaFile, ConfigValues, metaclass=Singleton):
             return True
         upgrade_func = getattr(self, 'upgrade_from_v{}'.format(from_version))
         if upgrade_func:
-            logger.info('updating Config to meta version {}'.format(from_version))
+            LOGGER.info('updating Config to meta version {}'.format(from_version))
             return upgrade_func()
 
     def __getitem__(self, key):
@@ -93,6 +93,6 @@ class Config(MetaFile, ConfigValues, metaclass=Singleton):
         super(Config, self).write()
 
 
-logger.info('config: initializing')
+LOGGER.info('config: initializing')
 config = Config()
-logger.info('config: initialized')
+LOGGER.info('config: initialized')

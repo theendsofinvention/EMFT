@@ -6,7 +6,7 @@ from src.utils.custom_logging import make_logger
 from src.meta import MetaPropertyWithDefault, MetaGUIDPropertyWithDefault
 from src.reorder.cfg_values import ReorderConfigValues
 
-logger = make_logger(__name__)
+LOGGER = make_logger(__name__)
 
 
 class ConfigValues(ReorderConfigValues):

@@ -15,7 +15,7 @@ from .base import Shortcut, VLayout, Widget
 from .main_ui_interface import I
 from .main_ui_mixins import MainUiMixins
 
-logger = make_logger(__name__)
+LOGGER = make_logger(__name__)
 
 
 class MainUi(QMainWindow, MainUiMixins):
@@ -83,12 +83,12 @@ class MainUi(QMainWindow, MainUiMixins):
 def start_ui(test=False):
     from PyQt5.QtWidgets import QApplication
     import sys
-    logger.info('starting application')
+    LOGGER.info('starting application')
     global_.QT_APP = QApplication([])
     main_ui = MainUi()
     global_.MAIN_UI = main_ui
 
-    logger.info('loading module: re-order')
+    LOGGER.info('loading module: re-order')
     from src.reorder.ui.tab_reorder import TabChildReorder
     global_.MAIN_UI.add_tab(TabChildReorder(main_ui))
 
@@ -96,27 +96,27 @@ def start_ui(test=False):
     from src.misc.fs import dcs_installs
     dcs_installs.discover_dcs_installations()
 
-    logger.info('loading tab: skins')
+    LOGGER.info('loading tab: skins')
     from src.ui.tab_skins import TabChildSkins
     global_.MAIN_UI.add_tab(TabChildSkins(main_ui))
 
-    logger.info('loading tab: roster')
+    LOGGER.info('loading tab: roster')
     from src.ui.tab_roster import TabChildRoster
     global_.MAIN_UI.add_tab(TabChildRoster(main_ui))
 
-    logger.info('loading tab: radios')
+    LOGGER.info('loading tab: radios')
     from src.ui.tab_radios import TabChildRadios
     global_.MAIN_UI.add_tab(TabChildRadios(main_ui))
 
-    logger.info('loading tab: config')
+    LOGGER.info('loading tab: config')
     from src.ui.tab_config import TabChildConfig
     global_.MAIN_UI.add_tab(TabChildConfig(main_ui))
 
-    logger.info('loading tab: log')
+    LOGGER.info('loading tab: log')
     from src.ui.tab_log import TabChildLog
     global_.MAIN_UI.add_tab(TabChildLog(main_ui))
 
-    logger.info('loading tab: about')
+    LOGGER.info('loading tab: about')
     from src.ui.tab_about import TabChildAbout
     global_.MAIN_UI.add_tab(TabChildAbout(main_ui))
 
@@ -124,7 +124,7 @@ def start_ui(test=False):
 
     def pre_update_hook():
         if not hasattr(sys, 'frozen'):
-            logger.warning('skipping update on script run')
+            LOGGER.warning('skipping update on script run')
             return False
         else:
             I.hide()
@@ -133,12 +133,12 @@ def start_ui(test=False):
     def cancel_update_hook():
         I.show()
 
-    logger.info('loading adapter: Progress')
+    LOGGER.info('loading adapter: Progress')
     from src.utils import Progress
     # noinspection PyTypeChecker
     Progress.register_adapter(I)
 
-    logger.info('loading module: updater')
+    LOGGER.info('loading module: updater')
     from src.updater import updater
     updater.find_and_install_latest_release(
         current_version=global_.APP_VERSION,
@@ -164,5 +164,5 @@ def start_ui(test=False):
         pool = ThreadPool(1, 'test', _daemon=True)
         pool.queue_task(test_hook)
 
-    logger.info('starting GUI')
+    LOGGER.info('starting GUI')
     sys.exit(global_.QT_APP.exec())

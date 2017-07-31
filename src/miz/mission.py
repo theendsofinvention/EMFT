@@ -10,10 +10,10 @@ from src.utils import Logged, valid_str, valid_positive_int, Validator, valid_bo
 
 EPOCH_DELTA = 1306886400
 
-logger = make_logger(__name__)
+LOGGER = make_logger(__name__)
 
 validator_group_or_unit_name = Validator(_type=str, _regex=r'[a-zA-Z0-9\_\-\#]+',
-                                         exc=ValueError, logger=logger)
+                                         exc=ValueError, logger=LOGGER)
 
 
 class BaseMissionObject(Logged):
@@ -197,7 +197,7 @@ class Mission(BaseMissionObject):
         _type=int,
         _min=0,
         exc=ValueError,
-        logger=logger
+        logger=LOGGER
     )
     validator_start_date = Validator(
         _type=str,
@@ -208,20 +208,20 @@ class Mission(BaseMissionObject):
                r'(((0?[1-9]|1[012])(:[0-5]\d){0,2}(\x20[AP]M))|([01]\d|2[0-3])'
                r'(:[0-5]\d){1,2})?$',
         exc=ValueError,
-        logger=logger
+        logger=LOGGER
     )
     validator_heading = Validator(
         _type=int,
         _min=0,
         _max=359,
         exc=ValueError,
-        logger=logger
+        logger=LOGGER
     )
     validator_group_category = Validator(
         _type=str,
         _in_list=['helicopter', 'ship', 'plane', 'vehicle'],
         exc=ValueError,
-        logger=logger)
+        logger=LOGGER)
     valid_group_categories = ('helicopter', 'plane', 'ship', 'vehicle')
 
     def __init__(self, mission_dict, l10n):
@@ -413,7 +413,7 @@ class Result(BaseMissionObject):
 
 
 class GroundControl(BaseMissionObject):
-    validator_commander = Validator(_type=int, _min=0, _max=100, exc=ValueError, logger=logger)
+    validator_commander = Validator(_type=int, _min=0, _max=100, exc=ValueError, logger=LOGGER)
 
     def __init__(self, mission_dict, l10n):
         super().__init__(mission_dict, l10n)
@@ -529,20 +529,20 @@ class GroundControl(BaseMissionObject):
 
 # noinspection PyProtectedMember
 class Weather(BaseMissionObject):
-    validator_precipitations = Validator(_type=int, _min=0, _max=4, exc=ValueError, logger=logger)
-    validator_cloud_density = Validator(_type=int, _min=0, _max=10, exc=ValueError, logger=logger)
+    validator_precipitations = Validator(_type=int, _min=0, _max=4, exc=ValueError, logger=LOGGER)
+    validator_cloud_density = Validator(_type=int, _min=0, _max=10, exc=ValueError, logger=LOGGER)
     validator_cloud_thickness = Validator(_type=int, _min=200, _max=2000, exc=ValueError,
-                                          logger=logger)
-    validator_cloud_base = Validator(_type=int, _min=300, _max=5000, exc=ValueError, logger=logger)
+                                          logger=LOGGER)
+    validator_cloud_base = Validator(_type=int, _min=300, _max=5000, exc=ValueError, logger=LOGGER)
     validator_fog_visibility = Validator(_type=int, _min=0, _max=6000, exc=ValueError,
-                                         logger=logger)
+                                         logger=LOGGER)
     validator_fog_thickness = Validator(_type=int, _min=0, _max=1000, exc=ValueError,
-                                        logger=logger)
-    validator_qnh = Validator(_type=int, _min=720, _max=790, exc=ValueError, logger=logger)
+                                        logger=LOGGER)
+    validator_qnh = Validator(_type=int, _min=720, _max=790, exc=ValueError, logger=LOGGER)
     validator_temp_spring_or_fall = Validator(_type=int, _min=-10, _max=30, exc=ValueError,
-                                              logger=logger)
-    validator_temp_winter = Validator(_type=int, _min=-50, _max=15, exc=ValueError, logger=logger)
-    validator_temp_summer = Validator(_type=int, _min=5, _max=50, exc=ValueError, logger=logger)
+                                              logger=LOGGER)
+    validator_temp_winter = Validator(_type=int, _min=-50, _max=15, exc=ValueError, logger=LOGGER)
+    validator_temp_summer = Validator(_type=int, _min=5, _max=50, exc=ValueError, logger=LOGGER)
     seasons_enum = {
         1: {
             'name': 'summer',
@@ -566,11 +566,11 @@ class Weather(BaseMissionObject):
         'fall': 4,
     }
     validator_season_name = Validator(_type=str, _in_list=['summer', 'winter', 'fall', 'spring'],
-                                      exc=ValueError, logger=logger)
-    validator_season_code = Validator(_type=int, _min=1, _max=4, exc=ValueError, logger=logger)
-    validator_turbulence = Validator(_type=int, _min=0, _max=60, exc=ValueError, logger=logger)
-    validator_atmo_type = Validator(_type=int, _min=0, _max=1, exc=ValueError, logger=logger)
-    validator_wind_speed = Validator(_type=int, _min=0, _max=50, exc=ValueError, logger=logger)
+                                      exc=ValueError, logger=LOGGER)
+    validator_season_code = Validator(_type=int, _min=1, _max=4, exc=ValueError, logger=LOGGER)
+    validator_turbulence = Validator(_type=int, _min=0, _max=60, exc=ValueError, logger=LOGGER)
+    validator_atmo_type = Validator(_type=int, _min=0, _max=1, exc=ValueError, logger=LOGGER)
+    validator_wind_speed = Validator(_type=int, _min=0, _max=50, exc=ValueError, logger=LOGGER)
 
     def __init__(self, mission_dict, l10n):
         super().__init__(mission_dict, l10n)
@@ -976,7 +976,7 @@ class Group(Country):
         def points(self):
             raise NotImplementedError('uh')
 
-    validator_group_route = Validator(_type=Route, exc=ValueError, logger=logger)
+    validator_group_route = Validator(_type=Route, exc=ValueError, logger=LOGGER)
     units_class_enum = None
 
     def __init__(self, mission_dict, l10n, coa_color, country_index, group_category, group_index):
@@ -1136,8 +1136,8 @@ class Group(Country):
 class BaseUnit(Group):
     validator_skill = Validator(_type=str,
                                 _in_list=['Average', 'Good', 'High', 'Excellent', 'Random', 'Client', 'Player'],
-                                exc=ValueError, logger=logger)
-    validator_unit_types = Validator(_type=str, _in_list=[], exc=ValueError, logger=logger)
+                                exc=ValueError, logger=LOGGER)
+    validator_unit_types = Validator(_type=str, _in_list=[], exc=ValueError, logger=LOGGER)
 
     def __init__(self, mission_dict, l10n, coa_color, country_index, group_category, group_index, unit_index):
         super().__init__(mission_dict, l10n, coa_color, country_index, group_category, group_index)
@@ -1253,7 +1253,7 @@ class BaseUnit(Group):
 
 class FlyingUnit(BaseUnit):
     validator_board_number = Validator(_type=str, _regex=r'[0-9]{3}', exc=ValueError,
-                                       logger=logger)
+                                       logger=LOGGER)
 
     class RadioPresets:
 

@@ -4,7 +4,7 @@ from collections import MutableMapping
 
 from src.utils import make_logger, Singleton
 
-logger = make_logger(__name__)
+LOGGER = make_logger(__name__)
 
 
 # noinspection PyAbstractClass

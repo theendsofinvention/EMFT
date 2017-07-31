@@ -9,7 +9,7 @@ from src.utils.custom_logging import make_logger
 from .widget_manual_reorder import WidgetManualReorder
 from .widget_auto_reorder import WidgetAutoReorder
 
-logger = make_logger(__name__)
+LOGGER = make_logger(__name__)
 
 
 class TabChildReorder(MainUiTabChild, TabReorderAdapter):

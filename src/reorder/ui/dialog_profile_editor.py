@@ -3,7 +3,7 @@ from src.ui.base import Dialog, Label, GridLayout, LineEdit, VSpacer, PushButton
     box_warning
 from src.utils import make_logger, Path
 
-logger = make_logger(__name__)
+LOGGER = make_logger(__name__)
 
 
 class DialogProfileEditor(Dialog):

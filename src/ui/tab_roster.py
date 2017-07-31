@@ -16,7 +16,7 @@ from .main_ui_interface import I
 from .tab_roster_adapter import TAB_NAME
 from .tab_roster_adapter import TabRosterAdapter
 
-logger = make_logger(__name__)
+LOGGER = make_logger(__name__)
 
 
 class TabChildRoster(MainUiTabChild, TabRosterAdapter):
@@ -145,7 +145,7 @@ class TabChildRoster(MainUiTabChild, TabRosterAdapter):
                 livery = unit.livery
             except KeyError:
                 msg = 'no livery found for unit with id "{}" ("{}"), falling back to default'
-                logger.error(msg.format(unit.unit_id, unit.unit_type))
+                LOGGER.error(msg.format(unit.unit_id, unit.unit_type))
                 livery = '--default-- (no skin found for this A/C type)'
 
             pilot_name = group.group_name
@@ -168,7 +168,7 @@ class TabChildRoster(MainUiTabChild, TabRosterAdapter):
             miz_data[pilot_name] = Roster.Pilot(pilot_name, aircraft, livery)
 
         if len(miz_data) == 0:
-            logger.error('no client group found in: {}'.format(self._miz_path.abspath()))
+            LOGGER.error('no client group found in: {}'.format(self._miz_path.abspath()))
             I().error('No client group found in this MIZ file.')
 
         return miz_data

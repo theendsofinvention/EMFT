@@ -7,7 +7,7 @@ from natsort import natsorted
 
 from src.utils.custom_logging import make_logger
 
-logger = make_logger(__name__)
+LOGGER = make_logger(__name__)
 
 # noinspection SpellCheckingInspection
 ERRORS = {
@@ -45,7 +45,7 @@ class SLTP:
     """Simple Lua Python Parser"""
 
     def __init__(self):
-        logger.debug('instantiating parser')
+        LOGGER.debug('instantiating parser')
         self.text = ''
         self.ch = ''
         self.at = 0
@@ -66,12 +66,12 @@ class SLTP:
         :param text: string to decode
         :return: dictionary
         """
-        logger.debug('decoding text to dictionary')
+        LOGGER.debug('decoding text to dictionary')
 
         if not text or type(text) is not str:
             raise SLTPParsingError(ERRORS['unexp_type_str'])
 
-        logger.debug('extracting qualifier')
+        LOGGER.debug('extracting qualifier')
         qual = re.compile(r'^(?P<value>(dictionary|mission|mapResource) = ?)\n')
         match = qual.match(text)
 
@@ -97,13 +97,13 @@ class SLTP:
         :param obj: object to encode
         :return: valid Lua string
         """
-        logger.debug('encoding dictionary to text')
+        LOGGER.debug('encoding dictionary to text')
         if not obj:
             if qualifier.replace('=', '').rstrip() == 'mapResource':
                 # Accept empty mapResource
                 return '{}\n{{\n}} -- end of {}\n'.format(qualifier, qualifier.replace('=', '').rstrip())
             else:
-                logger.error('{}\n{{\n}} -- end of {}\n'.format(qualifier, qualifier.replace('=', '').rstrip()))
+                LOGGER.error('{}\n{{\n}} -- end of {}\n'.format(qualifier, qualifier.replace('=', '').rstrip()))
                 raise SLTPEmptyObjectError(qualifier)
                 # return '{}\n{{\n}} -- end of {}\n'.format(qualifier, qualifier.replace('=', '').rstrip())
         self.depth = 0

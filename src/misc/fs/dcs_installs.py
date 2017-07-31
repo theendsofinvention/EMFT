@@ -14,7 +14,7 @@ from .saved_games import saved_games_path
 from src import global_
 # from src.cfg.cfg import Config
 
-logger = make_logger(__name__)
+LOGGER = make_logger(__name__)
 
 
 class InvalidSavedGamesPath(ValueError):
@@ -38,7 +38,7 @@ class AutoexecCFG:
         return self._vfs
 
     def parse_vfs(self):
-        logger.debug('reading "{}"'.format(self._path.abspath()))
+        LOGGER.debug('reading "{}"'.format(self._path.abspath()))
         with open(self._path.abspath()) as f:
             lines = f.readlines()
         if lines:
@@ -46,7 +46,7 @@ class AutoexecCFG:
                 m = self.RE_VFS.match(line)
                 if m:
                     self._vfs.add(m.group('path'))
-        logger.debug('found {} VFS path(s)'.format(len(self._vfs)))
+        LOGGER.debug('found {} VFS path(s)'.format(len(self._vfs)))
 
     @property
     def path(self) -> Path:
@@ -103,9 +103,9 @@ class DCSInstall:
 
         def scan_dir(p: Path):
             if not p.exists():
-                logger.debug('skipping absent folder: {}'.format(p.abspath()))
+                LOGGER.debug('skipping absent folder: {}'.format(p.abspath()))
                 return
-            logger.debug('scanning for skins in: {}'.format(p.abspath()))
+            LOGGER.debug('scanning for skins in: {}'.format(p.abspath()))
             for ac_folder in os.scandir(p.abspath()):
                 # logger.debug('scanning for skins in: {}'.format(ac_folder.path))
                 ac_name = ac_folder.name
@@ -132,7 +132,7 @@ class DCSInstall:
         scan_dir(Path(self.install_path).joinpath('bazar', 'liveries'))
         scan_dir(Path(self.saved_games).joinpath('liveries'))
 
-        logger.debug('found {} skins'.format(len(self.__skins)))
+        LOGGER.debug('found {} skins'.format(len(self.__skins)))
 
     @property
     def autoexec_cfg(self) -> AutoexecCFG:
@@ -141,10 +141,10 @@ class DCSInstall:
     def discover_autoexec(self):
         autoexec_cfg_path = Path(self.__sg).joinpath('config', 'autoexec.cfg')
         if autoexec_cfg_path.exists():
-            logger.debug('reading {}'.format(autoexec_cfg_path.abspath()))
+            LOGGER.debug('reading {}'.format(autoexec_cfg_path.abspath()))
             self.__autoexec = AutoexecCFG(autoexec_cfg_path)
         else:
-            logger.warning('file does not exist: {}'.format(autoexec_cfg_path.abspath()))
+            LOGGER.warning('file does not exist: {}'.format(autoexec_cfg_path.abspath()))
 
 
 class DCSInstalls:
@@ -188,15 +188,15 @@ class DCSInstalls:
 
     def __discover_install_path(self, k) -> Path or None:
         try:
-            logger.debug('{}: looking up in registry'.format(k))
+            LOGGER.debug('{}: looking up in registry'.format(k))
             with winreg.OpenKey(A_REG,
                                 r'Software\Eagle Dynamics\{}'.format(
                                     self.installs_props[k]['reg_key'])) as aKey:
                 p = Path(winreg.QueryValueEx(aKey, 'Path')[0])
-                logger.debug('{}: found path: {}'.format(k, p.abspath()))
+                LOGGER.debug('{}: found path: {}'.format(k, p.abspath()))
                 return p
         except FileNotFoundError:
-            logger.debug('{}: no install path found'.format(k))
+            LOGGER.debug('{}: no install path found'.format(k))
             return None
 
     def get_install_path(self, k) -> Path or None:
@@ -204,7 +204,7 @@ class DCSInstalls:
             return Config().dcs_custom_install_path
         install_path = self.__discover_install_path(k)
         if install_path is None:
-            logger.debug('{}: no install path found'.format(k))
+            LOGGER.debug('{}: no install path found'.format(k))
             return None
         install_path = Path(install_path)
         install_path.must_be_a_dir(InvalidInstallPath)
@@ -213,20 +213,20 @@ class DCSInstalls:
     def get_variant(self, k):
         install_path = Path(self.installs_props[k]['install'])
         variant_path = Path(install_path.joinpath('dcs_variant.txt'))
-        logger.debug('{}: looking for variant: {}'.format(k, variant_path.abspath()))
+        LOGGER.debug('{}: looking for variant: {}'.format(k, variant_path.abspath()))
         if variant_path.exists():
-            logger.debug('{}: found variant: "{}"; reading'.format(k, variant_path.abspath()))
+            LOGGER.debug('{}: found variant: "{}"; reading'.format(k, variant_path.abspath()))
             return saved_games_path.abspath().joinpath('DCS.{}'.format(variant_path.text()))
         else:
-            logger.debug('{}: no variant, falling back to default: {}'.format(k, self.installs_props[k]['sg_default']))
+            LOGGER.debug('{}: no variant, falling back to default: {}'.format(k, self.installs_props[k]['sg_default']))
             return saved_games_path.abspath().joinpath(self.installs_props[k]['sg_default'])
 
     def discover_dcs_installations(self):
-        logger.debug('looking for local DCS installations')
+        LOGGER.debug('looking for local DCS installations')
 
         for k in self.installs_props:
 
-            logger.debug('{}: searching for paths'.format(k))
+            LOGGER.debug('{}: searching for paths'.format(k))
 
             if k == 'custom':
                 install_path = Config().dcs_custom_install_path
@@ -236,15 +236,15 @@ class DCSInstalls:
                 install_path = self.get_install_path(k)
 
             if install_path is None:
-                logger.info('{}: no installation found, skipping'.format(k))
+                LOGGER.info('{}: no installation found, skipping'.format(k))
                 continue
 
             exe = Path(install_path.joinpath('bin').joinpath('dcs.exe'))
             if not exe.exists():
-                logger.info('{}: no executable found, skipping'.format(k))
+                LOGGER.info('{}: no executable found, skipping'.format(k))
                 continue
 
-            logger.debug('{}: install found: {}'.format(k, install_path.abspath()))
+            LOGGER.debug('{}: install found: {}'.format(k, install_path.abspath()))
 
             self.installs_props[k]['install'] = str(install_path.abspath())
             if k == 'custom':
@@ -252,10 +252,10 @@ class DCSInstalls:
             else:
                 self.installs_props[k]['sg'] = self.get_variant(k)
 
-            logger.debug('{}: getting version info from executable: {}'.format(k, exe.abspath()))
+            LOGGER.debug('{}: getting version info from executable: {}'.format(k, exe.abspath()))
             self.installs_props[k]['version'] = exe.get_win32_file_info().file_version
 
-            logger.debug('{}: set "Saved Games" path to: {}'.format(k, self.installs_props[k]['sg']))
+            LOGGER.debug('{}: set "Saved Games" path to: {}'.format(k, self.installs_props[k]['sg']))
 
             install = DCSInstall(*self.__get_props(k))
 
@@ -305,26 +305,26 @@ class DCSInstalls:
     def add_custom(self, install_dir: Path, variant_dir: Path):
 
         msg = 'custom: adding custom DCS installation; install_dir: "{}" Variant: "{}"'
-        logger.info(msg.format(install_dir.abspath(), variant_dir.abspath()))
+        LOGGER.info(msg.format(install_dir.abspath(), variant_dir.abspath()))
 
         exe = Path(install_dir.joinpath('bin').joinpath('dcs.exe'))
-        logger.debug('custom: looking for dcs.exe: "{}"'.format(exe.abspath()))
+        LOGGER.debug('custom: looking for dcs.exe: "{}"'.format(exe.abspath()))
         if not exe.exists():
             msg = '"dcs.exe" not found in:{{}}{}'.format(install_dir.abspath())
-            logger.error(msg.format(''))
+            LOGGER.error(msg.format(''))
             # noinspection PyCallByClass
             I.error(msg.format('\n\n'))
             return
 
-        logger.debug('custom: install found: {}'.format(install_dir.abspath()))
+        LOGGER.debug('custom: install found: {}'.format(install_dir.abspath()))
 
         self.installs_props['custom']['install'] = str(install_dir.abspath())
         self.installs_props['custom']['sg'] = str(variant_dir.abspath())
 
-        logger.debug('custom: getting version info from executable: {}'.format(exe.abspath()))
+        LOGGER.debug('custom: getting version info from executable: {}'.format(exe.abspath()))
         self.installs_props['custom']['version'] = exe.get_win32_file_info().file_version
 
-        logger.debug('custom: set "Saved Games" path to: {}'.format(self.installs_props['custom']['sg']))
+        LOGGER.debug('custom: set "Saved Games" path to: {}'.format(self.installs_props['custom']['sg']))
 
         install = DCSInstall(*self.__get_props('custom'))
 

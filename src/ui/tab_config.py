@@ -16,7 +16,7 @@ from src.ui.main_ui_interface import I
 from src.updater import updater
 from .tab_config_adapter import TAB_NAME, TabConfigAdapter
 
-logger = make_logger(__name__)
+LOGGER = make_logger(__name__)
 
 
 class TabChildConfig(MainUiTabChild, TabConfigAdapter):
@@ -178,15 +178,15 @@ class TabChildConfig(MainUiTabChild, TabConfigAdapter):
         self.install_new_version_btn.setVisible(False)
 
     def _custom_dcs_install_set(self):
-        logger.debug('setting custom DCS install')
+        LOGGER.debug('setting custom DCS install')
         install_dir = BrowseDialog.get_directory(self, 'DCS installation directory')
         if not install_dir:
-            logger.debug('user cancelled')
+            LOGGER.debug('user cancelled')
             return
         variant = BrowseDialog.get_directory(self, 'Variant directory (DCS subdir in Saved Games)',
                                              init_dir=saved_games.saved_games_path)
         if not variant:
-            logger.debug('user cancelled')
+            LOGGER.debug('user cancelled')
             return
         dcs_installs.add_custom(install_dir, variant)
 
@@ -247,7 +247,7 @@ class TabChildConfig(MainUiTabChild, TabConfigAdapter):
             logger.debug('installing release: {}'.format(self.latest_release.version))
             updater.download_and_install_release(self.latest_release, 'emft.exe')
         else:
-            logger.error('no release to install')
+            LOGGER.error('no release to install')
             # self.updater.install_latest_remote()
 
     def _sg_browse(self):

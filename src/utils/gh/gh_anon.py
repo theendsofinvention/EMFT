@@ -13,7 +13,7 @@ from .gh_objects.gh_branch import GHAllBranches
 from src.utils.custom_logging import make_logger
 from src.utils.singleton import Singleton
 
-logger = make_logger(__name__)
+LOGGER = make_logger(__name__)
 
 
 class GHAnonymousSession(requests.Session, metaclass=Singleton):
@@ -46,7 +46,7 @@ class GHAnonymousSession(requests.Session, metaclass=Singleton):
 
     def __parse_resp_error(self):
 
-        logger.error(self.req)
+        LOGGER.error(self.req)
 
         if self.resp.status_code >= 500:
             raise GithubAPIError(r'Github API seems to be down, check https://status.github.com/')
@@ -85,13 +85,13 @@ class GHAnonymousSession(requests.Session, metaclass=Singleton):
         if not self.__resp.ok:
             self.__parse_resp_error()
 
-        logger.debug(self.__resp.reason)
+        LOGGER.debug(self.__resp.reason)
 
         return self.__resp
 
     def _get(self, **kwargs) -> requests.models.Response:
 
-        logger.debug(self.req)
+        LOGGER.debug(self.req)
 
         self.__resp = super(GHAnonymousSession, self).get(self.req, **kwargs)
 
@@ -99,7 +99,7 @@ class GHAnonymousSession(requests.Session, metaclass=Singleton):
 
     def _put(self, **kwargs) -> requests.models.Response:
 
-        logger.debug(self.req)
+        LOGGER.debug(self.req)
 
         self.__resp = super(GHAnonymousSession, self).put(self.req, **kwargs)
 
@@ -113,7 +113,7 @@ class GHAnonymousSession(requests.Session, metaclass=Singleton):
 
     def _post(self, data=None, json: dict = None, **kwargs) -> requests.models.Response:
 
-        logger.debug(self.req)
+        LOGGER.debug(self.req)
 
         self.__resp = super(GHAnonymousSession, self).post(self.req, data, json, **kwargs)
 
@@ -121,7 +121,7 @@ class GHAnonymousSession(requests.Session, metaclass=Singleton):
 
     def _patch(self, data=None, **kwargs) -> requests.models.Response:
 
-        logger.debug(self.req)
+        LOGGER.debug(self.req)
 
         self.__resp = super(GHAnonymousSession, self).patch(self.req, data, **kwargs)
 
@@ -129,7 +129,7 @@ class GHAnonymousSession(requests.Session, metaclass=Singleton):
 
     def _delete(self, **kwargs) -> requests.models.Response:
 
-        logger.debug(self.req)
+        LOGGER.debug(self.req)
 
         self.__resp = super(GHAnonymousSession, self).delete(self.req, **kwargs)
 

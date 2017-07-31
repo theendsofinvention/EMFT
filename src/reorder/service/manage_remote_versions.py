@@ -11,7 +11,7 @@ from src.utils import Progress
 from src.utils import make_logger, ThreadPool, Path
 from src.utils.av import AVSession
 
-logger = make_logger(__name__)
+LOGGER = make_logger(__name__)
 
 
 class ManageRemoteVersions:
@@ -41,7 +41,7 @@ class ManageRemoteVersions:
         RemoteVersion.LATEST_REMOTE_VERSION = None
         build = ManageRemoteVersions._get_build(branch)
         if build:
-            logger.debug(f'latest build found on Appveyor: {build.build.version.raw_version_str}')
+            LOGGER.debug(f'latest build found on Appveyor: {build.build.version.raw_version_str}')
             jobs = build.build.jobs.successful_only()
             if not jobs:
                 raise RuntimeError('something')
@@ -73,7 +73,7 @@ class ManageRemoteVersions:
             )
 
         else:
-            logger.error('no active branch found')
+            LOGGER.error('no active branch found')
 
     @staticmethod
     def download_latest_remote_version(ui_parent=None):

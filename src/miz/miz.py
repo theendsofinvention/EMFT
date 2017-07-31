@@ -10,7 +10,7 @@ from src.miz.mission import Mission
 from src.sltp import SLTP
 from src.utils import make_logger, Path, Progress
 
-logger = make_logger('miz')
+LOGGER = make_logger('miz')
 
 
 # noinspection PyAbstractClass
@@ -50,7 +50,7 @@ class Miz:
         self.overwrite = overwrite
 
         self.tmpdir = Path(tempfile.mkdtemp('EMFT_'))
-        logger.debug('temporary directory: {}'.format(self.tmpdir.abspath()))
+        LOGGER.debug('temporary directory: {}'.format(self.tmpdir.abspath()))
 
         self.zip_content = None
         self._mission = None
@@ -61,21 +61,21 @@ class Miz:
         self._map_res_qual = None
 
     def __enter__(self):
-        logger.debug('instantiating new Mission object as a context')
+        LOGGER.debug('instantiating new Mission object as a context')
         self.unzip(self.overwrite)
         self._decode()
         return self
 
     def __exit__(self, exc_type, exc_val, exc_tb):
         if exc_type:
-            logger.error('there were error with this mission, keeping temp dir at "{}" and re-raising'.format(
+            LOGGER.error('there were error with this mission, keeping temp dir at "{}" and re-raising'.format(
                 self.tmpdir.abspath()))
-            logger.error('{}\n{}'.format(exc_type, exc_val))
+            LOGGER.error('{}\n{}'.format(exc_type, exc_val))
             return False
         else:
-            logger.debug('closing Mission object context')
+            LOGGER.debug('closing Mission object context')
             if not self.keep_temp_dir:
-                logger.debug('removing temp dir: {}'.format(self.tmpdir.abspath()))
+                LOGGER.debug('removing temp dir: {}'.format(self.tmpdir.abspath()))
                 self.tmpdir.rmtree()
 
     @property
@@ -111,29 +111,29 @@ class Miz:
     @staticmethod
     def reorder(miz_file_path, target_dir, skip_options_file):
 
-        logger.info('re-ordering miz file: {}'.format(miz_file_path))
-        logger.debug('destination folder: {}'.format(target_dir))
-        logger.debug('{}option file'.format('skipping' if skip_options_file else 'including'))
+        LOGGER.info('re-ordering miz file: {}'.format(miz_file_path))
+        LOGGER.debug('destination folder: {}'.format(target_dir))
+        LOGGER.debug('{}option file'.format('skipping' if skip_options_file else 'including'))
 
         with Miz(miz_file_path, overwrite=True) as m:
 
             def mirror_dir(src, dst):
-                logger.debug('{} -> {}'.format(src, dst))
+                LOGGER.debug('{} -> {}'.format(src, dst))
                 diff_ = dircmp(src, dst, ignore)
                 diff_list = diff_.left_only + diff_.diff_files
-                logger.debug('differences: {}'.format(diff_list))
+                LOGGER.debug('differences: {}'.format(diff_list))
                 for x in diff_list:
                     source = Path(diff_.left).joinpath(x)
                     target = Path(diff_.right).joinpath(x)
-                    logger.debug('looking at: {}'.format(x))
+                    LOGGER.debug('looking at: {}'.format(x))
                     if source.isdir():
-                        logger.debug('isdir: {}'.format(x))
+                        LOGGER.debug('isdir: {}'.format(x))
                         if not target.exists():
-                            logger.debug('creating: {}'.format(x))
+                            LOGGER.debug('creating: {}'.format(x))
                             target.mkdir()
                         mirror_dir(source, target)
                     else:
-                        logger.debug('copying: {}'.format(x))
+                        LOGGER.debug('copying: {}'.format(x))
                         source.copy2(diff_.right)
                 for sub in diff_.subdirs.values():
                     assert isinstance(sub, dircmp)
@@ -150,7 +150,7 @@ class Miz:
 
     def _decode(self):
 
-        logger.info('decoding lua tables')
+        LOGGER.info('decoding lua tables')
 
         if not self.zip_content:
             self.unzip(overwrite=False)
@@ -158,51 +158,51 @@ class Miz:
         Progress.start('Decoding MIZ file', length=3)
 
         Progress.set_label('Decoding map resource')
-        logger.debug('reading map resource file')
+        LOGGER.debug('reading map resource file')
         with open(self.map_res_file, encoding=ENCODING) as f:
             self._map_res, self._map_res_qual = SLTP().decode(f.read())
         Progress.set_value(1)
 
         Progress.set_label('Decoding dictionary file')
-        logger.debug('reading l10n file')
+        LOGGER.debug('reading l10n file')
         with open(self.dictionary_file, encoding=ENCODING) as f:
             self._l10n, self._l10n_qual = SLTP().decode(f.read())
         Progress.set_value(2)
 
         Progress.set_label('Decoding mission file')
-        logger.debug('reading mission file')
+        LOGGER.debug('reading mission file')
         with open(self.mission_file, encoding=ENCODING) as f:
             mission_data, self._mission_qual = SLTP().decode(f.read())
             self._mission = Mission(mission_data, self._l10n)
         Progress.set_value(3)
 
-        logger.info('decoding done')
+        LOGGER.info('decoding done')
 
     def _encode(self):
 
-        logger.info('encoding lua tables')
+        LOGGER.info('encoding lua tables')
 
         Progress.start('Decoding MIZ file', length=3)
 
         Progress.set_label('Encoding map resource')
-        logger.debug('encoding map resource')
+        LOGGER.debug('encoding map resource')
         with open(self.map_res_file, mode='w', encoding=ENCODING) as f:
             f.write(SLTP().encode(self._map_res, self._map_res_qual))
         Progress.set_value(1)
 
         Progress.set_label('Encoding map resource')
-        logger.debug('encoding l10n dictionary')
+        LOGGER.debug('encoding l10n dictionary')
         with open(self.dictionary_file, mode='w', encoding=ENCODING) as f:
             f.write(SLTP().encode(self.l10n, self._l10n_qual))
         Progress.set_value(2)
 
         Progress.set_label('Encoding map resource')
-        logger.debug('encoding mission dictionary')
+        LOGGER.debug('encoding mission dictionary')
         with open(self.mission_file, mode='w', encoding=ENCODING) as f:
             f.write(SLTP().encode(self.mission.d, self._mission_qual))
         Progress.set_value(3)
 
-        logger.info('encoding done')
+        LOGGER.info('encoding done')
 
     def _check_extracted_content(self):
 
@@ -216,12 +216,12 @@ class Miz:
         for item in zip_file.infolist():  # not using ZipFile.extractall() for security reasons
             assert isinstance(item, ZipInfo)
 
-            logger.debug('unzipping item: {}'.format(item.filename))
+            LOGGER.debug('unzipping item: {}'.format(item.filename))
 
             try:
                 zip_file.extract(item, self.tmpdir.abspath())
             except:
-                logger.error('failed to extract archive member: {}'.format(item.filename))
+                LOGGER.error('failed to extract archive member: {}'.format(item.filename))
                 raise
 
     def unzip(self, overwrite: bool = False):
@@ -229,13 +229,13 @@ class Miz:
         if self.zip_content and not overwrite:
             raise FileExistsError(self.tmpdir.abspath())
 
-        logger.debug('unzipping miz to temp dir')
+        LOGGER.debug('unzipping miz to temp dir')
 
         try:
 
             with ZipFile(self.miz_path.abspath()) as zip_file:
 
-                logger.debug('reading infolist')
+                LOGGER.debug('reading infolist')
 
                 self.zip_content = [f.filename for f in zip_file.infolist()]
 
@@ -245,10 +245,10 @@ class Miz:
             raise BadZipFile(self.miz_path.abspath())
 
         except:
-            logger.exception('error while unzipping miz file: {}'.format(self.miz_path.abspath()))
+            LOGGER.exception('error while unzipping miz file: {}'.format(self.miz_path.abspath()))
             raise
 
-        logger.debug('checking miz content')
+        LOGGER.debug('checking miz content')
 
         # noinspection PyTypeChecker
         for miz_item in map(
@@ -263,12 +263,12 @@ class Miz:
                 ]):
 
             if not exists(miz_item):
-                logger.error('missing file in miz: {}'.format(miz_item))
+                LOGGER.error('missing file in miz: {}'.format(miz_item))
                 raise FileNotFoundError(miz_item)
 
         self._check_extracted_content()
 
-        logger.debug('all files have been found, miz successfully unzipped')
+        LOGGER.debug('all files have been found, miz successfully unzipped')
 
     def zip(self, destination=None):
 
@@ -279,7 +279,7 @@ class Miz:
 
         destination = Path(destination).abspath()
 
-        logger.debug('zipping mission to: {}'.format(destination))
+        LOGGER.debug('zipping mission to: {}'.format(destination))
 
         with open(destination, mode='wb') as f:
             f.write(dummy_miz)
@@ -288,7 +288,7 @@ class Miz:
 
             for f in self.zip_content:
                 abs_path = self.tmpdir.joinpath(f).abspath()
-                logger.debug('injecting in zip file: {}'.format(abs_path))
+                LOGGER.debug('injecting in zip file: {}'.format(abs_path))
                 _z.write(abs_path, arcname=f)
 
         return destination

@@ -16,7 +16,7 @@ from src.utils.custom_logging import make_logger
 # from src.utils.crash_reporter import send_crash_report
 # ----------------------------------------------
 
-logger = make_logger(__name__)
+LOGGER = make_logger(__name__)
 
 SENTRY = None
 
@@ -236,7 +236,7 @@ class ThreadPoolThread(threading.Thread):
             _thread.interrupt_main()
         except:
             import sys
-            logger.error(
+            LOGGER.error(
                 'caught error in worker thread:'
                 '\ncmd: {} args: {} kwargs: {}'
                 '\n{}'

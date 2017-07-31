@@ -7,7 +7,7 @@ from src.utils import Path, make_logger
 
 from src.meta import MetaFile
 
-logger = make_logger(__name__)
+LOGGER = make_logger(__name__)
 
 MetaChannel = namedtuple('MetaChannel', 'freq, desc')
 MetaRadio = namedtuple('MetaRadio', 'name, channels')
@@ -30,7 +30,7 @@ class MetaFilePresets(MetaFile):
         MetaFile.__init__(self, path, init_dict)
 
     def write(self):
-        logger.info('writing "{}"'.format(self.path))
+        LOGGER.info('writing "{}"'.format(self.path))
         sorted_data = OrderedDict()
         for k in sorted(self._data.keys()):
             sorted_data[k] = self._data[k]

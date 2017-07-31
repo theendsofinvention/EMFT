@@ -4,7 +4,7 @@ from PyQt5.QtCore import QObject, pyqtSignal, QThread
 from src.utils import make_logger, ThreadPool
 from .main_ui_threading_adapter import MainUiThreadingAdapter
 
-logger = make_logger(__name__)
+LOGGER = make_logger(__name__)
 
 
 class MainGuiWorker(QObject):
@@ -90,7 +90,7 @@ class MainUiThreading(MainUiThreadingAdapter):
             else:
                 method()
         except TypeError:
-            logger.exception(
+            LOGGER.exception(
                 f'method "{method}" of object "{func}" failed ([{args}], {{{kwargs}}})')
 
     @classmethod
