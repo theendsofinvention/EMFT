@@ -17,3 +17,5 @@ htmlcov
 build/
 .pylint.d/
 __version_frozen__.py
+/~/
+*.exe
