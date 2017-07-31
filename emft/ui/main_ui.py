@@ -78,7 +78,7 @@ class MainUi(QMainWindow, MainUiMixins):
         self.exit()
 
 
-def start_ui():
+def start_ui(show: bool = True):
 
     from PyQt5.QtWidgets import QApplication
     import sys
@@ -119,7 +119,8 @@ def start_ui():
     from emft.ui.tab_about import TabChildAbout
     global_.MAIN_UI.add_tab(TabChildAbout(main_ui))
 
-    global_.MAIN_UI.show()
+    if show:
+        global_.MAIN_UI.show()
 
     LOGGER.info('loading adapter: Progress')
     from emft.utils import Progress

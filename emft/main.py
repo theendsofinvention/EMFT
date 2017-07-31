@@ -130,7 +130,7 @@ def main(test, profile, verbose):  # pylint: disable=too-many-locals
             reorder.initialize()
 
             from emft.ui.main_ui import start_ui
-            start_ui()
+            start_ui(show=bool(not test))
 
             from emft.global_ import QT_APP
 
