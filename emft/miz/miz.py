@@ -115,6 +115,10 @@ class Miz:
         LOGGER.debug('destination folder: {}'.format(target_dir))
         LOGGER.debug('{}option file'.format('skipping' if skip_options_file else 'including'))
 
+        if not Path(target_dir).exists():
+            LOGGER.debug(f'creating directory {target_dir}')
+            Path(target_dir).makedirs()
+
         with Miz(miz_file_path, overwrite=True) as m:
 
             def mirror_dir(src, dst):
