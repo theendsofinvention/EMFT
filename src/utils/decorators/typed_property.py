@@ -68,7 +68,7 @@ class _TypedProperty:
             # Checks for type of "value"
             raise TypeError('expected a {}, got: {} (value: {})'.format(str(self.type), type(value), value))
 
-        if value == getattr(instance, self.func.__name__):
+        if hasattr(instance, self.attrib) and value == getattr(instance, self.attrib):
             # Value hasn't changed, execute nothing
             return
 
