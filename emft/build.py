@@ -10,6 +10,7 @@ import shlex
 import subprocess
 import sys
 import typing
+import shutil
 from json import loads
 
 import certifi
@@ -537,6 +538,8 @@ def doc(ctx):
     """
     Builds the documentation using Sphinx (http://www.sphinx-doc.org/en/stable)
     """
+    if os.path.exists('./doc/html'):
+        shutil.rmtree('./doc/html')
     do(ctx, [
         'sphinx-apidoc',
         'emft',
