@@ -12,7 +12,7 @@ import raven.handlers.logging
 from src import global_
 from src.__version__ import __version__
 from src.sentry.sentry_context_provider import ISentryContextProvider
-from src.utils import Singleton, make_logger, nice_exit
+from src.utils import Singleton, make_logger
 
 LOGGER = make_logger(__name__)
 
@@ -79,7 +79,7 @@ class Sentry(raven.Client, metaclass=Singleton):
         super(Sentry, self).captureException(exc_info, **kwargs)
 
         if CRASH:
-            nice_exit(-1)
+            raise DeprecationWarning('this had been deprecated')
 
 
 LOGGER.info('SENTRY: initializing')
