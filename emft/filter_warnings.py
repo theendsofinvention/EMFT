@@ -43,3 +43,8 @@ warnings.filterwarnings('ignore',
                         message=r"Report\.file_reporters will no longer be available",
                         module='coverage',
                         )
+
+warnings.filterwarnings('ignore',
+                        category=ImportWarning,
+                        message=r"Not importing directory.*sphinxjp",
+                        )
