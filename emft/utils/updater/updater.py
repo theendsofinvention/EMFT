@@ -91,45 +91,6 @@ class Updater(Machine):
             conditions='_is_ready_to_install',
             after='_install_latest_version',
         )
-        # self.add_transition(
-        #     trigger='wait',
-        #     source='parsing',
-        #     dest='waiting',
-        #     before='_no_new_version_found',
-        #     unless=['has_new_version'],
-        # )
-        # self.add_transition(
-        #     trigger='wait',
-        #     source='parsing',
-        #     dest='waiting',
-        #     before='_new_version_found',
-        #     conditions=['has_new_version'],
-        #     unless=['auto_update']
-        # )
-        # self.add_transition(
-        #     trigger='wait',
-        #     source='parsing',
-        #     dest='downloading',
-        #     before='_new_version_found',
-        #     conditions=['has_new_version', 'auto_update'],
-        # )
-        # self.add_transition(
-        #     trigger='download',
-        #     source='wait',
-        #     dest='downloading',
-        #     conditions=['has_new_version'],
-        #     unless=['auto_update'],
-        # )
-        # self.add_transition(
-        #     trigger='install',
-        #     source='downloading',
-        #     dest='installing',
-        # )
-        # self.add_transition(
-        #     trigger='fail',
-        #     source='*',
-        #     dest='failure',
-        # )
 
         self._channel = channel
         self._av_user, self._av_repo = av_user, av_repo
