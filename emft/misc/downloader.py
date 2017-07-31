@@ -2,19 +2,29 @@
 
 import time
 
+import humanize
+
+from emft.utils import Downloader, make_logger
 # from src.ui.main_ui_interface import I
 from emft.utils import Progress
-from emft.utils import Downloader, make_logger
-import humanize
 
 LOGGER = make_logger(__name__)
 
 
-def download(url, local_file, file_size: int = None, hexdigest: str = None):
+def download(
+    url,
+    local_file,
+    file_size: int = None,
+    hexdigest: str = None,
+    title: str = '',
+):
     LOGGER.info('downloading {} -> {}'.format(url, local_file))
 
+    if not title:
+        title = f'Downloading {url.split("/")[-1]}'
+
     Progress.start(
-        f'Downloading {url.split("/")[-1]}',
+        title=title,
         label=f'Downloading to: {local_file}',
     )
 
