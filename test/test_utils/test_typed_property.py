@@ -102,6 +102,7 @@ class TestTypedProperty:
         o = SomeClass()
         prop = SomeClass.some_bool
         assert isinstance(prop, _TypedProperty)
+        assert o.some_bool is False
         prop.func = mock
-        o.some_bool = False
-        mock.assert_called_with(o, False)
+        o.some_bool = True
+        mock.assert_called_with(o, True)
