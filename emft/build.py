@@ -197,6 +197,7 @@ def do(
 
     Returns: stdout
     """
+
     def _filter_output(input_):
 
         def _filter_line(line):
@@ -627,9 +628,6 @@ def doc(ctx, show, clean, publish):
             do(ctx, ['git', 'add', '.'], filter_output=output_filter)
             do(ctx, ['git', 'commit', '-m', 'automated doc build'], filter_output=output_filter)
             do(ctx, ['git', 'push'], filter_output=output_filter)
-
-
-
 
 
 @cli.command()

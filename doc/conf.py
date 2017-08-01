@@ -40,6 +40,7 @@ extensions = [
     'sphinx.ext.napoleon',  # http://www.sphinx-doc.org/en/stable/ext/napoleon.html
     # 'sphinx.ext.autosectionlabel',
     'sphinx_autodoc_typehints',
+    'sphinx.ext.githubpages',
     'sphinx_git',
     'sphinx.ext.intersphinx',
     'sphinx.ext.ifconfig',
