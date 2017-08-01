@@ -48,8 +48,11 @@ class _MetaProperty:
             # Not set yet, returns default
             return self.default
         else:
-            # Check the value against the setter (I'm being paranoid here)
-            value = self.func(instance, instance.__getitem__(self.prop_name))
+            # # Check the value against the setter (I'm being paranoid here)
+            # value = self.func(instance, instance.__getitem__(self.prop_name))
+            # Turns out that was a bit too paranoid; trying to reset a value which passed the test before but
+            # don't anymore would be impossible
+            value = instance.__getitem__(self.prop_name)
 
             # Return actual value
             return value
