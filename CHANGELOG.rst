@@ -3,6 +3,8 @@
 
 Fix
 ~~~
+- Reorder: fix bug if target directory doesn't exist when re-ordering.
+  [132nd-etcher]
 - Fix bug in log tab: new records are now filtered. [132nd-etcher]
 
 Other

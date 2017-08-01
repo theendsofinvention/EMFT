@@ -7,9 +7,9 @@ from emft.miz.mission import Mission
 from emft.utils import Path
 
 if os.path.exists('./test_files'):
-    BASE_PATH = './test_files'
+    BASE_PATH = os.path.abspath('./test_files')
 elif os.path.exists('./test/test_files'):
-    BASE_PATH = './test/test_files'
+    BASE_PATH = os.path.abspath('./test/test_files')
 else:
     raise RuntimeError('cannot find test files')
 
@@ -21,7 +21,6 @@ ALL_OBJECTS = os.path.join(BASE_PATH, 'all_objects.miz')
 BAD_FILES = ['bad_zip_file.miz', 'missing_files.miz']
 
 
-@pytest.mark.nocleandir
 class TestMizPath:
 
     @pytest.mark.parametrize('cls', [Miz])

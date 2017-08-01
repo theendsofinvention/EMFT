@@ -286,7 +286,7 @@ def get_pep440_version(version: str) -> str:
             version_str += convert_prereleases[prerelease[0]]
             prerelease = prerelease[1:]
         else:
-            raise ValueError(f'unknown pre-release tag: {version_str.prerelease[0]}')
+            raise ValueError(f'unknown pre-release tag: {prerelease[0]}')
 
         # If there is a distance to the last tag, add a ".dev[distance]" suffix
         if re.match(r'[\d]+', prerelease[-1]):
@@ -468,15 +468,23 @@ def pin_version(ctx):
     """
     ensure_module('semantic_version')
 
+    previous_version = ctx.obj.get('semver')
+
     ctx.obj['version'] = get_gitversion()  # this is needed for later patching
     ctx.obj['semver'] = ctx.obj['version'].get("FullSemVer")
-    ctx.obj['pep440'] = get_pep440_version(ctx.obj['version'])
+    ctx.obj['pep440'] = get_pep440_version(ctx.obj['semver'])
 
     with open('./emft/__version_frozen__.py', 'w') as version_file:
         version_file.write(
             f"# coding=utf-8\n"
             f'__version__ = \'{ctx.obj["semver"]}\'\n'
             f'__pep440__ = \'{ctx.obj["pep440"]}\'\n')
+
+    if previous_version is None:
+        click.secho('__version_frozen__.py written anew', fg='green')
+    elif ctx.obj['semver'] != previous_version:
+        click.secho(f"New Semver: {ctx.obj['semver']}", fg='green')
+        click.secho(f"New PEP440: {ctx.obj['pep440']}", fg='green')
 
 
 @cli.command()
