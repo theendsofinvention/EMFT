@@ -179,7 +179,12 @@ def do_ex(ctx: click.Context, cmd: typing.List[str], cwd: str = '.') -> typing.T
     return _ensure_stripped_str(ctx, out), _ensure_stripped_str(ctx, err), p.returncode
 
 
-def do(ctx: click.Context, cmd: typing.List[str], cwd: str = '.') -> str:
+def do(
+    ctx: click.Context,
+    cmd: typing.List[str],
+    cwd: str = '.',
+    filter_output: typing.Union[None, typing.Iterable[str]] = None
+) -> str:
     """
     Executes a command and returns the result
 
@@ -187,17 +192,31 @@ def do(ctx: click.Context, cmd: typing.List[str], cwd: str = '.') -> str:
         ctx: click context
         cmd: command to execute
         cwd: working directory (defaults to ".")
+        filter_output: gives a list of partial strings to filter out from the output (stdout or stderr)
 
     Returns: stdout
     """
+    def _filter_output(input_):
+
+        def _filter_line(line):
+            # noinspection PyTypeChecker
+            for filter_str in filter_output:
+                if filter_str in line:
+                    return False
+            return True
+
+        if filter_output is None:
+            return input_
+        return '\n'.join(filter(_filter_line, input_.split('\n')))
+
     if not isinstance(cmd, (list, tuple)):
         cmd = shlex.split(cmd)
 
     out, err, ret = do_ex(ctx, cmd, cwd)
     if out:
-        click.secho(f'{out}', fg='cyan')
+        click.secho(f'{_filter_output(out)}', fg='cyan')
     if err:
-        click.secho(f'{err}', fg='red')
+        click.secho(f'{_filter_output(err)}', fg='red')
     if ret:
         click.secho(f'command failed: {cmd}', err=True, fg='red')
         exit(ret)
