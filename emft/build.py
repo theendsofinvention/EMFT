@@ -313,8 +313,8 @@ def get_pep440_version(version: str) -> str:
             # prerelease = prerelease[:-1]
 
     # Regular release
-    else:
-        version_str = f'{version_str.major}.{version_str.minor}.{version_str.patch}'
+    # else:
+    #     version_str = f'{version_str.major}.{version_str.minor}.{version_str.patch}'
 
     # Add SemVer, Sha and last commit date to the build tag
     # local_version = re.sub(r'[^a-zA-Z0-9\.]', '.', __version__.get('FullSemVer'))
