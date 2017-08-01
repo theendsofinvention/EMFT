@@ -64,7 +64,7 @@ init:
   - cmd: echo %APPVEYOR_REPO_COMMIT_MESSAGE_EXTENDED%
 
 cache:
-  - C:\Users\appveyor\AppData\Local\pip\cache
+  - C:\Users\appveyor\AppData\Local\pip\cache -> requirements.txt
   - C:\ProgramData\chocolatey\bin -> appveyor.yml
   - C:\ProgramData\chocolatey\lib -> appveyor.yml
 
