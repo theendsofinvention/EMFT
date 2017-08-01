@@ -1,5 +1,5 @@
 version: pending.{build}
-max_jobs: 1
+max_jobs: 10
 skip_branch_with_pr: false
 skip_commits:
   files:
@@ -70,17 +70,14 @@ cache:
 
 install:
   - "%PYTHON%/Scripts/pip.exe install --disable-pip-version-check --user --upgrade pip setuptools"
-#  - "%PYTHON%/Scripts/pip.exe install --upgrade coverage"
-#  - "%PYTHON%/Scripts/pip.exe install -r requirements.txt"
-#  - "%PYTHON%/Scripts/pip.exe install git+https://github.com/132nd-etcher/pyinstaller.git@develop#egg=PyInstaller"
   - choco install gitversion.portable -pre -y
-#  - choco install gitversion.portable -y
   - git clone --branch=master https://github.com/132nd-etcher/verpatch.git C:\projects\verpatch
   - curl -O http://esrg.sourceforge.net/utils_win_up/md5sum/crc32.exe
   - cmd: pip install -r requirements-dev.txt
 
 before_build:
-  - ps: C:\ProgramData\chocolatey\bin\gitversion /l console /output buildserver /updateassemblyinfo /b (get-item env:APPVEYOR_REPO_BRANCH).Value
+  # Gitversion: use "/l console" for verbose output
+  - ps: C:\ProgramData\chocolatey\bin\gitversion /output buildserver /updateassemblyinfo /b (get-item env:APPVEYOR_REPO_BRANCH).Value
   - cmd: appveyor UpdateBuild -Version %GitVersion_InformationalVersion%.%APPVEYOR_BUILD_NUMBER%
   - set PATH=c:\projects\verpatch;%PATH%
 
@@ -95,14 +92,10 @@ test_script:
   - cmd: emft.exe --test
 
 after_test:
-#  - 'git tag %GitVersion_SemVer% & exit 0'
-#  - 'git push origin %GitVersion_SemVer% & exit 0'
   - "%PYTHON%/Scripts/pip.exe install git+https://github.com/132nd-etcher/ocular.py.git"
   - "%PYTHON%/Scripts/ocular.exe --access-token %SCRUTINIZER_TOKEN% & exit 0"
   - "%PYTHON%/Scripts/pip.exe install codacy-coverage"
   - "%PYTHON%/Scripts/python-codacy-coverage.exe -r coverage.xml & exit 0"
-#  - "%PYTHON%/Scripts/pip.exe install coveralls"
-#  - "%PYTHON%/Scripts/coveralls.exe"
   - "%PYTHON%/Scripts/pip.exe install codecov"
   - "%PYTHON%/Scripts/codecov.exe & exit 0"
   - cmd: md5sum emft.exe > emft.md5
@@ -113,18 +106,6 @@ artifacts:
     name: emft
   - path: emft.md5
     name: hexdigest
-
-# branches:
-#   only:
-#     - master
-#     - develop
-#     - /release/.*/
-#     - /pull/.*/
-#     - /hotfix/.*/
-#     - /feature/.*/
-#
-#   except:
-#     - gh-pages
 
 deploy:
   - provider: GitHub
