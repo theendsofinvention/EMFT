@@ -754,5 +754,25 @@ def test_build(ctx):
     do(ctx, ['./dist/emft.exe', '--test'])
 
 
+@cli.command()
+@click.pass_context
+def pre_push(ctx):
+    """
+    This is meant to be used as a Git pre-push hook
+    """
+    if repo_is_dirty():
+        click.secho('Repository is dirty', err=True, fg='red')
+        exit(-1)
+    ctx.invoke(pin_version)
+    ctx.invoke(chglog)
+    ctx.invoke(pyrcc)
+    ctx.invoke(flake8)
+    ctx.invoke(safety)
+    ctx.invoke(reqs)
+    if repo_is_dirty():
+        click.secho('Repository is dirty', err=True, fg='red')
+        exit(-1)
+
+
 if __name__ == '__main__':
     cli(obj={})
