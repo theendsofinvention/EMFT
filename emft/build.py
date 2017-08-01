@@ -11,8 +11,8 @@ import shutil
 import subprocess
 import sys
 import typing
-from contextlib import contextmanager
 import webbrowser
+from contextlib import contextmanager
 from json import loads
 
 import certifi
@@ -421,7 +421,9 @@ def cli(ctx):
 @click.option('--dev/--no-dev', default=True, help='Whether or not to write "requirement-dev.txt"')
 @click.pass_context
 def reqs(ctx: click.Context, prod, test, dev):
-    """Write requirements files"""
+    """
+    Write requirements files
+    """
     if not find_executable('pip-compile'):
         click.secho('Missing module "pip-tools".\n'
                     'Install it manually with: "pip install pip-tools"\n'
@@ -492,7 +494,9 @@ def pin_version(ctx):
 @click.option('--push/--no-push', default=False, help='push the changes (default: False)')
 @click.pass_context
 def chglog(ctx, commit, push):
-    """Write changelog"""
+    """
+    Writes the changelog
+    """
     ensure_module('gitchangelog')
     find_executable('git')
     """
@@ -511,7 +515,9 @@ def chglog(ctx, commit, push):
 @cli.command()
 @click.pass_context
 def pyrcc(ctx):
-    """Compiles Qt resources (icons, pictures, ...)  to a usable python script"""
+    """
+    Compiles Qt resources (icons, pictures, ...)  to a usable python script
+    """
     if not find_executable('pyrcc5'):
         click.secho('Unable to find "pyrcc5" executable.\n'
                     f'Install it manually with: "pip install pyqt5"\n'
