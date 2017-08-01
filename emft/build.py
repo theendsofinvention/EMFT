@@ -7,10 +7,10 @@ import importlib
 import os
 import re
 import shlex
+import shutil
 import subprocess
 import sys
 import typing
-import shutil
 from json import loads
 
 import certifi
@@ -422,7 +422,7 @@ def pin_version(ctx):
     """
     ensure_module('semantic_version')
 
-    previous_version = ctx.obj['semver']
+    previous_version = ctx.obj.get('semver')
 
     ctx.obj['version'] = get_gitversion()  # this is needed for later patching
     ctx.obj['semver'] = ctx.obj['version'].get("FullSemVer")
@@ -434,7 +434,9 @@ def pin_version(ctx):
             f'__version__ = \'{ctx.obj["semver"]}\'\n'
             f'__pep440__ = \'{ctx.obj["pep440"]}\'\n')
 
-    if ctx.obj['semver'] != previous_version:
+    if previous_version is None:
+        click.secho('__version_frozen__.py written anew', fg='green')
+    elif ctx.obj['semver'] != previous_version:
         click.secho(f"New Semver: {ctx.obj['semver']}", fg='green')
         click.secho(f"New PEP440: {ctx.obj['pep440']}", fg='green')
 
