@@ -4,6 +4,7 @@ Collections of tools to build EMFT
 """
 import datetime
 import importlib
+import json
 import os
 import re
 import shlex
@@ -773,7 +774,11 @@ def pre_push(ctx):
     if repo_is_dirty():
         click.secho('Repository is dirty', err=True, fg='red')
         exit(-1)
-    ctx.invoke(pin_version)
+    try:
+        ctx.invoke(pin_version)
+    except json.JSONDecodeError:
+        click.secho('Assuming this is a command on remote refs...', err=True, fg='red')
+        exit(0)
     ctx.invoke(reqs)
     if ctx.invoke(chglog):
         click.secho('Changelog has been updated', err=True, fg='red')
