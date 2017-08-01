@@ -511,9 +511,12 @@ def pin_version(ctx):
 @click.option('--commit/--no-commit', default=True, help='commit the changes (default: True)')
 @click.option('--push/--no-push', default=False, help='push the changes (default: False)')
 @click.pass_context
-def chglog(ctx, commit, push):
+def chglog(ctx, commit, push) -> bool:
     """
     Writes the changelog
+
+    Returns:
+        bool: returns true if changes have been committed to the repository
     """
     ensure_module('gitchangelog')
     find_executable('git')
@@ -526,17 +529,22 @@ def chglog(ctx, commit, push):
     if commit:
         do_ex(ctx, ['git', 'add', 'CHANGELOG.rst'])
         _, _, ret = do_ex(ctx, ['git', 'commit', '-m', 'chg: dev: updated changelog [skip ci]'])
-        if ret == 0 and push:
-            do_ex(ctx, ['git', 'push'])
+        if ret == 0:
+            if push:
+                do_ex(ctx, ['git', 'push'])
+            return True
 
 
 @cli.command()
 @click.option('--commit/--no-commit', default=True, help='commit the changes (default: True)')
 @click.option('--push/--no-push', default=False, help='push the changes (default: False)')
 @click.pass_context
-def pyrcc(ctx, commit, push):
+def pyrcc(ctx, commit, push) -> bool:
     """
     Compiles Qt resources (icons, pictures, ...)  to a usable python script
+
+    Returns:
+        bool: returns true if changes have been committed to the repository
     """
     if not find_executable('pyrcc5'):
         click.secho('Unable to find "pyrcc5" executable.\n'
@@ -552,8 +560,10 @@ def pyrcc(ctx, commit, push):
     if commit:
         do_ex(ctx, ['git', 'add', './emft/ui/qt_resource.py'])
         _, _, ret = do_ex(ctx, ['git', 'commit', '-m', 'chg: dev: updated changelog [skip ci]'])
-        if ret == 0 and push:
-            do_ex(ctx, ['git', 'push'])
+        if ret == 0:
+            if push:
+                do_ex(ctx, ['git', 'push'])
+            return True
 
 
 @cli.command()
@@ -765,8 +775,13 @@ def pre_push(ctx):
         exit(-1)
     ctx.invoke(pin_version)
     ctx.invoke(reqs)
-    ctx.invoke(chglog)
+    if ctx.invoke(chglog):
+        click.secho('Changelog has been updated', err=True, fg='red')
+        exit(-1)
     ctx.invoke(pyrcc)
+    if ctx.invoke(chglog):
+        click.secho('Qt resources have been updated', err=True, fg='red')
+        exit(-1)
     ctx.invoke(flake8)
     ctx.invoke(safety)
     if repo_is_dirty():
