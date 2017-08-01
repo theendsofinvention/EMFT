@@ -1,11 +1,12 @@
 version: pending.{build}
-max_jobs: 1
+max_jobs: 10
 skip_branch_with_pr: false
 skip_commits:
   files:
     - docs/*
     - '**/*.html'
   message: /.*\[nobuild\].*/
+skip_tags: true
 
 environment:
     GIT_DAEMON_PATH:   "C:\\Program Files\\Git\\mingw64\\libexec\\git-core"
@@ -64,29 +65,26 @@ init:
   - cmd: echo %APPVEYOR_REPO_COMMIT_MESSAGE_EXTENDED%
 
 cache:
-  - C:\Users\appveyor\AppData\Local\pip\cache
+  - C:\Users\appveyor\AppData\Local\pip\cache -> requirements.txt
   - C:\ProgramData\chocolatey\bin -> appveyor.yml
   - C:\ProgramData\chocolatey\lib -> appveyor.yml
 
 install:
   - "%PYTHON%/Scripts/pip.exe install --disable-pip-version-check --user --upgrade pip setuptools"
-#  - "%PYTHON%/Scripts/pip.exe install --upgrade coverage"
-#  - "%PYTHON%/Scripts/pip.exe install -r requirements.txt"
-#  - "%PYTHON%/Scripts/pip.exe install git+https://github.com/132nd-etcher/pyinstaller.git@develop#egg=PyInstaller"
   - choco install gitversion.portable -pre -y
-#  - choco install gitversion.portable -y
   - git clone --branch=master https://github.com/132nd-etcher/verpatch.git C:\projects\verpatch
   - curl -O http://esrg.sourceforge.net/utils_win_up/md5sum/crc32.exe
   - cmd: pip install -r requirements-dev.txt
 
 before_build:
-  - ps: C:\ProgramData\chocolatey\bin\gitversion /l console /output buildserver /updateassemblyinfo /b (get-item env:APPVEYOR_REPO_BRANCH).Value
+  # Gitversion: use "/l console" for verbose output
+  - ps: C:\ProgramData\chocolatey\bin\gitversion /output buildserver /updateassemblyinfo /b (get-item env:APPVEYOR_REPO_BRANCH).Value
   - cmd: appveyor UpdateBuild -Version %GitVersion_InformationalVersion%.%APPVEYOR_BUILD_NUMBER%
   - set PATH=c:\projects\verpatch;%PATH%
 
 build_script:
   - cmd: pip install -e .
-  - cmd: emft-build pin_version flake8 pytest safety chglog doc reqs pyrcc freeze patch test_build
+  - cmd: emft-build pin_version flake8 pytest safety chglog doc --publish reqs pyrcc freeze patch test_build
 
 after_build:
   - cmd: move dist\emft.exe emft.exe
@@ -95,14 +93,10 @@ test_script:
   - cmd: emft.exe --test
 
 after_test:
-#  - 'git tag %GitVersion_SemVer% & exit 0'
-#  - 'git push origin %GitVersion_SemVer% & exit 0'
   - "%PYTHON%/Scripts/pip.exe install git+https://github.com/132nd-etcher/ocular.py.git"
   - "%PYTHON%/Scripts/ocular.exe --access-token %SCRUTINIZER_TOKEN% & exit 0"
   - "%PYTHON%/Scripts/pip.exe install codacy-coverage"
   - "%PYTHON%/Scripts/python-codacy-coverage.exe -r coverage.xml & exit 0"
-#  - "%PYTHON%/Scripts/pip.exe install coveralls"
-#  - "%PYTHON%/Scripts/coveralls.exe"
   - "%PYTHON%/Scripts/pip.exe install codecov"
   - "%PYTHON%/Scripts/codecov.exe & exit 0"
   - cmd: md5sum emft.exe > emft.md5
@@ -113,18 +107,6 @@ artifacts:
     name: emft
   - path: emft.md5
     name: hexdigest
-
-# branches:
-#   only:
-#     - master
-#     - develop
-#     - /release/.*/
-#     - /pull/.*/
-#     - /hotfix/.*/
-#     - /feature/.*/
-#
-#   except:
-#     - gh-pages
 
 deploy:
   - provider: GitHub

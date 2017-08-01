@@ -18,3 +18,4 @@ htmlcov
 .pylint.d/
 __version_frozen__.py
 /~/
+/emft-doc/

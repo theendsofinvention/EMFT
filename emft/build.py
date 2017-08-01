@@ -11,6 +11,8 @@ import shutil
 import subprocess
 import sys
 import typing
+from contextlib import contextmanager
+import webbrowser
 from json import loads
 
 import certifi
@@ -18,6 +20,22 @@ import click
 
 # noinspection SpellCheckingInspection
 PYINSTALLER_NEEDED_VERSION = '3.3.dev0+g2fcbe0f'
+
+
+@contextmanager
+def cd(path):
+    """
+    Context to temporarily change the working directory
+
+    Args:
+        path: working directory to cd into
+    """
+    old_dir = os.getcwd()
+    os.chdir(path)
+    try:
+        yield
+    finally:
+        os.chdir(old_dir)
 
 
 def ensure_repo():
@@ -162,7 +180,12 @@ def do_ex(ctx: click.Context, cmd: typing.List[str], cwd: str = '.') -> typing.T
     return _ensure_stripped_str(ctx, out), _ensure_stripped_str(ctx, err), p.returncode
 
 
-def do(ctx: click.Context, cmd: typing.List[str], cwd: str = '.') -> str:
+def do(
+    ctx: click.Context,
+    cmd: typing.List[str],
+    cwd: str = '.',
+    filter_output: typing.Union[None, typing.Iterable[str]] = None
+) -> str:
     """
     Executes a command and returns the result
 
@@ -170,17 +193,32 @@ def do(ctx: click.Context, cmd: typing.List[str], cwd: str = '.') -> str:
         ctx: click context
         cmd: command to execute
         cwd: working directory (defaults to ".")
+        filter_output: gives a list of partial strings to filter out from the output (stdout or stderr)
 
     Returns: stdout
     """
+
+    def _filter_output(input_):
+
+        def _filter_line(line):
+            # noinspection PyTypeChecker
+            for filter_str in filter_output:
+                if filter_str in line:
+                    return False
+            return True
+
+        if filter_output is None:
+            return input_
+        return '\n'.join(filter(_filter_line, input_.split('\n')))
+
     if not isinstance(cmd, (list, tuple)):
         cmd = shlex.split(cmd)
 
     out, err, ret = do_ex(ctx, cmd, cwd)
     if out:
-        click.secho(f'{out}', fg='cyan')
+        click.secho(f'{_filter_output(out)}', fg='cyan')
     if err:
-        click.secho(f'{err}', fg='red')
+        click.secho(f'{_filter_output(err)}', fg='red')
     if ret:
         click.secho(f'command failed: {cmd}', err=True, fg='red')
         exit(ret)
@@ -309,6 +347,9 @@ def _install_pyinstaller(ctx: click.Context, force: bool = False):
 
 
 def _get_version(ctx: click.Context):
+    if _get_version.leave_me_alone_already:
+        return
+
     if not hasattr(ctx, 'obj') or ctx.obj is None:
         ctx.obj = {}
 
@@ -321,6 +362,11 @@ def _get_version(ctx: click.Context):
 
     click.secho(f"Semver: {ctx.obj['semver']}", fg='green')
     click.secho(f"PEP440: {ctx.obj['pep440']}", fg='green')
+
+    _get_version.leave_me_alone_already = True
+
+
+_get_version.leave_me_alone_already = False
 
 
 # noinspection PyUnusedLocal
@@ -541,12 +587,19 @@ def safety(ctx):
 
 
 @cli.command()
+@click.option('-s', '--show', is_flag=True, help='Show the doc in browser')
+@click.option('-c', '--clean', is_flag=True, help='Clean build')
+@click.option('-p', '--publish', is_flag=True, help='Upload doc')
 @click.pass_context
-def doc(ctx):
+def doc(ctx, show, clean, publish):
     """
     Builds the documentation using Sphinx (http://www.sphinx-doc.org/en/stable)
     """
-    if os.path.exists('./doc/html'):
+    if publish:
+        ctx.invoke(pin_version)
+    else:
+        _get_version(ctx)
+    if clean and os.path.exists('./doc/html'):
         shutil.rmtree('./doc/html')
     do(ctx, [
         'sphinx-apidoc',
@@ -565,6 +618,24 @@ def doc(ctx):
         'doc',
         'doc/html'
     ])
+    if show:
+        webbrowser.open_new_tab(f'file://{os.path.abspath("./doc/html/index.html")}')
+    if publish:
+        output_filter = [
+            'warning: LF will be replaced by CRLF',
+            'The file will have its original line endings',
+            'Checking out files:'
+        ]
+        if not os.path.exists('./emft-doc'):
+            do(ctx, ['git', 'clone', r'https://github.com/132nd-etcher/emft-doc.git'], filter_output=output_filter)
+        with cd('./emft-doc'):
+            do(ctx, ['git', 'pull'])
+            if os.path.exists('./docs'):
+                shutil.rmtree('./docs')
+            shutil.copytree('../doc/html', './docs')
+            do(ctx, ['git', 'add', '.'], filter_output=output_filter)
+            do(ctx, ['git', 'commit', '-m', 'automated doc build'], filter_output=output_filter)
+            do(ctx, ['git', 'push'], filter_output=output_filter)
 
 
 @cli.command()
