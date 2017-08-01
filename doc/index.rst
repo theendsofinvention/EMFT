@@ -13,10 +13,7 @@ Welcome to EMFT's documentation!
     :maxdepth: 2
     :caption: Contents:
 
-    build
-    version
-    format_test
-    modules
+    dev
 
 .. include:: ../README.rst
 
