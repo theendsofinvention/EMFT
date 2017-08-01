@@ -6,6 +6,7 @@ skip_commits:
     - docs/*
     - '**/*.html'
   message: /.*\[nobuild\].*/
+skip_tags: true
 
 environment:
     GIT_DAEMON_PATH:   "C:\\Program Files\\Git\\mingw64\\libexec\\git-core"
