@@ -7,11 +7,12 @@ import importlib
 import os
 import re
 import shlex
+import shutil
 import subprocess
 import sys
 import typing
 from contextlib import contextmanager
-import shutil
+import webbrowser
 from json import loads
 
 import certifi
@@ -577,12 +578,19 @@ def safety(ctx):
 
 
 @cli.command()
+@click.option('-s', '--show', is_flag=True, help='Show the doc in browser')
+@click.option('-c', '--clean', is_flag=True, help='Clean build')
+@click.option('-p', '--publish', is_flag=True, help='Upload doc')
 @click.pass_context
-def doc(ctx):
+def doc(ctx, show, clean, publish):
     """
     Builds the documentation using Sphinx (http://www.sphinx-doc.org/en/stable)
     """
-    if os.path.exists('./doc/html'):
+    if publish:
+        ctx.invoke(pin_version)
+    else:
+        _get_version(ctx)
+    if clean and os.path.exists('./doc/html'):
         shutil.rmtree('./doc/html')
     do(ctx, [
         'sphinx-apidoc',
@@ -601,6 +609,27 @@ def doc(ctx):
         'doc',
         'doc/html'
     ])
+    if show:
+        webbrowser.open_new_tab(f'file://{os.path.abspath("./doc/html/index.html")}')
+    if publish:
+        output_filter = [
+            'warning: LF will be replaced by CRLF',
+            'The file will have its original line endings',
+            'Checking out files:'
+        ]
+        if not os.path.exists('./emft-doc'):
+            do(ctx, ['git', 'clone', r'https://github.com/132nd-etcher/emft-doc.git'], filter_output=output_filter)
+        with cd('./emft-doc'):
+            do(ctx, ['git', 'pull'])
+            if os.path.exists('./docs'):
+                shutil.rmtree('./docs')
+            shutil.copytree('../doc/html', './docs')
+            do(ctx, ['git', 'add', '.'], filter_output=output_filter)
+            do(ctx, ['git', 'commit', '-m', 'automated doc build'], filter_output=output_filter)
+            do(ctx, ['git', 'push'], filter_output=output_filter)
+
+
+
 
 
 @cli.command()
