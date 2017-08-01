@@ -517,8 +517,10 @@ def chglog(ctx, commit, push):
 
 
 @cli.command()
+@click.option('--commit/--no-commit', default=True, help='commit the changes (default: True)')
+@click.option('--push/--no-push', default=False, help='push the changes (default: False)')
 @click.pass_context
-def pyrcc(ctx):
+def pyrcc(ctx, commit, push):
     """
     Compiles Qt resources (icons, pictures, ...)  to a usable python script
     """
@@ -533,6 +535,11 @@ def pyrcc(ctx):
         './emft/ui/qt_resource.qrc',
         '-o', './emft/ui/qt_resource.py',
     ])
+    if commit:
+        do_ex(ctx, ['git', 'add', './emft/ui/qt_resource.py'])
+        _, _, ret = do_ex(ctx, ['git', 'commit', '-m', 'chg: dev: updated changelog [skip ci]'])
+        if ret == 0 and push:
+            do_ex(ctx, ['git', 'push'])
 
 
 @cli.command()
