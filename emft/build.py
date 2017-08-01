@@ -38,6 +38,20 @@ def cd(path):
         os.chdir(old_dir)
 
 
+def repo_is_dirty() -> bool:
+    """
+    Checks if the current repository contains uncommitted or untracked changes
+
+    Returns: true if the repository is clean
+    """
+    try:
+        subprocess.check_call(['git', 'diff', '--quiet', '--cached', 'HEAD', '--'])
+        subprocess.check_call(['git', 'diff-files', '--quiet'])
+        subprocess.check_call(['git', 'diff-index', '--quiet', 'HEAD'])
+    except subprocess.CalledProcessError:
+        return True
+
+
 def ensure_repo():
     """
     Makes sure the current working directory is EMFT's Git repository.
