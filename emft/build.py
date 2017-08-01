@@ -198,7 +198,9 @@ def do(
     cwd: str = '.',
     mute_stdout: bool = False,
     mute_stderr: bool = False,
-    filter_output: typing.Union[None, typing.Iterable[str]] = None
+    # @formatter:off
+    filter_output: typing.Union[None, typing.Iterable[str]]=None
+    # @formatter:on
 ) -> str:
     """
     Executes a command and returns the result
