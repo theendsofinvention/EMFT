@@ -8,8 +8,7 @@ GitVersion_ is used to infer the current version from the Git repository.
 ============== ===============================
  Branch         Tag
 ============== ===============================
- master
- support
+ master         (master has no pre-release tag)
  hotfix         patch
  release        exp
  develop        beta
@@ -17,13 +16,19 @@ GitVersion_ is used to infer the current version from the Git repository.
  pull request   alpha.PullRequest.[PR_NUMBER]
 ============== ===============================
 
-(``master`` and ``support`` do not have a pre-release tag)
+.. graphviz::
 
-(feature, pull request) < develop < release < hotfix < (master, support)
+    digraph foo {
+        rankdir="LR";
+        "hotfix\n(patch)" -> "master\n(stable)";
+        "feature\n(alpha)" -> "develop\n(beta)" -> "release\n(exp)" -> "master\n(stable)";
+        "Pull request\n(alpha)" -> "develop\n(beta)";
+
+    }
 
 .. figure:: _images/versionning.png
     :target: _images/versionning.png
-    :scale: 50 %
+    :width: 640px
     :alt: EMFT versionning scheme
 
     EMFT versionning scheme (click the picture for larger scale)
