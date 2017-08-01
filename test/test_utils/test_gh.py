@@ -7,11 +7,13 @@ import pytest
 import requests
 from httmock import response, urlmatch, with_httmock
 
-from src.utils.custom_path import Path
-from src.utils.gh import GHAnonymousSession, GHSessionError, NotFoundError, RateLimitationError, GithubAPIError, \
+from emft.utils import Path, make_logger, Singleton
+from emft.utils.gh import GHAnonymousSession, GHSessionError, NotFoundError, RateLimitationError, GithubAPIError, \
     GHAllAssets, GHRelease, GHRepo, GHRepoList, GHUser, GHSession, GHAuthorization, GHApp, GHPermissions, GHMailList, \
     GHMail
-from src.utils.singleton import Singleton
+
+
+LOGGER = make_logger(__name__)
 
 
 def test_build_req():
@@ -79,6 +81,7 @@ def mock_gh_api(url, request):
     assert isinstance(request, requests.models.PreparedRequest)
     fail = check_fail(url, request)
     if not fail == 'ok':
+        LOGGER.error(f'failing with {fail}')
         return fail
     if fail is None:
         return None
@@ -300,23 +303,16 @@ class TestGHAnonymousSession:
             repos = GHAnonymousSession().list_user_repos('easitest')
         except RateLimitationError:
             return
+        except GithubAPIError as exc:
+            if 'Github API seems to be down' in exc.msg:
+                pytest.xfail('Github API is down =/')
+                return
+            raise
         assert isinstance(repos, GHRepoList)
         assert 'unittests' in repos
         assert 'some_repo' not in repos
         repo = repos['unittests']
         assert isinstance(repo, GHRepo)
-
-    def test_latest_release(self):
-        try:
-            latest = GHAnonymousSession().get_latest_release('132nd-etcher', 'unittests')
-        except RateLimitationError:
-            return
-        assert isinstance(latest, GHRelease)
-        assert latest.author.login == '132nd-etcher'
-        assert not latest.prerelease
-        assert latest.name == 'Final-release 1'
-        assert latest.tag_name == '0.0.1.0'
-        assert 'README.rst' in latest.assets
 
     def test_new_gh_session(self, monkeypatch):
         try:
@@ -332,6 +328,11 @@ class TestGHAnonymousSession:
             usr = GHAnonymousSession().get_user('132nd-etcher')
         except RateLimitationError:
             return
+        except GithubAPIError as exc:
+            if 'Github API seems to be down' in exc.msg:
+                pytest.xfail('Github API is down =/')
+                return
+            raise
         assert isinstance(usr, GHUser)
         assert usr.id == 21277151
         assert usr.type == 'User'

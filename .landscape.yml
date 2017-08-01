@@ -1,6 +1,11 @@
-doc-warnings: false
+doc-warnings: true
 pep8:
+  options:
+    max-line-length: 120
   full: true
+mccabe:
+  options:
+    max-complexity: 10
 test-warnings: false
 strictness: veryhigh
 max-line-length: 120
@@ -8,7 +13,9 @@ autodetect: true
 ignore-paths:
     - test
 ignore-patterns:
-    - src/dummy_miz.py
-    - src/ui/qt_resource.py
+    - emft/dummy_miz.py
+    - emft/ui/qt_resource.py
 python-targets:
     - 3
+pyroma:
+  run: true

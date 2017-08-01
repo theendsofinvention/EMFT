@@ -1,0 +1,17 @@
+div.caution, div.warning, div.attention, div.danger, div.error {
+    background-color: #f2dede;
+    border-color: #eed3d7;
+    color: #b94a48;
+}
+
+div.tip, div.hint {
+    background-color: #d9edf7;
+    border-color: #bce8f1;
+    color: #3a87ad;
+}
+
+div.note, div.important {
+    background-color: #dff0d8;
+    border-color: #d6e9c6;
+    color: #468847;
+}

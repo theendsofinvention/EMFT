@@ -64,6 +64,8 @@ ignore_regexps = [
     r'@refactor', r'!refactor',
     r'@wip', r'!wip',
     r'.*Delete LICENSE.*',
+    r'.*update pyup config.*',
+    r'Pyup', r'pyup',
     r'^([cC]hg|[fF]ix|[nN]ew)\s*:\s*[p|P]kg:',
     r'^([cC]hg|[fF]ix|[nN]ew)\s*:\s*[d|D]ev:',
     r'^(.{3,3}\s*:)?\s*[fF]irst commit.?\s*$',
@@ -134,7 +136,7 @@ section_regexps = [
 #body_process = Wrap(regexp=r'\n(?=\w+\s*:)') | Indent(chars="  ")
 #body_process = Wrap(regexp=r'\n(?=\w+\s*:)')
 #body_process = noop
-body_process = ReSub(r'((^|\n)[A-Z]\w+(-\w+)*: .*(\n\s+.*)*)+$', r'') | strip
+body_process = ReSub(r'((^|\n)[A-Z]\w+(-\w+)*: .*(\n\s+.*)*)+$', r'') | strip | ReSub('\n\n', '\n')
 
 
 ## ``subject_process`` is a callable

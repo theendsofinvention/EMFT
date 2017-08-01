@@ -1,0 +1,15 @@
+include AUTHORS
+include LICENSE
+include MANIFEST.in
+include package.json
+include *.rst
+include tox.ini
+include
+graft src
+graft test
+graft doc
+global-exclude __pycache__
+global-exclude *.py[co]
+global-exclude html-cov
+exclude .landscape.yml
+exclude .appveyor.yml

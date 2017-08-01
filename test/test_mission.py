@@ -7,69 +7,29 @@ from time import sleep
 from zipfile import BadZipFile
 
 import pytest
-from src.utils import Path
+from emft.utils import Path
 
-from src.global_ import ENCODING
-from src.miz.mission import Mission, Country, Group, BaseUnit, FlyingUnit, EPOCH_DELTA, Coalition
-from src.miz.miz import Miz as Miz
+from emft.global_ import ENCODING
+from emft.miz.mission import Mission, Country, Group, BaseUnit, FlyingUnit, EPOCH_DELTA, Coalition
+from emft.miz.miz import Miz as Miz
 
 if os.path.exists('./test_files'):
-    BASE_PATH = './test_files'
+    BASE_PATH = os.path.abspath('./test_files')
 elif os.path.exists('./test/test_files'):
-    BASE_PATH = './test/test_files'
+    BASE_PATH = os.path.abspath('./test/test_files')
 else:
     raise RuntimeError('cannot find test files')
 
 
-# noinspection PyPep8Naming
-@pytest.fixture(scope='session')
-def TEST_FILE():
-    yield os.path.join(BASE_PATH, 'TRG_KA50.miz')
-
-
-# noinspection PyPep8Naming
-@pytest.fixture(scope='session')
-def OUT_FILE():
-    yield os.path.join(BASE_PATH, 'TRG_KA50_EMFT.miz')
-
-
-# noinspection PyPep8Naming
-@pytest.fixture(scope='session')
-def BAD_ZIP_FILE():
-    yield os.path.join(BASE_PATH, 'bad_zip_file.miz')
-
-
-# noinspection PyPep8Naming
-@pytest.fixture(scope='session')
-def MISSING_FILE():
-    yield os.path.join(BASE_PATH, 'missing_files.miz')
-
-
-# noinspection PyPep8Naming
-@pytest.fixture(scope='session')
-def ALL_OBJECTS():
-    yield os.path.join(BASE_PATH, 'all_objects.miz')
-
-
-# noinspection PyPep8Naming
-@pytest.fixture(scope='session')
-def LARGE_FILE():
-    yield os.path.join(BASE_PATH, 'TRMT_2.4.0.miz')
-
-
-# noinspection PyPep8Naming
-@pytest.fixture(scope='session')
-def RADIO_FILE():
-    yield os.path.join(BASE_PATH, 'radios.miz')
-
-
-# noinspection PyPep8Naming
-@pytest.fixture(scope='session')
-def BAD_FILES():
-    yield ['bad_zip_file.miz', 'missing_files.miz']
-
-
-SKIP_LONG_TESTS = os.environ.get('EMFT_SKIP_LONG_TESTS') == '1'
+TEST_FILE = os.path.join(BASE_PATH, 'TRG_KA50.miz')
+OUT_FILE = os.path.join(BASE_PATH, 'TRG_KA50_EMFT.miz')
+BAD_ZIP_FILE = os.path.join(BASE_PATH, 'bad_zip_file.miz')
+MISSING_FILE = os.path.join(BASE_PATH, 'missing_files.miz')
+DUPLICATE_GROUP_ID = os.path.join(BASE_PATH, 'duplicate_group_id.miz')
+ALL_OBJECTS = os.path.join(BASE_PATH, 'all_objects.miz')
+LARGE_FILE = os.path.join(BASE_PATH, 'TRMT_2.4.0.miz')
+RADIO_FILE = os.path.join(BASE_PATH, 'radios.miz')
+BAD_FILES = ['bad_zip_file.miz', 'missing_files.miz']
 
 RADIOS_TESTS = [
     (
@@ -151,43 +111,43 @@ RADIOS_TESTS = [
 
 
 # noinspection PyPep8Naming,PyShadowingNames
-@pytest.mark.nocleandir
+# @pytest.mark.nocleandir
 class TestMizBasics:
     @pytest.fixture(autouse=True)
-    def clean_up(self, OUT_FILE):
+    def clean_up(self):
         yield
         if os.path.exists(OUT_FILE):
             os.remove(OUT_FILE)
 
-    def test_init(self, TEST_FILE):
+    def test_init(self):
         Miz(TEST_FILE)
         with pytest.raises(FileNotFoundError):
             Miz('./i_do_not_exist')
 
-    def test_context(self, TEST_FILE):
+    def test_context(self):
         with Miz(TEST_FILE) as miz:
             assert isinstance(miz.mission, Mission)
             assert isinstance(miz.l10n, dict)
             assert miz.zip_content
 
-    def test_unzip(self, TEST_FILE):
+    def test_unzip(self):
         miz = Miz(TEST_FILE)
         miz.unzip()
 
-    def test_decode(self, TEST_FILE):
+    def test_decode(self):
         miz = Miz(TEST_FILE)
         miz.unzip()
         miz._decode()
 
-    @pytest.mark.skipif(SKIP_LONG_TESTS, reason='skipping long tests')
-    def test_large_decode(self, LARGE_FILE):
+    @pytest.mark.long
+    def test_large_decode(self):
         miz = Miz(LARGE_FILE)
         miz.unzip()
         miz._decode()
 
-    def test_zip(self, TEST_FILE, OUT_FILE):
+    def test_zip(self):
+        assert not Path(OUT_FILE).exists()
         with Miz(TEST_FILE) as miz:
-            assert not Path(OUT_FILE).exists()
             miz.zip(OUT_FILE)
         assert Path(OUT_FILE).exists()
         with Miz(OUT_FILE) as miz2:
@@ -195,8 +155,8 @@ class TestMizBasics:
             miz.mission.weather.cloud_density = 4
             assert not miz.mission.d == miz2.mission.d
 
-    @pytest.mark.skipif(SKIP_LONG_TESTS, reason='skipping long tests')
-    def test_large_zip(self, LARGE_FILE):
+    @pytest.mark.long
+    def test_large_zip(self):
         with Miz(LARGE_FILE, keep_temp_dir=True) as miz:
             out_file = miz.zip()
         assert Path(out_file).exists()
@@ -213,23 +173,23 @@ class TestMizBasics:
                 t2 = _f.read()
             assert t1 == t2
 
-    def test_is_unzipped(self, TEST_FILE):
+    def test_is_unzipped(self):
         mis = Miz(TEST_FILE)
         assert not mis.zip_content
         mis.unzip()
         assert mis.zip_content
 
-    def test_missing_file_in_miz(self, MISSING_FILE):
+    def test_missing_file_in_miz(self):
         missing = Miz(MISSING_FILE)
         with pytest.raises(FileNotFoundError):
             missing.unzip()
 
-    def test_bad_zip_file(self, BAD_ZIP_FILE):
+    def test_bad_zip_file(self):
         mis = Miz(BAD_ZIP_FILE)
         with pytest.raises(BadZipFile):
             mis.unzip()
 
-    def test_temp_dir_cleaning(self, TEST_FILE):
+    def test_temp_dir_cleaning(self):
         mis = Miz(TEST_FILE)
         mis.unzip()
         assert mis.tmpdir.exists()
@@ -245,15 +205,14 @@ class TestMizBasics:
 
 
 # noinspection PyPep8Naming,PyShadowingNames
-@pytest.mark.nocleandir
 class TestMizValues:
     @pytest.fixture(scope='class')
-    def miz(self, TEST_FILE):
+    def miz(self):
         with Miz(TEST_FILE, keep_temp_dir=True) as miz:
             yield miz
 
     @pytest.fixture(autouse=True)
-    def clean_up(self, OUT_FILE):
+    def clean_up(self):
 
         success = yield
 
@@ -548,7 +507,7 @@ class TestMizValues:
             assert isinstance(group, Group)
         assert l == 33
 
-    def test_get_groups_from_category(self, miz, ALL_OBJECTS):
+    def test_get_groups_from_category(self, miz):
         for invalid_category in ('caribou', 'Plane', 'plAne', 'ships', -1, 0, 1, True, False, None):
             with pytest.raises(ValueError):
                 for _ in miz.mission.blue_coa.get_groups_from_category(invalid_category):
@@ -579,9 +538,9 @@ class TestMizValues:
             with pytest.raises(ValueError):
                 for _ in miz.mission.blue_coa.get_units_from_category(invalid_category):
                     pass
-        with Miz('./test/test_files/all_objects.miz') as miz:
-            for unit in miz.mission.blue_coa.units:
-                print(unit.group_category)
+        with Miz(ALL_OBJECTS) as miz:
+            # for unit in miz.mission.blue_coa.units:
+            #     print(unit.group_category)
             for category in ('ship', 'plane', 'helicopter', 'vehicle'):
                 l = 0
                 for unit in miz.mission.blue_coa.get_units_from_category(category):
@@ -639,7 +598,7 @@ class TestMizValues:
             assert miz.mission.red_coa.get_unit_by_name(non_existing_unit_name) is None
             assert miz.mission.blue_coa.get_unit_by_name(non_existing_unit_name) is None
 
-    def test_set_hidden(self, TEST_FILE, OUT_FILE):
+    def test_set_hidden(self):
         with Miz(TEST_FILE) as miz:
             group = miz.mission.get_group_by_name('etcher')
             assert isinstance(group, Group)
@@ -654,7 +613,7 @@ class TestMizValues:
                 assert getattr(group, attrib) == getattr(new_group, attrib)
             assert group.group_hidden
 
-    def test_group_start_time(self, TEST_FILE, OUT_FILE):
+    def test_group_start_time(self):
         with Miz(TEST_FILE) as miz:
             group = miz.mission.get_group_by_name('etcher')
             assert miz.mission.mission_start_time == group.group_start_time
@@ -699,7 +658,7 @@ class TestMizValues:
         assert isinstance(unit3, BaseUnit)
         assert unit1 == unit2 == unit3
 
-    def test_objects(self, ALL_OBJECTS):
+    def test_objects(self):
         with Miz(ALL_OBJECTS) as miz:
             _ = miz.mission.blue_coa.get_country_by_id(2)
             country = miz.mission.blue_coa.get_country_by_id(2)
@@ -732,7 +691,7 @@ class TestMizValues:
                 assert isinstance(country.get_unit_by_name(unit_name), BaseUnit)
             assert country.get_unit_by_name('some other unit') is None
 
-    def test_get_country(self, miz, TEST_FILE):
+    def test_get_country(self, miz):
         assert isinstance(miz.mission.blue_coa.get_country_by_id(2), Country)
         assert isinstance(miz.mission.blue_coa.get_country_by_name('USA'), Country)
         with pytest.raises(ValueError):
@@ -744,7 +703,7 @@ class TestMizValues:
 
     @pytest.mark.parametrize('unit_id, unit_type, radios_to_test', RADIOS_TESTS)
     def test_radios(self, unit_id, unit_type, radios_to_test):
-        with Miz('./test/test_files/radios.miz') as miz:
+        with Miz(RADIO_FILE) as miz:
             mission = miz.mission
 
         unit = mission.get_unit_by_id(unit_id)
@@ -759,7 +718,7 @@ class TestMizValues:
                 assert radio_by_name.get_frequency(channel) == freq
                 assert radio_by_number.get_frequency(channel) == freq
 
-    def test_radios_set_freq(self, RADIO_FILE, OUT_FILE):
+    def test_radios_set_freq(self):
         with Miz(RADIO_FILE) as miz:
             unit = miz.mission.get_unit_by_id(1)
             assert isinstance(unit, FlyingUnit)
@@ -779,7 +738,7 @@ class TestMizValues:
                 radio2 = unit2.get_radio_by_number(1)
                 assert type(radio) == type(radio2)
 
-    def test_radios_equal(self, RADIO_FILE):
+    def test_radios_equal(self):
         with Miz(RADIO_FILE) as miz:
             unit = miz.mission.get_unit_by_id(6)
             assert isinstance(unit, FlyingUnit)
@@ -792,15 +751,15 @@ class TestMizValues:
             radio1.set_frequency(1, 30.0)
             assert not radio1 == radio3
 
-    def test_radios_generator(self):  # FIXME
-        with Miz(r'./test/test_files/radios.miz') as miz:
+    def test_radios_generator(self):
+        with Miz(RADIO_FILE) as miz:
             unit = miz.mission.get_unit_by_id(6)
             # noinspection PyUnusedLocal
             for radio in unit.radio_presets:
                 # TODO resume
                 pass
 
-    def test_mission_start_time(self, TEST_FILE):
+    def test_mission_start_time(self):
         with Miz(TEST_FILE) as miz:
             assert miz.mission.mission_start_time == 43200
             assert miz.mission.mission_start_time_as_date == '01/06/2011 12:00:00'
@@ -822,11 +781,11 @@ class TestMizValues:
             with pytest.raises(ValueError):
                 miz.mission.mission_start_time_as_date = '01/01/2010 00:00:00'
 
-    def test_repr(self, TEST_FILE):
+    def test_repr(self):
         with Miz(TEST_FILE) as miz:
             assert 'Mission({})'.format(miz.mission.d) == miz.mission.__repr__()
 
-    def test_coalitions_generator(self, TEST_FILE):
+    def test_coalitions_generator(self):
         with Miz(TEST_FILE) as miz:
             assert miz.mission.coalitions
             l = 0
@@ -835,7 +794,7 @@ class TestMizValues:
                 l += 1
             assert l == 2
 
-    def test_sortie_name(self, TEST_FILE, OUT_FILE):
+    def test_sortie_name(self):
         with Miz(TEST_FILE) as miz:
             assert miz.mission.sortie_name == 'sortie_test'
             wrong_sortie_names = [1, 0, -1, True, None]
@@ -851,13 +810,13 @@ class TestMizValues:
     def test_next_unit_id(self, miz):
         assert miz.mission.next_unit_id == 37
         with pytest.raises(IndexError):
-            with Miz('./test/test_files/duplicate_group_id.miz') as miz:
+            with Miz(DUPLICATE_GROUP_ID) as miz:
                 _ = miz.mission.next_unit_id
 
     def test_next_group_id(self, miz):
         assert miz.mission.next_group_id == 37
         with pytest.raises(IndexError):
-            with Miz('./test/test_files/duplicate_group_id.miz') as miz:
+            with Miz(DUPLICATE_GROUP_ID) as miz:
                 _ = miz.mission.next_group_id
 
     def test_get_group_by_name(self, miz):

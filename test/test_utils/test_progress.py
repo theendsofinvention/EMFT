@@ -4,7 +4,7 @@ import pytest
 from hypothesis import given
 from hypothesis.strategies import text, integers
 
-from src.utils import Progress, ProgressAdapter
+from emft.utils import Progress, ProgressAdapter
 
 not_a_string = [int(0), None, True, float(3.5)]
 not_an_int = ['text', None]  # not including bool because it's an instance of int

@@ -5,7 +5,7 @@ from logging import Logger, Handler, LogRecord, disable, ERROR, NOTSET
 
 import pytest
 
-from src.utils.custom_logging import make_logger, Logged
+from emft.utils.custom_logging import make_logger, Logged
 
 
 class DummyHandler(Handler):
@@ -34,6 +34,7 @@ class TestCustomLogging:
         logger = make_logger('test')
         assert isinstance(logger, Logger)
         assert logger.name == '__main__.test'
+        del logger
 
     def test_class_logger(self):
         class SomeClass(Logged):
@@ -46,8 +47,9 @@ class TestCustomLogging:
 
     def test_logfile_creation(self, tmpdir):
         p = tmpdir.join('logfile')
-        make_logger(log_file_path=str(p))
+        logger = make_logger(log_file_path=str(p))
         assert p.exists()
+        del logger
 
     def test_logfile_reset(self, tmpdir, mocker, monkeypatch):
         p = tmpdir.join('logfile')
@@ -57,9 +59,10 @@ class TestCustomLogging:
         mock = mocker.MagicMock()
         monkeypatch.setattr(os, 'remove', mock)
 
-        make_logger(log_file_path=str(p))
+        logger = make_logger(log_file_path=str(p))
         assert mock.call_count == 1
         assert mock.call_args_list == [mocker.call(str(p))]
+        del logger
 
     def test_custom_handler(self, mocker):
         handler = DummyHandler()
@@ -81,10 +84,12 @@ class TestCustomLogging:
         assert log_record.msg == 'test'
         assert log_record.levelname == 'DEBUG'
 
-        disable(ERROR)
+        del logger
 
     def test_sublogger_handler(self):
-        make_logger()
+        logger = make_logger()
         handler = DummyHandler
         sublogger = make_logger('sub', custom_handler=handler)
         assert handler in sublogger.handlers
+        del logger
+        del sublogger

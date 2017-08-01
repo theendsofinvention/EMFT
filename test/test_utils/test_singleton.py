@@ -1,7 +1,7 @@
 # coding=utf-8
 
 
-from src.utils.singleton import Singleton
+from emft.utils.singleton import Singleton
 
 
 class SomeClass(metaclass=Singleton):

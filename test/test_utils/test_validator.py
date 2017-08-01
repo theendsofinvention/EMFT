@@ -6,7 +6,7 @@ import pytest
 from hypothesis import given
 from hypothesis.strategies import text, integers, booleans, floats, one_of
 
-from src.utils.validator import Validator, not_an_int, not_a_str, not_a_positive_int, not_a_bool, valid_bool, \
+from emft.utils.validator import Validator, not_an_int, not_a_str, not_a_positive_int, not_a_bool, valid_bool, \
     valid_int, valid_positive_int, \
     valid_str
 

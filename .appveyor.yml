@@ -46,8 +46,10 @@ init:
         throw "There are newer queued builds for this pull request, failing early." }
 
   # Check that we have the expected version and architecture for Python
-  - "python --version"
-  - "python -c \"import struct; print(struct.calcsize('P') * 8)\""
+  - set PATH=%PYTHON%;%PYTHON%\Scripts;C:\MinGW\msys\1.0\bin;%PATH%
+  - "git config --system http.sslcainfo \"C:\\Program Files\\Git\\mingw64\\ssl\\certs\\ca-bundle.crt\""
+  - "%PYTHON%/python -V"
+  - "%PYTHON%/python -c \"import struct;print(8 * struct.calcsize(\'P\'))\""
   - "pip --version"
 
   - cmd: echo %PYTHON% %PYTHON_VERSION% %PYTHON_ARCH%
@@ -67,26 +69,26 @@ cache:
   - C:\ProgramData\chocolatey\lib -> appveyor.yml
 
 install:
-  - "%PYTHON%/Scripts/pip.exe install --disable-pip-version-check --user --upgrade pip"
-  - "%PYTHON%/Scripts/pip.exe install --upgrade coverage"
-  - "%PYTHON%/Scripts/pip.exe install -r requirements.txt"
-  - "%PYTHON%/Scripts/pip.exe install git+https://github.com/132nd-etcher/pyinstaller.git@develop#egg=PyInstaller"
+  - "%PYTHON%/Scripts/pip.exe install --disable-pip-version-check --user --upgrade pip setuptools"
+#  - "%PYTHON%/Scripts/pip.exe install --upgrade coverage"
+#  - "%PYTHON%/Scripts/pip.exe install -r requirements.txt"
+#  - "%PYTHON%/Scripts/pip.exe install git+https://github.com/132nd-etcher/pyinstaller.git@develop#egg=PyInstaller"
   - choco install gitversion.portable -pre -y
 #  - choco install gitversion.portable -y
   - git clone --branch=master https://github.com/132nd-etcher/verpatch.git C:\projects\verpatch
   - curl -O http://esrg.sourceforge.net/utils_win_up/md5sum/crc32.exe
+  - cmd: pip install -r requirements-dev.txt
 
 before_build:
   - ps: C:\ProgramData\chocolatey\bin\gitversion /l console /output buildserver /updateassemblyinfo /b (get-item env:APPVEYOR_REPO_BRANCH).Value
   - cmd: appveyor UpdateBuild -Version %GitVersion_InformationalVersion%.%APPVEYOR_BUILD_NUMBER%
-  - "%PYTHON%/python -m pytest --cov=src --cov-config .coveragerc --cov-report xml -c test/.pytest"
-  - set PATH="c:\projects\verpatch";%PATH%
+  - set PATH=c:\projects\verpatch;%PATH%
 
 build_script:
-  - "%PYTHON%/python.exe -m PyInstaller src/main.py --noconfirm --onefile --clean --icon src/ui/app.ico --workpath ./build --paths %PYTHON%/Lib/site-packages/PyQt5/Qt/bin --name EMFT --distpath ./dist --windowed --log-level=WARN"
+  - cmd: pip install -e .
+  - cmd: emft-build pin_version flake8 pytest safety chglog doc reqs pyrcc freeze patch test_build
 
 after_build:
-  - cmd: verpatch.exe %APPVEYOR_BUILD_FOLDER%\dist\emft.exe /high %GitVersion_SemVer% /va /pv %GitVersion_SemVer% /s product EMFT /s copyright "2017 etcher" /s build %GitVersion_Sha% /langid 1033 /s PrivateBuild %APPVEYOR_BUILD_NUMBER%
   - cmd: move dist\emft.exe emft.exe
 
 test_script:
@@ -103,11 +105,14 @@ after_test:
 #  - "%PYTHON%/Scripts/coveralls.exe"
   - "%PYTHON%/Scripts/pip.exe install codecov"
   - "%PYTHON%/Scripts/codecov.exe & exit 0"
+  - cmd: md5sum emft.exe > emft.md5
 
 
 artifacts:
   - path: emft.exe
     name: emft
+  - path: emft.md5
+    name: hexdigest
 
 # branches:
 #   only:
@@ -117,7 +122,7 @@ artifacts:
 #     - /pull/.*/
 #     - /hotfix/.*/
 #     - /feature/.*/
-# 
+#
 #   except:
 #     - gh-pages
 

@@ -5,7 +5,7 @@ from hypothesis import given
 from hypothesis.strategies import text, integers, booleans
 
 # noinspection PyProtectedMember
-from src.utils.decorators.typed_property import TypedProperty, _TypedProperty
+from emft.utils.decorators.typed_property import TypedProperty, _TypedProperty
 
 
 class SomeClass:
@@ -102,6 +102,7 @@ class TestTypedProperty:
         o = SomeClass()
         prop = SomeClass.some_bool
         assert isinstance(prop, _TypedProperty)
+        assert o.some_bool is False
         prop.func = mock
-        o.some_bool = False
-        mock.assert_called_with(o, False)
+        o.some_bool = True
+        mock.assert_called_with(o, True)

@@ -6,7 +6,7 @@ import subprocess
 import pytest
 from hypothesis import strategies as st, given
 
-from src.utils.custom_path import Path
+from emft.utils.custom_path import Path
 
 
 def test_get_version():
@@ -18,33 +18,33 @@ def test_get_version():
     info = p.get_win32_file_info()
     if os.environ.get('APPVEYOR'):
         # noinspection SpellCheckingInspection
-        assert info.file_version == '6.3.9600.17031 (winblue_gdr.140221-1952)'
+        assert info.file_version == '6.3.9600.18231 (winblue_ltsb.160208-0600)'
         assert info.fixed_version == '6.3.9600.18231'
-        assert info.product_version == '6.3.9600.17031'
+        assert info.product_version == '6.3.9600.18231'
     else:
-        assert info.file_version == '6.1.7600.16385 (win7_rtm.090713-1255)'
+        assert info.file_version == '6.1.7601.23537 (win7sp1_ldr.160829-0600)'
         assert info.fixed_version == '6.1.7601.23537'
-        assert info.product_version == '6.1.7600.16385'
+        assert info.product_version == '6.1.7601.23537'
     assert info.comments is None
     assert info.company_name == 'Microsoft Corporation'
-    assert info.copyright == '© Microsoft Corporation. All rights reserved.'
+    assert info.copyright == r'\xa9 Microsoft Corporation. All rights reserved.'
     assert info.file_description == 'Windows Explorer'
     assert info.internal_name == 'explorer'
     assert info.private_build is None
-    assert info.original_filename == 'EXPLORER.EXE.MUI'
-    assert info.product_name == 'Microsoft® Windows® Operating System'
+    assert info.original_filename == 'EXPLORER.EXE'
+    assert info.product_name == r'Microsoft\xae Windows\xae Operating System'
     assert info.special_build is None
     assert info.trademark is None
     with pytest.raises(FileNotFoundError):
-        Path('c:\explorer.exe').get_win32_file_info()
+        Path(r'c:\explorer.exe').get_win32_file_info()
     with pytest.raises(TypeError):
-        Path('c:\windows').get_win32_file_info()
+        Path(r'c:\windows').get_win32_file_info()
     with pytest.raises(ValueError):
         p = Path(__file__)
         p.get_win32_file_info()
 
 
-@given(s=st.one_of(st.text(alphabet=string.ascii_letters, min_size=1)))
+@given(s=st.one_of(st.text(alphabet=string.ascii_letters, min_size=4)))
 def test_create_temp_file(tmpdir, s):
     p = Path(str(tmpdir.join(s)))
     p.write_text('')

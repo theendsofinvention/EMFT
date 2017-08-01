@@ -1,6 +1,6 @@
 import pytest
 
-from src.reorder.service import ConvertUrl
+from emft.reorder.service import ConvertUrl
 
 
 class TestConvertUrl:
