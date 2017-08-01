@@ -18,7 +18,7 @@ Welcome to EMFT's documentation!
     format_test
     modules
 
-.. include README.rst
+.. include:: ../README.rst
 
 Recent Changes
 --------------
