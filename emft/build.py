@@ -10,6 +10,7 @@ import shlex
 import subprocess
 import sys
 import typing
+from contextlib import contextmanager
 import shutil
 from json import loads
 
@@ -18,6 +19,22 @@ import click
 
 # noinspection SpellCheckingInspection
 PYINSTALLER_NEEDED_VERSION = '3.3.dev0+g2fcbe0f'
+
+
+@contextmanager
+def cd(path):
+    """
+    Context to temporarily change the working directory
+
+    Args:
+        path: working directory to cd into
+    """
+    old_dir = os.getcwd()
+    os.chdir(path)
+    try:
+        yield
+    finally:
+        os.chdir(old_dir)
 
 
 def ensure_repo():
