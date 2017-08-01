@@ -764,11 +764,11 @@ def pre_push(ctx):
         click.secho('Repository is dirty', err=True, fg='red')
         exit(-1)
     ctx.invoke(pin_version)
+    ctx.invoke(reqs)
     ctx.invoke(chglog)
     ctx.invoke(pyrcc)
     ctx.invoke(flake8)
     ctx.invoke(safety)
-    ctx.invoke(reqs)
     if repo_is_dirty():
         click.secho('Repository is dirty', err=True, fg='red')
         exit(-1)
