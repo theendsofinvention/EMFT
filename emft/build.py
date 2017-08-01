@@ -345,6 +345,9 @@ def _install_pyinstaller(ctx: click.Context, force: bool = False):
 
 
 def _get_version(ctx: click.Context):
+    if _get_version.leave_me_alone_already:
+        return
+
     if not hasattr(ctx, 'obj') or ctx.obj is None:
         ctx.obj = {}
 
@@ -357,6 +360,11 @@ def _get_version(ctx: click.Context):
 
     click.secho(f"Semver: {ctx.obj['semver']}", fg='green')
     click.secho(f"PEP440: {ctx.obj['pep440']}", fg='green')
+
+    _get_version.leave_me_alone_already = True
+
+
+_get_version.leave_me_alone_already = False
 
 
 # noinspection PyUnusedLocal
