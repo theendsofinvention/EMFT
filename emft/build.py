@@ -184,6 +184,8 @@ def do(
     ctx: click.Context,
     cmd: typing.List[str],
     cwd: str = '.',
+    mute_stdout: bool = False,
+    mute_stderr: bool = False,
     filter_output: typing.Union[None, typing.Iterable[str]] = None
 ) -> str:
     """
@@ -193,6 +195,8 @@ def do(
         ctx: click context
         cmd: command to execute
         cwd: working directory (defaults to ".")
+        mute_stdout: if true, stdout will not be printed
+        mute_stderr: if true, stderr will not be printed
         filter_output: gives a list of partial strings to filter out from the output (stdout or stderr)
 
     Returns: stdout
@@ -215,9 +219,9 @@ def do(
         cmd = shlex.split(cmd)
 
     out, err, ret = do_ex(ctx, cmd, cwd)
-    if out:
+    if out and not mute_stdout:
         click.secho(f'{_filter_output(out)}', fg='cyan')
-    if err:
+    if err and not mute_stderr:
         click.secho(f'{_filter_output(err)}', fg='red')
     if ret:
         click.secho(f'command failed: {cmd}', err=True, fg='red')
@@ -502,7 +506,7 @@ def chglog(ctx, commit, push):
     """
     Write the changelog using "gitchangelog" (https://github.com/vaab/gitchangelog)
     """
-    changelog = do(ctx, ['gitchangelog', '0.4.1..HEAD'])
+    changelog = do(ctx, ['gitchangelog', '0.4.1..HEAD'], mute_stdout=True)
     with open('CHANGELOG.rst', mode='w') as f:
         f.write(re.sub(r'(\s*\r\n){2,}', '\r\n', changelog))
     if commit:
