@@ -4,7 +4,6 @@ Collections of tools to build EMFT
 """
 import datetime
 import importlib
-import json
 import os
 import re
 import shlex
@@ -47,8 +46,6 @@ def repo_is_dirty() -> bool:
     """
     try:
         subprocess.check_call(['git', 'diff', '--quiet', '--cached', 'HEAD', '--'])
-        subprocess.check_call(['git', 'diff-files', '--quiet'])
-        subprocess.check_call(['git', 'diff-index', '--quiet', 'HEAD'])
     except subprocess.CalledProcessError:
         return True
 
@@ -509,10 +506,8 @@ def pin_version(ctx):
 
 
 @cli.command()
-@click.option('--commit/--no-commit', default=True, help='commit the changes (default: True)')
-@click.option('--push/--no-push', default=False, help='push the changes (default: False)')
 @click.pass_context
-def chglog(ctx, commit, push) -> bool:
+def chglog(ctx):
     """
     Writes the changelog
 
@@ -527,20 +522,11 @@ def chglog(ctx, commit, push) -> bool:
     changelog = do(ctx, ['gitchangelog', '0.4.1..HEAD'], mute_stdout=True)
     with open('CHANGELOG.rst', mode='w') as f:
         f.write(re.sub(r'(\s*\r\n){2,}', '\r\n', changelog))
-    if commit:
-        do_ex(ctx, ['git', 'add', 'CHANGELOG.rst'])
-        _, _, ret = do_ex(ctx, ['git', 'commit', '-m', 'chg: dev: updated changelog [skip ci]'])
-        if ret == 0:
-            if push:
-                do_ex(ctx, ['git', 'push'])
-            return True
 
 
 @cli.command()
-@click.option('--commit/--no-commit', default=True, help='commit the changes (default: True)')
-@click.option('--push/--no-push', default=False, help='push the changes (default: False)')
 @click.pass_context
-def pyrcc(ctx, commit, push) -> bool:
+def pyrcc(ctx):
     """
     Compiles Qt resources (icons, pictures, ...)  to a usable python script
 
@@ -558,13 +544,6 @@ def pyrcc(ctx, commit, push) -> bool:
         './emft/ui/qt_resource.qrc',
         '-o', './emft/ui/qt_resource.py',
     ])
-    if commit:
-        do_ex(ctx, ['git', 'add', './emft/ui/qt_resource.py'])
-        _, _, ret = do_ex(ctx, ['git', 'commit', '-m', 'chg: dev: updated changelog [skip ci]'])
-        if ret == 0:
-            if push:
-                do_ex(ctx, ['git', 'push'])
-            return True
 
 
 @cli.command()
@@ -771,22 +750,11 @@ def pre_push(ctx):
     """
     This is meant to be used as a Git pre-push hook
     """
-    if repo_is_dirty():
-        click.secho('Repository is dirty', err=True, fg='red')
-        exit(-1)
-    try:
-        ctx.invoke(pin_version)
-    except json.JSONDecodeError:
-        click.secho('Assuming this is a command on remote refs...', err=True, fg='red')
-        exit(0)
+    ctx.invoke(pin_version)
     ctx.invoke(reqs)
-    if ctx.invoke(chglog):
-        click.secho('Changelog has been updated', err=True, fg='red')
-        exit(-1)
+    ctx.invoke(chglog)
     ctx.invoke(pyrcc)
-    if ctx.invoke(chglog):
-        click.secho('Qt resources have been updated', err=True, fg='red')
-        exit(-1)
+    ctx.invoke(chglog)
     ctx.invoke(flake8)
     ctx.invoke(safety)
     if repo_is_dirty():
