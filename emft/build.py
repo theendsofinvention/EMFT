@@ -4,6 +4,7 @@ Collections of tools to build EMFT
 """
 import datetime
 import importlib
+import json
 import os
 import re
 import shlex
@@ -11,8 +12,8 @@ import shutil
 import subprocess
 import sys
 import typing
-from contextlib import contextmanager
 import webbrowser
+from contextlib import contextmanager
 from json import loads
 
 import certifi
@@ -36,6 +37,20 @@ def cd(path):
         yield
     finally:
         os.chdir(old_dir)
+
+
+def repo_is_dirty() -> bool:
+    """
+    Checks if the current repository contains uncommitted or untracked changes
+
+    Returns: true if the repository is clean
+    """
+    try:
+        subprocess.check_call(['git', 'diff', '--quiet', '--cached', 'HEAD', '--'])
+        subprocess.check_call(['git', 'diff-files', '--quiet'])
+        subprocess.check_call(['git', 'diff-index', '--quiet', 'HEAD'])
+    except subprocess.CalledProcessError:
+        return True
 
 
 def ensure_repo():
@@ -184,6 +199,8 @@ def do(
     ctx: click.Context,
     cmd: typing.List[str],
     cwd: str = '.',
+    mute_stdout: bool = False,
+    mute_stderr: bool = False,
     filter_output: typing.Union[None, typing.Iterable[str]] = None
 ) -> str:
     """
@@ -193,6 +210,8 @@ def do(
         ctx: click context
         cmd: command to execute
         cwd: working directory (defaults to ".")
+        mute_stdout: if true, stdout will not be printed
+        mute_stderr: if true, stderr will not be printed
         filter_output: gives a list of partial strings to filter out from the output (stdout or stderr)
 
     Returns: stdout
@@ -215,9 +234,9 @@ def do(
         cmd = shlex.split(cmd)
 
     out, err, ret = do_ex(ctx, cmd, cwd)
-    if out:
+    if out and not mute_stdout:
         click.secho(f'{_filter_output(out)}', fg='cyan')
-    if err:
+    if err and not mute_stderr:
         click.secho(f'{_filter_output(err)}', fg='red')
     if ret:
         click.secho(f'command failed: {cmd}', err=True, fg='red')
@@ -421,7 +440,9 @@ def cli(ctx):
 @click.option('--dev/--no-dev', default=True, help='Whether or not to write "requirement-dev.txt"')
 @click.pass_context
 def reqs(ctx: click.Context, prod, test, dev):
-    """Write requirements files"""
+    """
+    Write requirements files
+    """
     if not find_executable('pip-compile'):
         click.secho('Missing module "pip-tools".\n'
                     'Install it manually with: "pip install pip-tools"\n'
@@ -491,27 +512,41 @@ def pin_version(ctx):
 @click.option('--commit/--no-commit', default=True, help='commit the changes (default: True)')
 @click.option('--push/--no-push', default=False, help='push the changes (default: False)')
 @click.pass_context
-def chglog(ctx, commit, push):
-    """Write changelog"""
+def chglog(ctx, commit, push) -> bool:
+    """
+    Writes the changelog
+
+    Returns:
+        bool: returns true if changes have been committed to the repository
+    """
     ensure_module('gitchangelog')
     find_executable('git')
     """
     Write the changelog using "gitchangelog" (https://github.com/vaab/gitchangelog)
     """
-    changelog = do(ctx, ['gitchangelog', '0.4.1..HEAD'])
+    changelog = do(ctx, ['gitchangelog', '0.4.1..HEAD'], mute_stdout=True)
     with open('CHANGELOG.rst', mode='w') as f:
         f.write(re.sub(r'(\s*\r\n){2,}', '\r\n', changelog))
     if commit:
         do_ex(ctx, ['git', 'add', 'CHANGELOG.rst'])
         _, _, ret = do_ex(ctx, ['git', 'commit', '-m', 'chg: dev: updated changelog [skip ci]'])
-        if ret == 0 and push:
-            do_ex(ctx, ['git', 'push'])
+        if ret == 0:
+            if push:
+                do_ex(ctx, ['git', 'push'])
+            return True
 
 
 @cli.command()
+@click.option('--commit/--no-commit', default=True, help='commit the changes (default: True)')
+@click.option('--push/--no-push', default=False, help='push the changes (default: False)')
 @click.pass_context
-def pyrcc(ctx):
-    """Compiles Qt resources (icons, pictures, ...)  to a usable python script"""
+def pyrcc(ctx, commit, push) -> bool:
+    """
+    Compiles Qt resources (icons, pictures, ...)  to a usable python script
+
+    Returns:
+        bool: returns true if changes have been committed to the repository
+    """
     if not find_executable('pyrcc5'):
         click.secho('Unable to find "pyrcc5" executable.\n'
                     f'Install it manually with: "pip install pyqt5"\n'
@@ -523,6 +558,13 @@ def pyrcc(ctx):
         './emft/ui/qt_resource.qrc',
         '-o', './emft/ui/qt_resource.py',
     ])
+    if commit:
+        do_ex(ctx, ['git', 'add', './emft/ui/qt_resource.py'])
+        _, _, ret = do_ex(ctx, ['git', 'commit', '-m', 'chg: dev: updated changelog [skip ci]'])
+        if ret == 0:
+            if push:
+                do_ex(ctx, ['git', 'push'])
+            return True
 
 
 @cli.command()
@@ -721,6 +763,35 @@ def test_build(ctx):
     Runs the embedded tests in the resulting EMFT.exe
     """
     do(ctx, ['./dist/emft.exe', '--test'])
+
+
+@cli.command()
+@click.pass_context
+def pre_push(ctx):
+    """
+    This is meant to be used as a Git pre-push hook
+    """
+    if repo_is_dirty():
+        click.secho('Repository is dirty', err=True, fg='red')
+        exit(-1)
+    try:
+        ctx.invoke(pin_version)
+    except json.JSONDecodeError:
+        click.secho('Assuming this is a command on remote refs...', err=True, fg='red')
+        exit(0)
+    ctx.invoke(reqs)
+    if ctx.invoke(chglog):
+        click.secho('Changelog has been updated', err=True, fg='red')
+        exit(-1)
+    ctx.invoke(pyrcc)
+    if ctx.invoke(chglog):
+        click.secho('Qt resources have been updated', err=True, fg='red')
+        exit(-1)
+    ctx.invoke(flake8)
+    ctx.invoke(safety)
+    if repo_is_dirty():
+        click.secho('Repository is dirty', err=True, fg='red')
+        exit(-1)
 
 
 if __name__ == '__main__':
