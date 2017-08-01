@@ -1,6 +1,13 @@
 0.5.0 (2017-08-01)
 ------------------
 
+Changes
+~~~~~~~
+- New updater - please see details below. [132nd-etcher]
+
+  The new updater has different update channels. If the channel you had selected previously (example: "dev") does not
+  exist in the new updater, it will default to "beta" (which corresponds to the develop branch).
+
 Fix
 ~~~
 - Reorder: fix bug if target directory doesn't exist when re-ordering.
