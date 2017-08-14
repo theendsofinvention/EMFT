@@ -7,10 +7,10 @@ from time import sleep
 from zipfile import BadZipFile
 
 import pytest
-from emft.utils import Path
 
-from emft.global_ import ENCODING
-from emft.miz.mission import Mission, Country, Group, BaseUnit, FlyingUnit, EPOCH_DELTA, Coalition
+from emft.core.constant import ENCODING
+from emft.core.path import Path
+from emft.miz.mission import BaseUnit, Coalition, Country, EPOCH_DELTA, FlyingUnit, Group, Mission
 from emft.miz.miz import Miz as Miz
 
 if os.path.exists('./test_files'):

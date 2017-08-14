@@ -3,10 +3,10 @@
 import typing
 from calendar import timegm
 from itertools import chain
-from time import strftime, gmtime, strptime
+from time import gmtime, strftime, strptime
 
-from emft.utils import make_logger
-from emft.utils import Logged, valid_str, valid_positive_int, Validator, valid_bool, valid_int, valid_float
+from emft.core.logging import Logged, make_logger
+from emft.core.validator import Validator, valid_bool, valid_float, valid_int, valid_positive_int, valid_str
 
 EPOCH_DELTA = 1306886400
 
@@ -536,9 +536,12 @@ class Weather(BaseMissionObject):
     validator_cloud_base = Validator(_type=int, _min=300, _max=5000, exc=ValueError, logger=LOGGER)
     validator_fog_visibility = Validator(_type=int, _min=0, _max=6000, exc=ValueError,
                                          logger=LOGGER)
+    validator_visibility = Validator(_type=int, _min=0, _max=80000, exc=ValueError,
+                                     logger=LOGGER)
     validator_fog_thickness = Validator(_type=int, _min=0, _max=1000, exc=ValueError,
                                         logger=LOGGER)
     validator_qnh = Validator(_type=int, _min=720, _max=790, exc=ValueError, logger=LOGGER)
+    validator_temperature = Validator(_type=int, _min=-50, _max=50, exc=ValueError, logger=LOGGER)
     validator_temp_spring_or_fall = Validator(_type=int, _min=-10, _max=30, exc=ValueError,
                                               logger=LOGGER)
     validator_temp_winter = Validator(_type=int, _min=-50, _max=15, exc=ValueError, logger=LOGGER)
@@ -588,19 +591,6 @@ class Weather(BaseMissionObject):
         return self.seasons_enum[season_name]
 
     @property
-    def _section_fog(self):
-        return self._section_weather['fog']
-
-    @property
-    def fog_thickness(self):
-        return self._section_fog['thickness']
-
-    @fog_thickness.setter
-    def fog_thickness(self, value):
-        self.validator_fog_thickness.validate(value, 'fog_thickness')
-        self._section_fog['thickness'] = value
-
-    @property
     def _section_wind_at_ground_level(self):
         return self._section_wind['atGround']
 
@@ -623,6 +613,19 @@ class Weather(BaseMissionObject):
         self._section_wind_at_ground_level['speed'] = value
 
     @property
+    def _section_fog(self):
+        return self._section_weather['fog']
+
+    @property
+    def fog_thickness(self):
+        return self._section_fog['thickness']
+
+    @fog_thickness.setter
+    def fog_thickness(self, value):
+        self.validator_fog_thickness.validate(value, 'fog_thickness')
+        self._section_fog['thickness'] = value
+
+    @property
     def fog_visibility(self):
         return self._section_fog['visibility']
 
@@ -630,6 +633,28 @@ class Weather(BaseMissionObject):
     def fog_visibility(self, value):
         self.validator_fog_visibility.validate(value, 'fog_visibility')
         self._section_fog['visibility'] = value
+
+    @property
+    def fog_enabled(self):
+        return self._section_weather['enable_fog']
+
+    @fog_enabled.setter
+    def fog_enabled(self, value):
+        valid_bool.validate(value, 'enable_fog')
+        self._section_weather['enable_fog'] = value
+
+    @property
+    def _section_visibility(self):
+        return self._section_weather['visibility']
+
+    @property
+    def visibility(self):
+        return self._section_visibility['distance']
+
+    @visibility.setter
+    def visibility(self, value):
+        self.validator_visibility.validate(value, 'visibility')
+        self._section_visibility['distance'] = value
 
     @property
     def precipitations(self):
@@ -668,12 +693,12 @@ class Weather(BaseMissionObject):
 
     @temperature.setter
     def temperature(self, value):
-        self.seasons_enum[self.season_code]['temp_validator'].validate(value, 'temperature')
+        self.validator_temperature.validate(value, 'temperature')
         self._section_season['temperature'] = value
-        if value > 0 and self.precipitations > 2:
-            self.precipitations -= 2
-        if value < 0 < self.precipitations < 3:  # PyKek
-            self.precipitations += 2
+        # if value > 0 and self.precipitations > 2:
+        #     self.precipitations -= 2
+        # if value < 0 < self.precipitations < 3:  # PyKek
+        #     self.precipitations += 2
 
     @property
     def _section_wind_at8000(self):
@@ -687,28 +712,6 @@ class Weather(BaseMissionObject):
     def wind_at_ground_level_dir(self, value):
         Mission.validator_heading.validate(value, 'wind_at_ground_level_dir')
         self._section_wind_at_ground_level['dir'] = value
-
-    @property
-    def _section_clouds(self):
-        return self._section_weather['clouds']
-
-    @property
-    def cloud_thickness(self):
-        return self._section_clouds['thickness']
-
-    @cloud_thickness.setter
-    def cloud_thickness(self, value):
-        self.validator_cloud_thickness.validate(value, 'cloud_thickness')
-        self._section_clouds['thickness'] = value
-
-    @property
-    def fog_enabled(self):
-        return self._section_weather['enable_fog']
-
-    @fog_enabled.setter
-    def fog_enabled(self, value):
-        valid_bool.validate(value, 'enable_fog')
-        self._section_weather['enable_fog'] = value
 
     @property
     def _section_wind(self):
@@ -750,15 +753,6 @@ class Weather(BaseMissionObject):
         self._section_wind_at2000['dir'] = value
 
     @property
-    def cloud_density(self):
-        return self._section_clouds['density']
-
-    @cloud_density.setter
-    def cloud_density(self, value):
-        self.validator_cloud_density.validate(value, 'cloud_density')
-        self._section_clouds['density'] = value
-
-    @property
     def _section_season(self):
         return self._section_weather['season']
 
@@ -785,6 +779,19 @@ class Weather(BaseMissionObject):
             self.temperature = self.seasons_enum[value]['temp_validator'].max
 
     @property
+    def _section_clouds(self):
+        return self._section_weather['clouds']
+
+    @property
+    def cloud_thickness(self):
+        return self._section_clouds['thickness']
+
+    @cloud_thickness.setter
+    def cloud_thickness(self, value):
+        self.validator_cloud_thickness.validate(value, 'cloud_thickness')
+        self._section_clouds['thickness'] = value
+
+    @property
     def cloud_base(self):
         return self._section_clouds['base']
 
@@ -792,6 +799,15 @@ class Weather(BaseMissionObject):
     def cloud_base(self, value):
         self.validator_cloud_base.validate(value, 'cloud_base')
         self._section_clouds['base'] = value
+
+    @property
+    def cloud_density(self):
+        return self._section_clouds['density']
+
+    @cloud_density.setter
+    def cloud_density(self, value):
+        self.validator_cloud_density.validate(value, 'cloud_density')
+        self._section_clouds['density'] = value
 
     @property
     def wind_at8000_speed(self):

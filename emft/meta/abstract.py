@@ -1,7 +1,7 @@
 # coding=utf-8
 import abc
 
-from emft.sentry.sentry_context_provider import ISentryContextProvider
+from emft.core.sentry import ISentryContextProvider
 
 
 class AbstractMeta(ISentryContextProvider, metaclass=abc.ABCMeta):

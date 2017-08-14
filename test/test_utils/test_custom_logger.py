@@ -1,11 +1,11 @@
 # coding=utf-8
 
 import os
-from logging import Logger, Handler, LogRecord, disable, ERROR, NOTSET
+from logging import Handler, LogRecord, Logger, NOTSET, disable
 
 import pytest
 
-from emft.utils.custom_logging import make_logger, Logged
+from emft.core.logging import Logged, make_logger
 
 
 class DummyHandler(Handler):

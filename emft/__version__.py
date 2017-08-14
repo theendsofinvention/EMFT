@@ -1,10 +1,11 @@
 # coding=utf-8
 
 import os
-from emft.utils.updater.customversion import CustomVersion
 import subprocess
 import sys
-from json import loads, JSONDecodeError
+from json import JSONDecodeError, loads
+
+from emft.updater.customversion import CustomVersion
 
 __version__ = None
 

@@ -2,13 +2,15 @@
 import tempfile
 from filecmp import dircmp
 from os.path import exists, join
-from zipfile import ZipFile, BadZipFile, ZipInfo
+from zipfile import BadZipFile, ZipFile, ZipInfo
 
-from emft.dummy_miz import dummy_miz
-from emft.global_ import ENCODING
+from emft.core.constant import ENCODING
+from emft.core.logging import make_logger
+from emft.core.path import Path
+from emft.core.progress import Progress
+from emft.core.sltp import SLTP
 from emft.miz.mission import Mission
-from emft.sltp import SLTP
-from emft.utils import make_logger, Path, Progress
+from emft.resources.dummy_miz import dummy_miz
 
 LOGGER = make_logger('miz')
 
@@ -111,7 +113,7 @@ class Miz:
     @staticmethod
     def reorder(miz_file_path, target_dir, skip_options_file):
 
-        LOGGER.info('re-ordering miz file: {}'.format(miz_file_path))
+        LOGGER.debug('re-ordering miz file: {}'.format(miz_file_path))
         LOGGER.debug('destination folder: {}'.format(target_dir))
         LOGGER.debug('{}option file'.format('skipping' if skip_options_file else 'including'))
 
@@ -154,7 +156,7 @@ class Miz:
 
     def _decode(self):
 
-        LOGGER.info('decoding lua tables')
+        LOGGER.debug('decoding lua tables')
 
         if not self.zip_content:
             self.unzip(overwrite=False)
@@ -180,13 +182,13 @@ class Miz:
             self._mission = Mission(mission_data, self._l10n)
         Progress.set_value(3)
 
-        LOGGER.info('decoding done')
+        LOGGER.debug('decoding done')
 
     def _encode(self):
 
-        LOGGER.info('encoding lua tables')
+        LOGGER.debug('encoding lua tables')
 
-        Progress.start('Decoding MIZ file', length=3)
+        Progress.start('Encoding MIZ file', length=3)
 
         Progress.set_label('Encoding map resource')
         LOGGER.debug('encoding map resource')
@@ -194,19 +196,19 @@ class Miz:
             f.write(SLTP().encode(self._map_res, self._map_res_qual))
         Progress.set_value(1)
 
-        Progress.set_label('Encoding map resource')
+        Progress.set_label('Encoding l10n dictionary')
         LOGGER.debug('encoding l10n dictionary')
         with open(self.dictionary_file, mode='w', encoding=ENCODING) as f:
             f.write(SLTP().encode(self.l10n, self._l10n_qual))
         Progress.set_value(2)
 
-        Progress.set_label('Encoding map resource')
+        Progress.set_label('Encoding mission dictionary')
         LOGGER.debug('encoding mission dictionary')
         with open(self.mission_file, mode='w', encoding=ENCODING) as f:
             f.write(SLTP().encode(self.mission.d, self._mission_qual))
         Progress.set_value(3)
 
-        LOGGER.info('encoding done')
+        LOGGER.debug('encoding done')
 
     def _check_extracted_content(self):
 
@@ -256,15 +258,16 @@ class Miz:
 
         # noinspection PyTypeChecker
         for miz_item in map(
-                join,
-                [self.tmpdir.abspath()],
-                [
-                    'mission',
-                    'options',
-                    'warehouses',
-                    'l10n/DEFAULT/dictionary',
-                    'l10n/DEFAULT/mapResource'
-                ]):
+            join,
+            [self.tmpdir.abspath()],
+            [
+                'mission',
+                'options',
+                'warehouses',
+                'l10n/DEFAULT/dictionary',
+                'l10n/DEFAULT/mapResource'
+            ]
+        ):
 
             if not exists(miz_item):
                 LOGGER.error('missing file in miz: {}'.format(miz_item))

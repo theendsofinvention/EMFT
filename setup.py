@@ -24,8 +24,11 @@ def read_local_files(*file_paths: str) -> str:
     return '\n' + '\n\n'.join(map(_read_single_file, file_paths))
 
 
+dependency_links = [r'https://github.com/tomp/python-metar.git']
+
 # noinspection SpellCheckingInspection
 install_requires = [
+    'pyinstrument',
     'semantic_version',
     'colorama',
     'transitions',
@@ -43,6 +46,8 @@ install_requires = [
     'ruamel.yaml',
     'simplekml',
     'urllib3<1.23,>=1.21.1',  # Specific from requests
+    'pytaf',
+    'metar',
 ]
 
 # noinspection SpellCheckingInspection
@@ -107,6 +112,7 @@ if __name__ == '__main__':
         tests_require=test_requires,
         use_scm_version=True,
         setup_requires=setup_requires,
+        dependency_links=dependency_links,
         python_requires='>=3.6',
         classifiers=[
             'Development Status :: 3 - Alpha',

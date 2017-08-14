@@ -4,11 +4,10 @@ import logging
 
 import pytest
 from hypothesis import given
-from hypothesis.strategies import text, integers, booleans, floats, one_of
+from hypothesis.strategies import booleans, floats, integers, one_of, text
 
-from emft.utils.validator import Validator, not_an_int, not_a_str, not_a_positive_int, not_a_bool, valid_bool, \
-    valid_int, valid_positive_int, \
-    valid_str
+from emft.core.validator import Validator, not_a_bool, not_a_positive_int, not_a_str, not_an_int, valid_bool,\
+    valid_int, valid_positive_int, valid_str
 
 
 # all = [text(), integers(), booleans(), floats(), lists(), sets(), dictionaries(text(), text())]

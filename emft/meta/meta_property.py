@@ -1,5 +1,5 @@
 # coding=utf-8
-from .abstract import AbstractMeta
+from emft.meta.abstract import AbstractMeta
 
 
 class _MetaProperty:

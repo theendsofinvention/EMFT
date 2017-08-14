@@ -19,3 +19,9 @@ htmlcov
 __version_frozen__.py
 /~/
 /emft-doc/
+/test/test_files/weather_output/
+/test/test_files/weather/
+/test/test_files/weather_output.miz
+/test/test_files/time_output/
+/test/test_files/time/
+/test/test_files/empty/

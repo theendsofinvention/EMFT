@@ -1,8 +1,6 @@
 Building EMFT
 =============
 
-.. contents::
-
 Installing EMFT as developer
 ----------------------------
 
@@ -17,7 +15,9 @@ Then, make *SURE* your virtualenv is active, and install with::
 Compiling EMFT
 --------------
 
-.. important:: EMFT only compiles on a Windows platform, and against Python 3.6 or newer.
+.. important:: EMFT only compiles on a Windows platform, and against Python 3.6 or newer. The compilation also requires
+    a specific version of PyInstaller, which can be installed with the "freeze" command of emft-build tool
+    described below.
 
 EMFT is meant to be compiled as a single Win32 portable executable file.
 
@@ -26,8 +26,8 @@ To facilitate the building process, it is self-contained in the ``emft/build.py`
 The script is installed as an executable when you install EMFT and available as ``emft-build``, which I'll explain
 below.
 
-Helper applications
-+++++++++++++++++++
+Third-party applications
+++++++++++++++++++++++++
 
 .. tip:: You will need to manually install these two applications if you want to build EMFT locally
 
@@ -54,8 +54,8 @@ this external tool...
 
 In the meanwhile, Verpatch can be obtained at: https://ddverpatch.codeplex.com/releases
 
-The emft-build tool
--------------------
+Helpers
++++++++
 
 .. click:: emft.build:cli
     :prog: emft-build

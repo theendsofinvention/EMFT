@@ -1,17 +1,18 @@
 # coding=utf-8
 
 import os
-from json import loads, dumps
+from json import dumps, loads
 
 import pytest
 import requests
 from httmock import response, urlmatch, with_httmock
 
-from emft.utils import Path, make_logger, Singleton
-from emft.utils.gh import GHAnonymousSession, GHSessionError, NotFoundError, RateLimitationError, GithubAPIError, \
-    GHAllAssets, GHRelease, GHRepo, GHRepoList, GHUser, GHSession, GHAuthorization, GHApp, GHPermissions, GHMailList, \
-    GHMail
-
+from emft.core.logging import make_logger
+from emft.core.path import Path
+from emft.core.providers.github import GHAllAssets, GHAnonymousSession, GHApp, GHAuthorization, GHMail, GHMailList, \
+    GHPermissions, \
+    GHRelease, GHRepo, GHRepoList, GHSession, GHSessionError, GHUser, GithubAPIError, NotFoundError, RateLimitationError
+from emft.core.singleton import Singleton
 
 LOGGER = make_logger(__name__)
 
@@ -46,6 +47,7 @@ class GHResource:
         assert isinstance(local_d, dict)
         local_d.update(req_d)
         local_j = dumps(local_d)
+        # noinspection PyArgumentEqualDefault
         return response(200, local_j, HEADERS, 'OK', 5, request)
 
 
@@ -99,7 +101,6 @@ def mock_gh_api(url, request):
 
 
 @pytest.mark.nocleandir
-# @pytest.mark.skipif(not os.path.exists('./tests/api.github.com'), reason='No test files')
 @pytest.mark.skipif(os.getenv('APPVEYOR'), reason='Skipping Github tests on Appveyor to prevent rate limit')
 class TestGH:
     @with_httmock(mock_gh_api)

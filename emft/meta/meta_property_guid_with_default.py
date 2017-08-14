@@ -1,9 +1,9 @@
 # coding=utf-8
 
-from emft.global_ import MACHINE_GUID
-from .abstract import AbstractMeta
+from emft.core.constant import MACHINE_GUID
+from emft.meta.abstract import AbstractMeta
 # noinspection PyProtectedMember
-from .meta_property_with_default import MetaPropertyWithDefault, _MetaProperty
+from emft.meta.meta_property_with_default import MetaPropertyWithDefault, _MetaProperty
 
 
 class _MetaGUIDProperty(_MetaProperty):

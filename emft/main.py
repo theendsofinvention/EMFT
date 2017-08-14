@@ -6,8 +6,9 @@ import os
 import click
 
 # noinspection PyUnresolvedReferences
-import emft.filter_warnings  # noqa: F401 # pylint: disable=unused-import
-from emft.misc.nice_exit import nice_exit
+import emft.core.filter_warnings  # noqa: F401 # pylint: disable=unused-import
+from emft import cli
+from emft.core import nice_exit
 
 LOGGER = None
 PROFILER = None
@@ -19,7 +20,7 @@ def check_cert():
     """
     LOGGER.info('certificate: checking')
     import certifi
-    from emft.utils import Path
+    from emft.core.path import Path
     cacert = str(Path(certifi.where()).abspath())
     if not os.path.exists(cacert):
         raise FileNotFoundError(cacert)
@@ -31,20 +32,22 @@ def check_cert():
     LOGGER.info('certificate: checked')
 
 
-def _setup_logger(verbose):
-    from emft.utils.custom_logging import make_logger
+def _setup_logger(verbose, quiet):
+    from emft.core.logging import make_logger, get_console_handler, DEBUG, INFO, CRITICAL
+    from emft.core.logging import persistent_logging_handler
     # noinspection PyProtectedMember
-    from emft.global_ import PATH_LOG_FILE
-    from emft.misc.logging_handler import persistent_logging_handler
+    from emft.core.constant import PATH_LOG_FILE
 
     global LOGGER
     LOGGER = make_logger(log_file_path=PATH_LOG_FILE, custom_handler=persistent_logging_handler)
 
-    from emft.utils.custom_logging import CH, DEBUG, INFO
+    console_handler = get_console_handler()
     if verbose:
-        CH.setLevel(DEBUG)
+        console_handler.setLevel(DEBUG)
+    elif quiet:
+        console_handler.setLevel(CRITICAL)
     else:
-        CH.setLevel(INFO)
+        console_handler.setLevel(INFO)
 
 
 def _start_profiler(profile):
@@ -69,8 +72,8 @@ def _another_instance_is_running():
     from PyQt5.QtWidgets import QApplication, QMessageBox  # pylint: disable=no-name-in-module
     from PyQt5.QtGui import QIcon  # pylint: disable=no-name-in-module
     # noinspection PyUnresolvedReferences
-    from emft.ui import qt_resource  # noqa: F401  # pylint: disable=unused-variable
-    from emft.global_ import APP_SHORT_NAME, DEFAULT_ICON
+    from emft.resources import qt_resource  # noqa: F401  # pylint: disable=unused-variable
+    from emft.core.constant import APP_SHORT_NAME, DEFAULT_ICON
     # noinspection PyArgumentList
     app = QApplication.instance()
 
@@ -87,19 +90,21 @@ def _another_instance_is_running():
     nice_exit()
 
 
-@click.command()
+@click.group(invoke_without_command=True, chain=True)
+@click.pass_context
 @click.option('-t', '--test', is_flag=True, help='Test and exit')
 @click.option('-p', '--profile', is_flag=True, help='Profile execution')
 @click.option('-v', '--verbose', is_flag=True, help='Outputs debug messages')
-def main(test, profile, verbose):  # pylint: disable=too-many-locals
+@click.option('-q', '--quiet', is_flag=True, help='Critical output only')
+def main(ctx, test, profile, verbose, quiet):  # pylint: disable=too-many-locals
     """Init Sentry"""
     # noinspection PyUnresolvedReferences
-    from emft.sentry import SENTRY
-    from emft.utils.threadpool import register_sentry
+    from emft.core.sentry import SENTRY
+    from emft.core.threadpool import register_sentry
     register_sentry(SENTRY)
 
     try:
-        _setup_logger(verbose)
+        _setup_logger(verbose, quiet)
 
     except PermissionError:
         _another_instance_is_running()
@@ -114,56 +119,70 @@ def main(test, profile, verbose):  # pylint: disable=too-many-locals
 
         # Init config
         # noinspection PyUnresolvedReferences
-        from emft.cfg.cfg import Config
+        from emft.config.cfg import Config
         SENTRY.register_context('config', Config())
 
-        # Intercept SIGINT
-        import signal as core_sig
-        # Intercept OS signals to trigger a nice exit
-        core_sig.signal(core_sig.SIGINT, nice_exit)
+        if ctx.invoked_subcommand is None:
+            # Intercept SIGINT
+            import signal as core_sig
+            # Intercept OS signals to trigger a nice exit
+            core_sig.signal(core_sig.SIGINT, nice_exit)
 
-        # noinspection PyBroadException
-        try:
-            check_cert()
+            # noinspection PyBroadException
+            try:
+                check_cert()
 
-            from emft import reorder
-            reorder.initialize()
+                from emft.updater import initialize_updater
 
-            from emft.ui.main_ui import start_ui
-            start_ui(show=bool(not test))
+                initialize_updater(
+                    current_version=__version__,
+                    av_user='132nd-etcher',
+                    av_repo='EMFT',
+                    local_executable='emft.exe',
+                    channel=Config().update_channel,
+                )
 
-            from emft.global_ import QT_APP
+                from emft.plugins import reorder
+                reorder.initialize()
 
-            if test:
-                LOGGER.critical('RUNNING IN TEST MODE')
-                import time
-                from emft.utils import ThreadPool
+                from emft.gui.main_ui import start_ui
+                start_ui(show=bool(not test))
 
-                def test_hook():
-                    LOGGER.critical('TEST MODE: waiting 10 seconds')
-                    time.sleep(10)
-                    LOGGER.critical('TEST MODE: end of timer')
-                    QT_APP.exit(0)
-                    # nice_exit()
+                from emft.core.constant import QT_APP
 
-                pool = ThreadPool(1, 'test', _daemon=True)
-                pool.queue_task(test_hook)
+                if test:
+                    LOGGER.critical('RUNNING IN TEST MODE')
+                    import time
+                    from emft.core.threadpool import ThreadPool
 
-            exit_code = QT_APP.exec()
+                    def test_hook():
+                        LOGGER.critical('TEST MODE: waiting 10 seconds')
+                        time.sleep(10)
+                        LOGGER.critical('TEST MODE: end of timer')
+                        QT_APP.exit(0)
+                        # nice_exit()
 
-            _stop_profiler()
+                    pool = ThreadPool(1, 'test', _daemon=True)
+                    pool.queue_task(test_hook)
 
-        except SystemExit as exc:
-            LOGGER.info('caught SystemExit')
-            exit_code = exc.code or 1
-        except:  # pylint: disable=bare-except
-            LOGGER.exception('caught exception in main loop')
-            SENTRY.captureException()
-            exit_code = 1
+                exit_code = QT_APP.exec()
 
-        LOGGER.info('bye bye ! =)')
-        nice_exit(exit_code)
+                _stop_profiler()
 
+            except SystemExit as exc:
+                LOGGER.info('caught SystemExit')
+                exit_code = exc.code or 1
+            except:  # pylint: disable=bare-except
+                LOGGER.exception('caught exception in main loop')
+                SENTRY.captureException()
+                exit_code = 1
+
+            LOGGER.info('bye bye ! =)')
+            nice_exit(exit_code)
+
+
+main.add_command(cli.set_weather)
+main.add_command(cli.set_time)
 
 if __name__ == '__main__':
     main()  # pylint: disable=no-value-for-parameter

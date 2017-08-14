@@ -1,3 +1,11 @@
+0.5.1 (2017-08-14)
+------------------
+
+New
+~~~
+- Added weather management from command line. [132nd-etcher]
+
+
 0.5.0 (2017-08-01)
 ------------------
 

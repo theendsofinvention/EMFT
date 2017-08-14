@@ -1,10 +1,11 @@
 # coding=utf-8
 
-import pytest
 from unittest.mock import MagicMock
 
-from emft.utils import WatchedProperty
-from emft.utils.decorators.watched_property import _WatchedProperty
+import pytest
+
+# noinspection PyProtectedMember
+from emft.core.properties.watched_property import _WatchedProperty, WatchedProperty
 
 
 class Dummy:
