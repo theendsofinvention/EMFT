@@ -8,4 +8,4 @@ Documentation for developers
     build
     version
     format_test
-    modules
+    api/modules

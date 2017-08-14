@@ -4,8 +4,9 @@ import math
 import pickle
 from collections import namedtuple
 
-from ._parking_spots import parkings
-from .mission import Static
+# noinspection PyProtectedMember
+from emft.miz._parking_spots import parkings
+from emft.miz.mission import Static
 
 ParkingSpot = namedtuple('ParkingSpot', 'airport spot')
 parkings = pickle.loads(parkings)

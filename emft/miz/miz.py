@@ -2,13 +2,15 @@
 import tempfile
 from filecmp import dircmp
 from os.path import exists, join
-from zipfile import ZipFile, BadZipFile, ZipInfo
+from zipfile import BadZipFile, ZipFile, ZipInfo
 
-from emft.dummy_miz import dummy_miz
-from emft.global_ import ENCODING
+from emft.core.constant import ENCODING
+from emft.core.logging import make_logger
+from emft.core.path import Path
+from emft.core.progress import Progress
+from emft.core.sltp import SLTP
 from emft.miz.mission import Mission
-from emft.sltp import SLTP
-from emft.utils import make_logger, Path, Progress
+from emft.resources.dummy_miz import dummy_miz
 
 LOGGER = make_logger('miz')
 
@@ -256,15 +258,16 @@ class Miz:
 
         # noinspection PyTypeChecker
         for miz_item in map(
-                join,
-                [self.tmpdir.abspath()],
-                [
-                    'mission',
-                    'options',
-                    'warehouses',
-                    'l10n/DEFAULT/dictionary',
-                    'l10n/DEFAULT/mapResource'
-                ]):
+            join,
+            [self.tmpdir.abspath()],
+            [
+                'mission',
+                'options',
+                'warehouses',
+                'l10n/DEFAULT/dictionary',
+                'l10n/DEFAULT/mapResource'
+            ]
+        ):
 
             if not exists(miz_item):
                 LOGGER.error('missing file in miz: {}'.format(miz_item))

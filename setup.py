@@ -26,6 +26,7 @@ def read_local_files(*file_paths: str) -> str:
 
 # noinspection SpellCheckingInspection
 install_requires = [
+    'pyinstrument',
     'semantic_version',
     'colorama',
     'transitions',

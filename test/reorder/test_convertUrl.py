@@ -1,6 +1,6 @@
 import pytest
 
-from emft.reorder.service import ConvertUrl
+from emft.plugins.reorder.service import ConvertUrl
 
 
 class TestConvertUrl:
@@ -11,9 +11,9 @@ class TestConvertUrl:
             (r'git@github.com:132nd-etcher/EMFT.git', '132nd-etcher', 'EMFT'),
             (r'https://github.com/132nd-etcher/EMFT.git', '132nd-etcher', 'EMFT'),
             (
-                    r'https://github.com/132nd-vWing/132nd-Virtual-Wing-Training-Mission-Tblisi/issues/37',
-                    '132nd-vWing',
-                    '132nd-Virtual-Wing-Training-Mission-Tblisi'
+                r'https://github.com/132nd-vWing/132nd-Virtual-Wing-Training-Mission-Tblisi/issues/37',
+                '132nd-vWing',
+                '132nd-Virtual-Wing-Training-Mission-Tblisi'
             ),
         ]
     )

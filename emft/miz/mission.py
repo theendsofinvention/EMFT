@@ -3,10 +3,10 @@
 import typing
 from calendar import timegm
 from itertools import chain
-from time import strftime, gmtime, strptime
+from time import gmtime, strftime, strptime
 
-from emft.utils import make_logger
-from emft.utils import Logged, valid_str, valid_positive_int, Validator, valid_bool, valid_int, valid_float
+from emft.core.logging import Logged, make_logger
+from emft.core.validator import Validator, valid_bool, valid_float, valid_int, valid_positive_int, valid_str
 
 EPOCH_DELTA = 1306886400
 

@@ -2,7 +2,7 @@
 
 import pytest
 
-from emft.utils.updater import CustomVersion
+from emft.updater import customversion
 
 VALID_VERSION_STRINGS = ['0.1.0', '0.1.1', '0.2.0', '0.3.1']
 INVALID_VERSION_STRINGS = ['0.1', '0.1.1.0', '0.2.text', 'A.3.1']
@@ -34,32 +34,32 @@ ORDERED_VERSION_STRINGS = [
 
 @pytest.mark.parametrize('version_str', VALID_VERSION_STRINGS)
 def test_valid_init(version_str):
-    v = CustomVersion(version_str)
+    v = customversion.CustomVersion(version_str)
     assert str(v) == version_str
 
 
 @pytest.mark.parametrize('version_str', VALID_VERSION_STRINGS)
 def test_to_spec(version_str):
-    v = CustomVersion(version_str)
+    v = customversion.CustomVersion(version_str)
     assert v.to_spec() == '.'.join(map(str, [v.major, v.minor, v.patch]))
 
 
 @pytest.mark.parametrize('version_str', INVALID_VERSION_STRINGS)
 def test_invalid_init(version_str):
     with pytest.raises(ValueError):
-        CustomVersion(version_str)
+        customversion.CustomVersion(version_str)
 
 
 @pytest.mark.parametrize('partial_version', PARTIAL_VERSION_STRINGS)
 def test_invalid_init(partial_version):
     version_str, expected_result = partial_version
-    v = CustomVersion(version_str, partial=True)
+    v = customversion.CustomVersion(version_str, partial=True)
     assert str(v) == version_str
     assert list(v) == expected_result
 
 
 @pytest.mark.parametrize('ordered_versions', ORDERED_VERSION_STRINGS)
 def test_ordered_versions(ordered_versions):
-    versions_list = [CustomVersion(version) for version in ordered_versions]
+    versions_list = [customversion.CustomVersion(version) for version in ordered_versions]
     assert versions_list == sorted(versions_list)
     assert max(versions_list) == versions_list[-1]

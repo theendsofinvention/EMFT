@@ -3,10 +3,11 @@ import abc
 import time
 from collections import OrderedDict
 
-from ruamel.yaml import load as yload, resolver, add_constructor, add_representer
+from ruamel.yaml import add_constructor, add_representer, load as yload, resolver
 
+from emft.core.logging import make_logger
 from emft.meta.meta import Meta
-from emft.utils import make_logger, Path
+from emft.core.path import Path
 
 LOGGER = make_logger(__name__)
 

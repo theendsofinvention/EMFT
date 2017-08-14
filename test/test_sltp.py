@@ -2,10 +2,10 @@
 
 import os
 
-import pytest
 import datadiff
+import pytest
 
-from emft.sltp import SLTP, SLTPParsingError
+from emft.core.sltp import SLTP, SLTPParsingError
 
 if os.path.exists('./test_files'):
     BASE_PATH = os.path.abspath('./test_files/sltp')

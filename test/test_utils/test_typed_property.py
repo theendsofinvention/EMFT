@@ -2,10 +2,10 @@
 
 import pytest
 from hypothesis import given
-from hypothesis.strategies import text, integers, booleans
+from hypothesis.strategies import booleans, integers, text
 
 # noinspection PyProtectedMember
-from emft.utils.decorators.typed_property import TypedProperty, _TypedProperty
+from emft.core.properties.typed_property import TypedProperty, _TypedProperty
 
 
 class SomeClass:

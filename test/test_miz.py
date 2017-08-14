@@ -4,7 +4,7 @@ import pytest
 import os
 from emft.miz.miz import Miz
 from emft.miz.mission import Mission
-from emft.utils import Path
+from emft.core.path import Path
 
 if os.path.exists('./test_files'):
     BASE_PATH = os.path.abspath('./test_files')

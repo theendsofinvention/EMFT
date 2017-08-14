@@ -146,8 +146,8 @@ def do_ex(ctx: click.Context, cmd: typing.List[str], cwd: str = '.') -> typing.T
 
     """
 
-    def _popen_pipes(ctx_, cmd_, cwd_):
-        def _always_strings(ctx__, env_dict):
+    def _popen_pipes(cmd_, cwd_):
+        def _always_strings(env_dict):
             """
             On Windows and Python 2, environment dictionaries must be strings
             and not unicode.
@@ -164,7 +164,6 @@ def do_ex(ctx: click.Context, cmd: typing.List[str], cwd: str = '.') -> typing.T
             stderr=subprocess.PIPE,
             cwd=str(cwd_),
             env=_always_strings(
-                ctx_,
                 dict(
                     os.environ,
                     # try to disable i18n
@@ -186,7 +185,7 @@ def do_ex(ctx: click.Context, cmd: typing.List[str], cwd: str = '.') -> typing.T
         exit(-1)
     cmd.insert(0, exe)
     click.secho(f'{cmd}', nl=False, fg='magenta')
-    p = _popen_pipes(ctx, cmd, cwd)
+    p = _popen_pipes(cmd, cwd)
     out, err = p.communicate()
     click.secho(f' -> {p.returncode}', fg='magenta')
     return _ensure_stripped_str(ctx, out), _ensure_stripped_str(ctx, err), p.returncode
@@ -406,12 +405,12 @@ def _print_version(ctx: click.Context, param, value):
 @click.pass_context
 def cli(ctx):
     """
-    Handles all the tasks to build a working EMFT application
+    emft-build is a tool that handles all the tasks to build a working EMFT application
 
     This tool is installed as a setuptools entry point, which means it should be accessible from your terminal once EMFT
     is installed in develop mode.
 
-    Just type the following in whatever shell you fancy:
+    Just activate your venv and type the following in whatever shell you fancy:
     """
 
     ensure_repo()
@@ -543,8 +542,8 @@ def pyrcc(ctx):
                     )
     do(ctx, [
         'pyrcc5',
-        './emft/ui/qt_resource.qrc',
-        '-o', './emft/ui/qt_resource.py',
+        './emft/resources/qt_resource.qrc',
+        '-o', './emft/resources/qt_resource.py',
     ])
 
 
@@ -624,10 +623,12 @@ def doc(ctx, show, clean, publish):
         _get_version(ctx)
     if clean and os.path.exists('./doc/html'):
         shutil.rmtree('./doc/html')
+    if os.path.exists('./doc/api'):
+        shutil.rmtree('./doc/api')
     do(ctx, [
         'sphinx-apidoc',
         'emft',
-        '-o', 'doc',
+        '-o', 'doc/api',
         '-H', 'EMFT API',
         '-A', '132nd-etcher',
         '-V', f'{ctx.obj["semver"]}\n({ctx.obj["pep440"]})',
@@ -688,7 +689,7 @@ def freeze(ctx, install: bool, force: bool):
         '-m', 'PyInstaller',
         '--log-level=WARN',
         '--noconfirm', '--onefile', '--clean', '--windowed',
-        '--icon', './emft/ui/app.ico',
+        '--icon', './emft/resources/app.ico',
         '--workpath', './build',
         '--distpath', './dist',
         '--paths', f'{os.path.join(sys.exec_prefix, "Lib/site-packages/PyQt5/Qt/bin")}',
@@ -762,6 +763,21 @@ def pre_push(ctx):
     if repo_is_dirty():
         click.secho('Repository is dirty', err=True, fg='red')
         exit(-1)
+
+
+@cli.command()
+@click.pass_context
+def test_local_build(ctx):
+    """
+    This is meant to be used as a Git pre-push hook
+    """
+    ctx.invoke(pin_version)
+    ctx.invoke(flake8)
+    ctx.invoke(pytest)
+    ctx.invoke(pyrcc)
+    ctx.invoke(freeze)
+    ctx.invoke(patch)
+    ctx.invoke(test_build)
 
 
 if __name__ == '__main__':

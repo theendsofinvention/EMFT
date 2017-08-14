@@ -224,6 +224,9 @@ html_theme_options = {
 # Output file base name for HTML help builder.
 htmlhelp_basename = 'EMFTdoc'
 
+html_last_updated_fmt = '%d %b %Y'
+html_split_index = True
+
 # -- Options for LaTeX output ---------------------------------------------
 
 latex_elements = {
@@ -274,6 +277,7 @@ texinfo_documents = [
 
 
 def setup(app):
+    # noinspection PyPackageRequirements
     from sphinx.util.texescape import tex_replacements
     tex_replacements += [(u'♮', u'$\\natural$'),
                          (u'ē', u'\=e'),

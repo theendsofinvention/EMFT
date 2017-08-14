@@ -4,11 +4,10 @@ from unittest import mock
 
 import pytest
 
-from emft.reorder.ui import dialog_profile_editor
+from emft.plugins.reorder.gui import dialog_profile_editor
 
 
 class TestDialogProfileEditor:
-
     @pytest.fixture()
     def valid_dialog(self, qtbot):
         dialog = dialog_profile_editor.DialogProfileEditor()
@@ -30,10 +29,10 @@ class TestDialogProfileEditor:
             yield box
 
     def test_name_validation(
-            self,
-            warning_box,
-            valid_dialog: dialog_profile_editor.DialogProfileEditor,
-            qtbot
+        self,
+        warning_box,
+        valid_dialog: dialog_profile_editor.DialogProfileEditor,
+        qtbot
     ):
         valid_dialog._name_le.setText('')
         assert not valid_dialog._is_valid()
@@ -47,9 +46,9 @@ class TestDialogProfileEditor:
         assert valid_dialog._is_valid()
 
     def test_src_folder(
-            self,
-            warning_box,
-            valid_dialog: dialog_profile_editor.DialogProfileEditor,
+        self,
+        warning_box,
+        valid_dialog: dialog_profile_editor.DialogProfileEditor,
     ):
         valid_dialog._src_folder.setText('')
         assert not valid_dialog._is_valid()
@@ -72,9 +71,9 @@ class TestDialogProfileEditor:
         warning_box.assert_not_called()
 
     def test_output_folder(
-            self,
-            warning_box,
-            valid_dialog: dialog_profile_editor.DialogProfileEditor,
+        self,
+        warning_box,
+        valid_dialog: dialog_profile_editor.DialogProfileEditor,
     ):
         valid_dialog._output_folder.setText('')
         assert not valid_dialog._is_valid()
@@ -97,9 +96,9 @@ class TestDialogProfileEditor:
         warning_box.assert_not_called()
 
     def test_gh_repo(
-            self,
-            warning_box,
-            valid_dialog: dialog_profile_editor.DialogProfileEditor,
+        self,
+        warning_box,
+        valid_dialog: dialog_profile_editor.DialogProfileEditor,
     ):
         def assert_wrong():
             assert not valid_dialog._is_valid()
@@ -118,9 +117,9 @@ class TestDialogProfileEditor:
         assert valid_dialog._is_valid()
 
     def test_av_repo(
-            self,
-            warning_box,
-            valid_dialog: dialog_profile_editor.DialogProfileEditor,
+        self,
+        warning_box,
+        valid_dialog: dialog_profile_editor.DialogProfileEditor,
     ):
         def assert_wrong():
             assert not valid_dialog._is_valid()

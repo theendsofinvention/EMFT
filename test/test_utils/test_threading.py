@@ -3,9 +3,9 @@
 import time
 
 import pytest
-from hypothesis import strategies as st, given, example
+from hypothesis import example, given, strategies as st
 
-from emft.utils.threadpool import ThreadPool
+from emft.core.threadpool import ThreadPool
 
 
 def sleep(t=0.1):

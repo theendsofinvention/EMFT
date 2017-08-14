@@ -4,9 +4,9 @@ import string
 import subprocess
 
 import pytest
-from hypothesis import strategies as st, given
+from hypothesis import given, strategies as st
 
-from emft.utils.custom_path import Path
+from emft.core.path import Path
 
 
 def test_get_version():
@@ -27,12 +27,18 @@ def test_get_version():
         assert info.product_version == '6.1.7601.23537'
     assert info.comments is None
     assert info.company_name == 'Microsoft Corporation'
-    assert info.copyright == r'\xa9 Microsoft Corporation. All rights reserved.'
+    assert info.copyright in (
+        r'\xa9 Microsoft Corporation. All rights reserved.',
+        r'Â© Microsoft Corporation. All rights reserved.',
+    )
     assert info.file_description == 'Windows Explorer'
     assert info.internal_name == 'explorer'
     assert info.private_build is None
     assert info.original_filename == 'EXPLORER.EXE'
-    assert info.product_name == r'Microsoft\xae Windows\xae Operating System'
+    assert info.product_name in (
+        r'Microsoft\xae Windows\xae Operating System',
+        r'MicrosoftÂ® WindowsÂ® Operating System',
+    )
     assert info.special_build is None
     assert info.trademark is None
     with pytest.raises(FileNotFoundError):

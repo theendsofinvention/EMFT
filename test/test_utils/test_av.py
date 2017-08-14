@@ -1,14 +1,14 @@
 # coding=utf-8
 
 import os
-from json import loads, dumps
+from json import dumps, loads
 
 import pytest
 import requests
-from httmock import response, urlmatch, HTTMock
+from httmock import HTTMock, response, urlmatch
 
-from emft.utils import Path
-from emft.utils.av import AVSession
+from emft.core.path import Path
+from emft.core.providers.appveyor import AVSession
 
 ENDPOINT = r'(.*\.)?ci\.appveyor\.com$'
 HEADERS = {'content-type': 'application/json'}
@@ -33,6 +33,7 @@ class AVResource:
         assert isinstance(local_d, dict)
         local_d.update(req_d)
         local_j = dumps(local_d)
+        # noinspection PyArgumentEqualDefault
         return response(200, local_j, HEADERS, 'OK', 5, request)
 
 
@@ -57,7 +58,6 @@ def get_file_path(url):
         file_path = 'test/test_utils/{}'.format(file_path)
     if not os.path.exists(file_path):
         raise FileNotFoundError(os.path.abspath(file_path))
-        return False
     return file_path
 
 

@@ -4,9 +4,9 @@ import pytest
 import transitions
 from httmock import with_httmock
 
-from emft.utils.av import AVHistory, AVBuild
-from emft.utils import make_logger
-from emft.utils.updater import Updater, CustomVersion, Channel
+from emft.core.logging import make_logger
+from emft.core.providers.appveyor import AVBuild, AVHistory
+from emft.updater import channel, customversion, updater
 from test.test_utils.test_av import mock_av_api
 
 DEFAULT_PARAMS = {
@@ -14,7 +14,7 @@ DEFAULT_PARAMS = {
     'av_user': '132nd-etcher',
     'av_repo': 'EMFT',
     'local_executable': 'emft.exe',
-    'channel': Channel.stable,
+    'channel': channel.STABLE,
 }
 
 LOGGER = make_logger(__name__)
@@ -50,9 +50,10 @@ class DummyAVHistory(AVHistory):
         AVHistory.__init__(self, json)
 
 
+# noinspection PyProtectedMember
 def test_init():
-    u = Updater(**DEFAULT_PARAMS)
-    assert isinstance(u.current_version, CustomVersion)
+    u = updater.Updater(**DEFAULT_PARAMS)
+    assert isinstance(u.current_version, customversion.CustomVersion)
     assert str(u.current_version) == DEFAULT_PARAMS['current_version']
     assert isinstance(u, transitions.Machine)
     assert u.state == 'initial'
@@ -66,9 +67,10 @@ def test_init():
     assert u._hexdigest is None
 
 
+# noinspection PyProtectedMember
 def test_collection_av_get_history(qtbot, mocker):
-    av_session = mocker.patch('emft.utils.updater.updater.AVSession', spec=True)
-    u = Updater(**DEFAULT_PARAMS)
+    av_session = mocker.patch('emft.updater.updater.AVSession', spec=True)
+    u = updater.Updater(**DEFAULT_PARAMS)
     assert u.state == 'initial'
     u.look_for_new_version(auto_update=False)
     qtbot.wait_until(lambda: u.state == 'collecting')
@@ -82,8 +84,8 @@ def test_collection_av_get_history(qtbot, mocker):
 
 
 def test_collection_reset_values(qtbot, mocker):
-    av_session = mocker.patch('emft.utils.updater.updater.AVSession', spec=True)
-    u = Updater(**DEFAULT_PARAMS)
+    av_session = mocker.patch('emft.updater.updater.AVSession', spec=True)
+    u = updater.Updater(**DEFAULT_PARAMS)
     assert u.state == 'initial'
     reset_mock = mocker.spy(u, '_reset_internal_values')
     u.look_for_new_version(auto_update=False)
@@ -93,21 +95,22 @@ def test_collection_reset_values(qtbot, mocker):
     qtbot.wait_until(lambda: u.state == 'waiting')
 
 
+# noinspection PyProtectedMember
 def test_collection_auto_update_value(qtbot, mocker):
-    av_session = mocker.patch('emft.utils.updater.updater.AVSession', spec=True)
-    u = Updater(**DEFAULT_PARAMS)
+    av_session = mocker.patch('emft.updater.updater.AVSession', spec=True)
+    u = updater.Updater(**DEFAULT_PARAMS)
     assert u.state == 'initial'
     u.look_for_new_version()
     qtbot.wait_until(lambda: u.state == 'collecting')
     qtbot.wait_until(lambda: av_session.assert_called_with())
     assert u._auto_update is False
-    u = Updater(**DEFAULT_PARAMS)
+    u = updater.Updater(**DEFAULT_PARAMS)
     assert u.state == 'initial'
     u.look_for_new_version(auto_update=False)
     qtbot.wait_until(lambda: u.state == 'collecting')
     qtbot.wait_until(lambda: av_session.assert_called_with())
     assert u._auto_update is False
-    u = Updater(**DEFAULT_PARAMS)
+    u = updater.Updater(**DEFAULT_PARAMS)
     assert u.state == 'initial'
     u.look_for_new_version(auto_update=True)
     qtbot.wait_until(lambda: u.state == 'collecting')
@@ -121,8 +124,8 @@ def test_finalize_event_error(mocker, caplog):
         assert isinstance(event, transitions.EventData)
         raise ValueError('uh oh!')
 
-    mocker.patch('emft.utils.updater.updater.AVSession', spec=True)
-    u = Updater(**DEFAULT_PARAMS)
+    mocker.patch('emft.updater.updater.AVSession', spec=True)
+    u = updater.Updater(**DEFAULT_PARAMS)
     u.dummy_raise = dummy_raise
     u.add_states('failed')
     u.add_transition('fail', '*', 'failed', after='dummy_raise')
@@ -135,8 +138,8 @@ def test_finalize_event_no_error(mocker, caplog):
     def dummy_pass(event):
         assert isinstance(event, transitions.EventData)
 
-    mocker.patch('emft.utils.updater.updater.AVSession', spec=True)
-    u = Updater(**DEFAULT_PARAMS)
+    mocker.patch('emft.updater.updater.AVSession', spec=True)
+    u = updater.Updater(**DEFAULT_PARAMS)
     u.dummy_pass = dummy_pass
     u.add_states('passed')
     u.add_transition('pass_', '*', 'passed', after='dummy_pass')
@@ -147,18 +150,18 @@ def test_finalize_event_no_error(mocker, caplog):
 @pytest.mark.parametrize(
     'av_builds,expected_keys', [
         (
-                (('0.1.0', 'success'), ('0.2.0', 'fail')), ('0.1.0',),
+            (('0.1.0', 'success'), ('0.2.0', 'fail')), ('0.1.0',),
         ),
         (
-                (('0.1.0', 'success'), ('0.2.0', 'success')), ('0.1.0', '0.2.0'),
+            (('0.1.0', 'success'), ('0.2.0', 'success')), ('0.1.0', '0.2.0'),
         )])
 def test_collection_with_result(av_builds, expected_keys, qtbot, mocker):
     av_session = mocker.patch(
-        'emft.utils.updater.updater.AVSession.get_history',
+        'emft.updater.updater.AVSession.get_history',
         spec=True,
         return_value=DummyAVHistory([dict(version=build[0], status=build[1]) for build in av_builds])
     )
-    u = Updater(**DEFAULT_PARAMS)
+    u = updater.Updater(**DEFAULT_PARAMS)
     parser = mocker.patch.object(u, '_parse_available_releases')
     assert u.state == 'initial'
     qtbot.wait_until(lambda: av_session.assert_not_called())
@@ -166,7 +169,7 @@ def test_collection_with_result(av_builds, expected_keys, qtbot, mocker):
     qtbot.wait_until(lambda: u.state == 'collecting')
     qtbot.wait_until(lambda: av_session.assert_called_once())
     qtbot.wait_until(lambda: u.state == 'parsing')
-    assert list(map(CustomVersion, expected_keys)) == list(u.av_builds.keys())
+    assert list(map(customversion.CustomVersion, expected_keys)) == list(u.av_builds.keys())
     parser.assert_called_once()
 
 
@@ -175,17 +178,17 @@ def test_collection_with_result(av_builds, expected_keys, qtbot, mocker):
 @pytest.mark.parametrize(
     'channel,expected_version',
     [
-        (Channel.stable, '0.4.3'),
-        (Channel.patch, '0.4.4-patch.2'),
-        (Channel.exp, '0.5.0-exp.3'),
-        (Channel.beta, '0.6.0-beta.2'),
-        (Channel.alpha, '0.7.0-alpha.3'),
+        (channel.STABLE, '0.4.3'),
+        (channel.PATCH, '0.4.4-patch.2'),
+        (channel.EXP, '0.5.0-exp.3'),
+        (channel.BETA, '0.6.0-beta.2'),
+        (channel.ALPHA, '0.7.0-alpha.3'),
     ]
 )
 def test_parsing(channel, expected_version, qtbot, mocker, caplog):
-    from emft.utils.updater.updater import AVSession
+    from emft.core.providers.appveyor import AVSession
     get_build_by_version_mock = mocker.spy(AVSession, 'get_build_by_version')
-    u = Updater(DEFAULT_PARAMS['current_version'], 'test', 'test_updater_parser', 'emft.exe', channel)
+    u = updater.Updater(DEFAULT_PARAMS['current_version'], 'test', 'test_updater_parser', 'emft.exe', channel)
     reset_mock = mocker.spy(u, '_reset_internal_values')
     parser_mock = mocker.spy(u, '_parse_available_releases')
     assert u.state == 'initial'
@@ -195,7 +198,7 @@ def test_parsing(channel, expected_version, qtbot, mocker, caplog):
     parser_mock.assert_called_once()
     get_build_by_version_mock.assert_called_once()
     assert u.latest_version.to_short_string() == expected_version
-    if channel == Channel.stable:
+    if channel == '':
         assert 'skipping pre-release' in caplog.text
     else:
         assert 'skipping badly formatted version string: "pending.275"' in caplog.text
@@ -207,123 +210,123 @@ def test_parsing(channel, expected_version, qtbot, mocker, caplog):
 @pytest.mark.parametrize(
     'channel,current_version,should_update',
     [
-        (Channel.stable, '0.4.2', True),
-        (Channel.patch, '0.4.2', True),
-        (Channel.exp, '0.4.2', True),
-        (Channel.beta, '0.4.2', True),
-        (Channel.alpha, '0.4.2', True),
+        (channel.STABLE, '0.4.2', True),
+        (channel.PATCH, '0.4.2', True),
+        (channel.EXP, '0.4.2', True),
+        (channel.BETA, '0.4.2', True),
+        (channel.ALPHA, '0.4.2', True),
 
-        (Channel.stable, '0.4.3', False),
-        (Channel.patch, '0.4.3', True),
-        (Channel.exp, '0.4.3', True),
-        (Channel.beta, '0.4.3', True),
-        (Channel.alpha, '0.4.3', True),
+        (channel.STABLE, '0.4.3', False),
+        (channel.PATCH, '0.4.3', True),
+        (channel.EXP, '0.4.3', True),
+        (channel.BETA, '0.4.3', True),
+        (channel.ALPHA, '0.4.3', True),
 
-        (Channel.stable, '0.4.4', False),
-        (Channel.patch, '0.4.4', False),
-        (Channel.exp, '0.4.4', True),
-        (Channel.beta, '0.4.4', True),
-        (Channel.alpha, '0.4.4', True),
+        (channel.STABLE, '0.4.4', False),
+        (channel.PATCH, '0.4.4', False),
+        (channel.EXP, '0.4.4', True),
+        (channel.BETA, '0.4.4', True),
+        (channel.ALPHA, '0.4.4', True),
 
-        (Channel.stable, '0.5.0', False),
-        (Channel.patch, '0.5.0', False),
-        (Channel.exp, '0.5.0', False),
-        (Channel.beta, '0.5.0', True),
-        (Channel.alpha, '0.5.0', True),
+        (channel.STABLE, '0.5.0', False),
+        (channel.PATCH, '0.5.0', False),
+        (channel.EXP, '0.5.0', False),
+        (channel.BETA, '0.5.0', True),
+        (channel.ALPHA, '0.5.0', True),
 
-        (Channel.stable, '0.6.0', False),
-        (Channel.patch, '0.6.0', False),
-        (Channel.exp, '0.6.0', False),
-        (Channel.beta, '0.6.0', False),
-        (Channel.alpha, '0.6.0', True),
+        (channel.STABLE, '0.6.0', False),
+        (channel.PATCH, '0.6.0', False),
+        (channel.EXP, '0.6.0', False),
+        (channel.BETA, '0.6.0', False),
+        (channel.ALPHA, '0.6.0', True),
 
-        (Channel.stable, '0.7.0', False),
-        (Channel.patch, '0.7.0', False),
-        (Channel.exp, '0.7.0', False),
-        (Channel.beta, '0.7.0', False),
-        (Channel.alpha, '0.7.0', False),
+        (channel.STABLE, '0.7.0', False),
+        (channel.PATCH, '0.7.0', False),
+        (channel.EXP, '0.7.0', False),
+        (channel.BETA, '0.7.0', False),
+        (channel.ALPHA, '0.7.0', False),
 
-        (Channel.stable, '0.4.3-patch.1', True),
-        (Channel.patch, '0.4.3-patch.1', True),
-        (Channel.exp, '0.4.3-patch.1', True),
-        (Channel.beta, '0.4.3-patch.1', True),
-        (Channel.alpha, '0.4.3-patch.1', True),
+        (channel.STABLE, '0.4.3-patch.1', True),
+        (channel.PATCH, '0.4.3-patch.1', True),
+        (channel.EXP, '0.4.3-patch.1', True),
+        (channel.BETA, '0.4.3-patch.1', True),
+        (channel.ALPHA, '0.4.3-patch.1', True),
 
-        (Channel.stable, '0.4.4-patch.1', False),
-        (Channel.patch, '0.4.4-patch.1', True),
-        (Channel.exp, '0.4.4-patch.1', True),
-        (Channel.beta, '0.4.4-patch.1', True),
-        (Channel.alpha, '0.4.4-patch.1', True),
+        (channel.STABLE, '0.4.4-patch.1', False),
+        (channel.PATCH, '0.4.4-patch.1', True),
+        (channel.EXP, '0.4.4-patch.1', True),
+        (channel.BETA, '0.4.4-patch.1', True),
+        (channel.ALPHA, '0.4.4-patch.1', True),
 
-        (Channel.stable, '0.4.4-patch.2', False),
-        (Channel.patch, '0.4.4-patch.2', False),
-        (Channel.exp, '0.4.4-patch.2', True),
-        (Channel.beta, '0.4.4-patch.2', True),
-        (Channel.alpha, '0.4.4-patch.2', True),
+        (channel.STABLE, '0.4.4-patch.2', False),
+        (channel.PATCH, '0.4.4-patch.2', False),
+        (channel.EXP, '0.4.4-patch.2', True),
+        (channel.BETA, '0.4.4-patch.2', True),
+        (channel.ALPHA, '0.4.4-patch.2', True),
 
-        (Channel.stable, '0.4.0-exp.1', True),
-        (Channel.patch, '0.4.0-exp.1', True),
-        (Channel.exp, '0.4.0-exp.1', True),
-        (Channel.beta, '0.4.0-exp.1', True),
-        (Channel.alpha, '0.4.0-exp.1', True),
+        (channel.STABLE, '0.4.0-exp.1', True),
+        (channel.PATCH, '0.4.0-exp.1', True),
+        (channel.EXP, '0.4.0-exp.1', True),
+        (channel.BETA, '0.4.0-exp.1', True),
+        (channel.ALPHA, '0.4.0-exp.1', True),
 
-        (Channel.stable, '0.5.0-exp.1', False),
-        (Channel.patch, '0.5.0-exp.1', False),
-        (Channel.exp, '0.5.0-exp.1', True),
-        (Channel.beta, '0.5.0-exp.1', True),
-        (Channel.alpha, '0.5.0-exp.1', True),
+        (channel.STABLE, '0.5.0-exp.1', False),
+        (channel.PATCH, '0.5.0-exp.1', False),
+        (channel.EXP, '0.5.0-exp.1', True),
+        (channel.BETA, '0.5.0-exp.1', True),
+        (channel.ALPHA, '0.5.0-exp.1', True),
 
-        (Channel.stable, '0.5.0-exp.2', False),
-        (Channel.patch, '0.5.0-exp.2', False),
-        (Channel.exp, '0.5.0-exp.2', True),
-        (Channel.beta, '0.5.0-exp.2', True),
-        (Channel.alpha, '0.5.0-exp.2', True),
+        (channel.STABLE, '0.5.0-exp.2', False),
+        (channel.PATCH, '0.5.0-exp.2', False),
+        (channel.EXP, '0.5.0-exp.2', True),
+        (channel.BETA, '0.5.0-exp.2', True),
+        (channel.ALPHA, '0.5.0-exp.2', True),
 
-        (Channel.stable, '0.5.0-exp.3', False),
-        (Channel.patch, '0.5.0-exp.3', False),
-        (Channel.exp, '0.5.0-exp.3', False),
-        (Channel.beta, '0.5.0-exp.3', True),
-        (Channel.alpha, '0.5.0-exp.3', True),
+        (channel.STABLE, '0.5.0-exp.3', False),
+        (channel.PATCH, '0.5.0-exp.3', False),
+        (channel.EXP, '0.5.0-exp.3', False),
+        (channel.BETA, '0.5.0-exp.3', True),
+        (channel.ALPHA, '0.5.0-exp.3', True),
 
-        (Channel.stable, '0.6.0-beta.1', False),
-        (Channel.patch, '0.6.0-beta.1', False),
-        (Channel.exp, '0.6.0-beta.1', False),
-        (Channel.beta, '0.6.0-beta.1', True),
-        (Channel.alpha, '0.6.0-beta.1', True),
+        (channel.STABLE, '0.6.0-beta.1', False),
+        (channel.PATCH, '0.6.0-beta.1', False),
+        (channel.EXP, '0.6.0-beta.1', False),
+        (channel.BETA, '0.6.0-beta.1', True),
+        (channel.ALPHA, '0.6.0-beta.1', True),
 
-        (Channel.stable, '0.6.0-beta.2', False),
-        (Channel.patch, '0.6.0-beta.2', False),
-        (Channel.exp, '0.6.0-beta.2', False),
-        (Channel.beta, '0.6.0-beta.2', False),
-        (Channel.alpha, '0.6.0-beta.2', True),
+        (channel.STABLE, '0.6.0-beta.2', False),
+        (channel.PATCH, '0.6.0-beta.2', False),
+        (channel.EXP, '0.6.0-beta.2', False),
+        (channel.BETA, '0.6.0-beta.2', False),
+        (channel.ALPHA, '0.6.0-beta.2', True),
 
-        (Channel.stable, '0.6.0-beta.3', False),
-        (Channel.patch, '0.6.0-beta.3', False),
-        (Channel.exp, '0.6.0-beta.3', False),
-        (Channel.beta, '0.6.0-beta.3', False),
-        (Channel.alpha, '0.6.0-beta.3', True),
+        (channel.STABLE, '0.6.0-beta.3', False),
+        (channel.PATCH, '0.6.0-beta.3', False),
+        (channel.EXP, '0.6.0-beta.3', False),
+        (channel.BETA, '0.6.0-beta.3', False),
+        (channel.ALPHA, '0.6.0-beta.3', True),
 
-        (Channel.stable, '0.7.0-alpha.1', False),
-        (Channel.patch, '0.7.0-alpha.1', False),
-        (Channel.exp, '0.7.0-alpha.1', False),
-        (Channel.beta, '0.7.0-alpha.1', False),
-        (Channel.alpha, '0.7.0-alpha.1', True),
+        (channel.STABLE, '0.7.0-alpha.1', False),
+        (channel.PATCH, '0.7.0-alpha.1', False),
+        (channel.EXP, '0.7.0-alpha.1', False),
+        (channel.BETA, '0.7.0-alpha.1', False),
+        (channel.ALPHA, '0.7.0-alpha.1', True),
 
-        (Channel.stable, '0.7.0-alpha.2', False),
-        (Channel.patch, '0.7.0-alpha.2', False),
-        (Channel.exp, '0.7.0-alpha.2', False),
-        (Channel.beta, '0.7.0-alpha.2', False),
-        (Channel.alpha, '0.7.0-alpha.2', True),
+        (channel.STABLE, '0.7.0-alpha.2', False),
+        (channel.PATCH, '0.7.0-alpha.2', False),
+        (channel.EXP, '0.7.0-alpha.2', False),
+        (channel.BETA, '0.7.0-alpha.2', False),
+        (channel.ALPHA, '0.7.0-alpha.2', True),
 
-        (Channel.stable, '0.7.0-alpha.3', False),
-        (Channel.patch, '0.7.0-alpha.3', False),
-        (Channel.exp, '0.7.0-alpha.3', False),
-        (Channel.beta, '0.7.0-alpha.3', False),
-        (Channel.alpha, '0.7.0-alpha.3', False),
+        (channel.STABLE, '0.7.0-alpha.3', False),
+        (channel.PATCH, '0.7.0-alpha.3', False),
+        (channel.EXP, '0.7.0-alpha.3', False),
+        (channel.BETA, '0.7.0-alpha.3', False),
+        (channel.ALPHA, '0.7.0-alpha.3', False),
     ]
 )
 def test_auto_update(channel, current_version, should_update, qtbot, mocker):
-    u = Updater(current_version, 'test', 'test_updater_parser', 'emft.exe', channel)
+    u = updater.Updater(current_version, 'test', 'test_updater_parser', 'emft.exe', channel)
     reset_mock = mocker.spy(u, '_reset_internal_values')
     parser_mock = mocker.spy(u, '_parse_available_releases')
     download_mock = mocker.patch.object(u, '_download_latest_version')

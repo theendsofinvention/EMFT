@@ -3,7 +3,7 @@ from collections import OrderedDict
 
 from ruamel.yaml import dump as ydump, safe_load as yload, RoundTripDumper
 
-from .abstract import AbstractMeta
+from emft.meta.abstract import AbstractMeta
 
 
 class Meta(AbstractMeta):
