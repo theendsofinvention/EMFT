@@ -113,7 +113,7 @@ class Miz:
     @staticmethod
     def reorder(miz_file_path, target_dir, skip_options_file):
 
-        LOGGER.info('re-ordering miz file: {}'.format(miz_file_path))
+        LOGGER.debug('re-ordering miz file: {}'.format(miz_file_path))
         LOGGER.debug('destination folder: {}'.format(target_dir))
         LOGGER.debug('{}option file'.format('skipping' if skip_options_file else 'including'))
 
@@ -156,7 +156,7 @@ class Miz:
 
     def _decode(self):
 
-        LOGGER.info('decoding lua tables')
+        LOGGER.debug('decoding lua tables')
 
         if not self.zip_content:
             self.unzip(overwrite=False)
@@ -182,11 +182,11 @@ class Miz:
             self._mission = Mission(mission_data, self._l10n)
         Progress.set_value(3)
 
-        LOGGER.info('decoding done')
+        LOGGER.debug('decoding done')
 
     def _encode(self):
 
-        LOGGER.info('encoding lua tables')
+        LOGGER.debug('encoding lua tables')
 
         Progress.start('Encoding MIZ file', length=3)
 
@@ -208,7 +208,7 @@ class Miz:
             f.write(SLTP().encode(self.mission.d, self._mission_qual))
         Progress.set_value(3)
 
-        LOGGER.info('encoding done')
+        LOGGER.debug('encoding done')
 
     def _check_extracted_content(self):
 
