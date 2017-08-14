@@ -13,6 +13,7 @@ INFO = logging.INFO
 ERROR = logging.ERROR
 WARN = WARNING
 ERR = ERROR
+CRITICAL = logging.CRITICAL
 
 CH = None
 FH = None

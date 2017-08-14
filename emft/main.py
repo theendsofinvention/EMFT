@@ -32,8 +32,8 @@ def check_cert():
     LOGGER.info('certificate: checked')
 
 
-def _setup_logger(verbose):
-    from emft.core.logging import make_logger, get_console_handler, DEBUG, INFO
+def _setup_logger(verbose, quiet):
+    from emft.core.logging import make_logger, get_console_handler, DEBUG, INFO, CRITICAL
     from emft.core.logging import persistent_logging_handler
     # noinspection PyProtectedMember
     from emft.core.constant import PATH_LOG_FILE
@@ -44,6 +44,8 @@ def _setup_logger(verbose):
     console_handler = get_console_handler()
     if verbose:
         console_handler.setLevel(DEBUG)
+    elif quiet:
+        console_handler.setLevel(CRITICAL)
     else:
         console_handler.setLevel(INFO)
 
@@ -93,7 +95,8 @@ def _another_instance_is_running():
 @click.option('-t', '--test', is_flag=True, help='Test and exit')
 @click.option('-p', '--profile', is_flag=True, help='Profile execution')
 @click.option('-v', '--verbose', is_flag=True, help='Outputs debug messages')
-def main(ctx, test, profile, verbose):  # pylint: disable=too-many-locals
+@click.option('-q', '--quiet', is_flag=True, help='Critical output only')
+def main(ctx, test, profile, verbose, quiet):  # pylint: disable=too-many-locals
     """Init Sentry"""
     # noinspection PyUnresolvedReferences
     from emft.core.sentry import SENTRY
@@ -101,7 +104,7 @@ def main(ctx, test, profile, verbose):  # pylint: disable=too-many-locals
     register_sentry(SENTRY)
 
     try:
-        _setup_logger(verbose)
+        _setup_logger(verbose, quiet)
 
     except PermissionError:
         _another_instance_is_running()
