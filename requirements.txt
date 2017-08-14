@@ -12,7 +12,6 @@ mpmath==0.19
 natsort==5.0.3
 path.py==10.3.1
 pefile==2017.8.1
-pendulum==1.2.4
 polycircles==0.3.7
 pyinstrument==0.13.2
 pyqt5==5.9

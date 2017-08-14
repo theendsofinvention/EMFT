@@ -48,7 +48,6 @@ install_requires = [
     'urllib3<1.23,>=1.21.1',  # Specific from requests
     'pytaf',
     'metar',
-    'pendulum',
 ]
 
 # noinspection SpellCheckingInspection
