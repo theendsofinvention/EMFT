@@ -181,5 +181,8 @@ def main(ctx, test, profile, verbose, quiet):  # pylint: disable=too-many-locals
             nice_exit(exit_code)
 
 
+main.add_command(cli.set_weather)
+main.add_command(cli.set_time)
+
 if __name__ == '__main__':
     main()  # pylint: disable=no-value-for-parameter
