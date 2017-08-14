@@ -7,6 +7,7 @@ import pytest
 from hypothesis import given, strategies as st
 
 from emft.cli.weather import MissionWeather, _set_weather
+from emft.miz import Miz
 
 if os.path.exists('./test_files'):
     BASE_PATH = os.path.abspath('./test_files')
@@ -51,3 +52,13 @@ def test_set_weather(icao):
     assert result['icao'] == icao
     assert result['from'] == TEST_FILE
     assert result['to'] == OUT_FILE
+    with Miz(TEST_FILE) as miz:
+        miz._encode()
+        m1 = miz.mission
+    with Miz(OUT_FILE) as miz:
+        miz._encode()
+        m2 = miz.mission
+    for (coa1, coa2) in ((m1.red_coa, m2.red_coa), (m1.blue_coa, m2.blue_coa)):
+        for attr in ('_section_bullseye', '_section_coalition', '_section_country', '_section_nav_points'):
+            assert getattr(coa1, attr) == getattr(coa2, attr)
+    assert m1.weather != m2.weather
