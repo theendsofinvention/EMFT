@@ -188,7 +188,7 @@ class Miz:
 
         LOGGER.info('encoding lua tables')
 
-        Progress.start('Decoding MIZ file', length=3)
+        Progress.start('Encoding MIZ file', length=3)
 
         Progress.set_label('Encoding map resource')
         LOGGER.debug('encoding map resource')
@@ -196,13 +196,13 @@ class Miz:
             f.write(SLTP().encode(self._map_res, self._map_res_qual))
         Progress.set_value(1)
 
-        Progress.set_label('Encoding map resource')
+        Progress.set_label('Encoding l10n dictionary')
         LOGGER.debug('encoding l10n dictionary')
         with open(self.dictionary_file, mode='w', encoding=ENCODING) as f:
             f.write(SLTP().encode(self.l10n, self._l10n_qual))
         Progress.set_value(2)
 
-        Progress.set_label('Encoding map resource')
+        Progress.set_label('Encoding mission dictionary')
         LOGGER.debug('encoding mission dictionary')
         with open(self.mission_file, mode='w', encoding=ENCODING) as f:
             f.write(SLTP().encode(self.mission.d, self._mission_qual))
