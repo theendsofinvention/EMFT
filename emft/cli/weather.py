@@ -41,7 +41,7 @@ def _retrieve_meta(station_icao):
 @click.option('-i', '--in-file', help='Mission file to update', required=True,
               type=click.Path(exists=True, dir_okay=False, readable=True))
 @click.option('-o', '--out-file', help='Mission file to write (defaults to same file)', required=False,
-              type=click.Path(exists=True, dir_okay=False, writable=True))
+              type=click.Path(dir_okay=False, writable=True))
 def set_weather(station_icao, in_file, out_file):
     LOGGER.debug(f'getting METAR for {station_icao}')
     metar_str = _retrieve_meta(station_icao)
