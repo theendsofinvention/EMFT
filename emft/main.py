@@ -7,6 +7,7 @@ import click
 
 # noinspection PyUnresolvedReferences
 import emft.core.filter_warnings  # noqa: F401 # pylint: disable=unused-import
+from emft import cli
 from emft.core import nice_exit
 
 LOGGER = None
@@ -87,11 +88,12 @@ def _another_instance_is_running():
     nice_exit()
 
 
-@click.command()
+@click.group(invoke_without_command=True, chain=True)
+@click.pass_context
 @click.option('-t', '--test', is_flag=True, help='Test and exit')
 @click.option('-p', '--profile', is_flag=True, help='Profile execution')
 @click.option('-v', '--verbose', is_flag=True, help='Outputs debug messages')
-def main(test, profile, verbose):  # pylint: disable=too-many-locals
+def main(ctx, test, profile, verbose):  # pylint: disable=too-many-locals
     """Init Sentry"""
     # noinspection PyUnresolvedReferences
     from emft.core.sentry import SENTRY
@@ -117,62 +119,63 @@ def main(test, profile, verbose):  # pylint: disable=too-many-locals
         from emft.config.cfg import Config
         SENTRY.register_context('config', Config())
 
-        # Intercept SIGINT
-        import signal as core_sig
-        # Intercept OS signals to trigger a nice exit
-        core_sig.signal(core_sig.SIGINT, nice_exit)
+        if ctx.invoked_subcommand is None:
+            # Intercept SIGINT
+            import signal as core_sig
+            # Intercept OS signals to trigger a nice exit
+            core_sig.signal(core_sig.SIGINT, nice_exit)
 
-        # noinspection PyBroadException
-        try:
-            check_cert()
+            # noinspection PyBroadException
+            try:
+                check_cert()
 
-            from emft.updater import initialize_updater
+                from emft.updater import initialize_updater
 
-            initialize_updater(
-                current_version=__version__,
-                av_user='132nd-etcher',
-                av_repo='EMFT',
-                local_executable='emft.exe',
-                channel=Config().update_channel,
-            )
+                initialize_updater(
+                    current_version=__version__,
+                    av_user='132nd-etcher',
+                    av_repo='EMFT',
+                    local_executable='emft.exe',
+                    channel=Config().update_channel,
+                )
 
-            from emft.plugins import reorder
-            reorder.initialize()
+                from emft.plugins import reorder
+                reorder.initialize()
 
-            from emft.gui.main_ui import start_ui
-            start_ui(show=bool(not test))
+                from emft.gui.main_ui import start_ui
+                start_ui(show=bool(not test))
 
-            from emft.core.constant import QT_APP
+                from emft.core.constant import QT_APP
 
-            if test:
-                LOGGER.critical('RUNNING IN TEST MODE')
-                import time
-                from emft.core.threadpool import ThreadPool
+                if test:
+                    LOGGER.critical('RUNNING IN TEST MODE')
+                    import time
+                    from emft.core.threadpool import ThreadPool
 
-                def test_hook():
-                    LOGGER.critical('TEST MODE: waiting 10 seconds')
-                    time.sleep(10)
-                    LOGGER.critical('TEST MODE: end of timer')
-                    QT_APP.exit(0)
-                    # nice_exit()
+                    def test_hook():
+                        LOGGER.critical('TEST MODE: waiting 10 seconds')
+                        time.sleep(10)
+                        LOGGER.critical('TEST MODE: end of timer')
+                        QT_APP.exit(0)
+                        # nice_exit()
 
-                pool = ThreadPool(1, 'test', _daemon=True)
-                pool.queue_task(test_hook)
+                    pool = ThreadPool(1, 'test', _daemon=True)
+                    pool.queue_task(test_hook)
 
-            exit_code = QT_APP.exec()
+                exit_code = QT_APP.exec()
 
-            _stop_profiler()
+                _stop_profiler()
 
-        except SystemExit as exc:
-            LOGGER.info('caught SystemExit')
-            exit_code = exc.code or 1
-        except:  # pylint: disable=bare-except
-            LOGGER.exception('caught exception in main loop')
-            SENTRY.captureException()
-            exit_code = 1
+            except SystemExit as exc:
+                LOGGER.info('caught SystemExit')
+                exit_code = exc.code or 1
+            except:  # pylint: disable=bare-except
+                LOGGER.exception('caught exception in main loop')
+                SENTRY.captureException()
+                exit_code = 1
 
-        LOGGER.info('bye bye ! =)')
-        nice_exit(exit_code)
+            LOGGER.info('bye bye ! =)')
+            nice_exit(exit_code)
 
 
 if __name__ == '__main__':
