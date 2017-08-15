@@ -12,6 +12,22 @@ emft\.miz\.mission module
     :undoc-members:
     :show-inheritance:
 
+emft\.miz\.mission\_time module
+-------------------------------
+
+.. automodule:: emft.miz.mission_time
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+emft\.miz\.mission\_weather module
+----------------------------------
+
+.. automodule:: emft.miz.mission_weather
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
 emft\.miz\.miz module
 ---------------------
 
