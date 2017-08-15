@@ -287,19 +287,20 @@ class TestMizValues:
                 miz.mission.weather.qnh = wrong_qnh
 
     def test_seasons(self, miz):
+        # Season code has been deprecated by ED
         miz.mission.weather.season_code = miz.mission.weather.seasons_enum['winter']
         miz.mission.weather.temperature = -50
         assert miz.mission.weather.temperature == -50
         miz.mission.weather.season_code = miz.mission.weather.seasons_enum['summer']
         assert miz.mission.weather.temperature == 5
-        with pytest.raises(ValueError):
-            miz.mission.weather.temperature = -50
+        # with pytest.raises(ValueError):
+        miz.mission.weather.temperature = -50
         miz.mission.weather.temperature = 50
         assert miz.mission.weather.temperature == 50
         miz.mission.weather.season_code = miz.mission.weather.seasons_enum['winter']
         assert miz.mission.weather.temperature == 15
-        with pytest.raises(ValueError):
-            miz.mission.weather.temperature = 50
+        # with pytest.raises(ValueError):
+        miz.mission.weather.temperature = 50
         miz.mission.weather.temperature = -50
         miz.mission.weather.season_code = miz.mission.weather.seasons_enum['fall']
         assert miz.mission.weather.temperature == -10
@@ -428,15 +429,16 @@ class TestMizValues:
             with pytest.raises(ValueError, msg=i):
                 miz.mission.weather.precipitations = i
         miz.mission.weather.precipitations = 4
-        miz.mission.weather.season_code = 1
-        assert miz.mission.weather.temperature == 5
-        assert miz.mission.weather.precipitations == 2
-        miz.mission.weather.season_code = 2
-        miz.mission.weather.temperature = -20
-        assert miz.mission.weather.precipitations == 4
-        miz.mission.weather.precipitations = 3
-        miz.mission.weather.season_code = 1
-        assert miz.mission.weather.precipitations == 1
+        # Season code has been deprecated by ED
+        # miz.mission.weather.season_code = 1
+        # assert miz.mission.weather.temperature == 5
+        # assert miz.mission.weather.precipitations == 2
+        # miz.mission.weather.season_code = 2
+        # miz.mission.weather.temperature = -20
+        # assert miz.mission.weather.precipitations == 4
+        # miz.mission.weather.precipitations = 3
+        # miz.mission.weather.season_code = 1
+        # assert miz.mission.weather.precipitations == 1
 
     def test_ground_control(self, miz):
         assert not miz.mission.ground_control.pilots_control_vehicles

@@ -79,6 +79,7 @@ dev_requires = [
     'sphinx-click',
     'sphinx-git',
     'sphinxjp.themes.basicstrap',
+    'tox',
 ]
 
 setup_requires = [
