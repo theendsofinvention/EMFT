@@ -6,15 +6,14 @@ Subpackages
 
 .. toctree::
 
+    emft.cli
     emft.config
     emft.core
-    emft.data
+    emft.gui
     emft.meta
     emft.miz
-    emft.radio
-    emft.reorder
-    emft.roster
-    emft.ui
+    emft.plugins
+    emft.resources
     emft.updater
 
 Submodules
@@ -24,22 +23,6 @@ emft\.build module
 ------------------
 
 .. automodule:: emft.build
-    :members:
-    :undoc-members:
-    :show-inheritance:
-
-emft\.filter\_warnings module
------------------------------
-
-.. automodule:: emft.filter_warnings
-    :members:
-    :undoc-members:
-    :show-inheritance:
-
-emft\.global\_ module
----------------------
-
-.. automodule:: emft.global_
     :members:
     :undoc-members:
     :show-inheritance:
