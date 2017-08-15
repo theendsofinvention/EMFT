@@ -26,7 +26,9 @@ packaging==16.8           # via dparse, safety
 pbr==3.1.1                # via sphinx-click
 pep8-naming==0.4.1        # via prospector
 pip-tools==1.9.0
+pluggy==0.4.0             # via tox
 prospector==0.12.7
+py==1.4.34                # via tox
 pycodestyle==2.0.0        # via flake8, prospector
 pydocstyle==2.0.0         # via prospector
 pyflakes==1.5.0           # via flake8, prospector
@@ -53,5 +55,7 @@ sphinx-git==10.0.0
 sphinx==1.6.3
 sphinxcontrib-websupport==1.0.1  # via sphinx
 sphinxjp.themes.basicstrap==0.4.3
+tox==2.7.0
 urllib3==1.22             # via requests
+virtualenv==15.1.0        # via tox
 wrapt==1.10.11            # via astroid
