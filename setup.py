@@ -2,7 +2,7 @@
 
 import os
 
-from setuptools import setup
+from setuptools import setup, find_packages
 
 
 def read_local_files(*file_paths: str) -> str:
@@ -98,15 +98,16 @@ if __name__ == '__main__':
         name='EMFT',
         author='132nd-etcher',
         zip_safe=False,
+        package_dir={'': 'emft'},
         author_email='emft@daribouca.net',
         platforms=['win32'],
         url=r'https://github.com/132nd-etcher/EMFT',
         download_url=r'https://github.com/132nd-etcher/EMFT/releases',
         description='Set of tools for the DCS mission builder',
         license='GPLv3',
-        py_modules=['emft'],
+        # py_modules=['emft'],
         long_description=read_local_files('README.rst', 'CHANGELOG.rst'),
-        packages=['emft'],
+        packages=find_packages("emft", exclude=["test"]),
         include_package_data=True,
         install_requires=install_requires,
         entry_points=entry_points,

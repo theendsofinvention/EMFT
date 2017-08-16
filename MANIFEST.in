@@ -1,15 +1,23 @@
+graft emft
 include AUTHORS
 include LICENSE
 include MANIFEST.in
 include package.json
 include *.rst
 include tox.ini
-include
-graft src
-graft test
-graft doc
 global-exclude __pycache__
 global-exclude *.py[co]
 global-exclude html-cov
+global-exclude .coverage
 exclude .landscape.yml
 exclude .appveyor.yml
+exclude .editorconfig
+exclude .gitignore
+exclude .gitchangelog.Rc
+exclude .pylintrc
+exclude .travis.yml
+exclude .GitVersion.yml
+exclude doc
+prune test
+prune doc
+prune *.qrc

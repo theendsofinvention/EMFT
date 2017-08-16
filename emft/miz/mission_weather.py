@@ -223,7 +223,7 @@ class MissionWeather:
 
             miz.mission.weather.temperature = self.temperature
 
-            miz.zip(outfile)
+            # miz.zip(outfile)
 
             return True
 
