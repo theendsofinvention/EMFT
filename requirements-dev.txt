@@ -2,7 +2,7 @@
 -r requirements-test.txt
 alabaster==0.7.10         # via sphinx
 astroid==1.5.3            # via pylint, pylint-celery, pylint-flask, pylint-plugin-utils, requirements-detector
-babel==2.4.0              # via sphinx
+babel==2.5.0              # via sphinx
 certifi==2017.7.27.1
 chardet==3.0.4            # via requests
 click==6.7                # via pip-tools, safety
