@@ -29,7 +29,7 @@ pip-tools==1.9.0
 pluggy==0.4.0             # via tox
 prospector==0.12.7
 py==1.4.34                # via tox
-pycodestyle==2.0.0        # via flake8, prospector
+pycodestyle==2.3.1        # via flake8, prospector
 pydocstyle==2.0.0         # via prospector
 pyflakes==1.5.0           # via flake8, prospector
 pygments==2.2.0           # via sphinx
