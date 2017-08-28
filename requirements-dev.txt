@@ -42,7 +42,7 @@ pylint==1.7.2
 pyparsing==2.2.0          # via packaging
 pytz==2017.2              # via babel
 pyyaml==3.12              # via dparse, prospector
-requests==2.18.3          # via safety, sphinx
+requests==2.18.4          # via safety, sphinx
 requirements-detector==0.5.2  # via prospector
 safety==1.5.1
 setoptconf==0.2.0         # via prospector
