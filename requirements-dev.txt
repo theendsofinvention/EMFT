@@ -15,7 +15,7 @@ flake8==3.4.1
 gitchangelog==3.0.3
 gitdb2==2.0.2             # via gitpython
 gitpython==2.1.5          # via sphinx-git
-idna==2.5                 # via requests
+idna==2.6                 # via requests
 imagesize==0.7.1          # via sphinx
 isort==4.2.15             # via pylint
 jinja2==2.9.6             # via sphinx
