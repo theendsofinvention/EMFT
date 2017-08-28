@@ -49,7 +49,7 @@ setoptconf==0.2.0         # via prospector
 six==1.10.0               # via astroid, dparse, packaging, pip-tools, pydocstyle, pylint, sphinx, sphinx-git
 smmap2==2.0.3             # via gitdb2
 snowballstemmer==1.2.1    # via pydocstyle, sphinx
-sphinx-autodoc-typehints==1.2.1
+sphinx-autodoc-typehints==1.2.3
 sphinx-click==1.0.2
 sphinx-git==10.0.0
 sphinx==1.6.3
