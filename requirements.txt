@@ -6,7 +6,7 @@ contextlib2==0.5.5        # via raven
 future==0.16.0            # via pefile
 geographiclib==1.48       # via polycircles
 humanize==0.5.1
-idna==2.5                 # via requests
+idna==2.6                 # via requests
 metar==1.5.0
 mpmath==0.19
 natsort==5.0.3
