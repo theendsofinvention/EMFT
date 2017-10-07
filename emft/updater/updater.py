@@ -317,7 +317,7 @@ class Updater(Machine):
         bat_liiiiiiiiiiiines = [  # I'm deeply sorry ...
             '@echo off',
             'echo Updating to latest version...',
-            'ping 127.0.0.1 - n 5 - w 1000 > NUL',
+            'ping 127.0.0.1 -n 5 -w 1000 > NUL',
             f'move /Y "update" "{os.path.basename(self._local_executable)}" > NUL',
             'echo restarting...',
             f'start "" "{os.path.basename(self._local_executable)}"',
