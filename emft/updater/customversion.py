@@ -6,6 +6,7 @@ class CustomVersion(SemanticVersion):
     """
     Proxy class over semantic_version.Version
     """
+
     def __init__(self, version_string, partial=False):
         SemanticVersion.__init__(self, version_string, partial)
 

@@ -33,7 +33,6 @@ class ThreadPool:
     thread."""
 
     def __init__(self, _num_threads, _basename=None, _daemon=None):
-
         """Initialize the thread pool with numThreads workers."""
         self.resize_lock = threading.Condition(threading.Lock())
         self.tasks = []
@@ -47,7 +46,6 @@ class ThreadPool:
         self.set_thread_count(_num_threads)
 
     def set_thread_count(self, new_num_threads):
-
         """ External method to set the current pool size.  Acquires
         the resizing lock, then calls the internal version to do real
         work.
@@ -65,7 +63,6 @@ class ThreadPool:
         return True
 
     def set_thread_count_no_lock(self, new_num_threads):
-
         """Set the current pool size, spawning or terminating threads
         if necessary.  Internal use only; assumes the resizing lock is
         held."""
@@ -86,7 +83,6 @@ class ThreadPool:
             del self.threads[0]
 
     def get_thread_count(self):
-
         """Return the number of threads in the pool."""
 
         self.resize_lock.acquire()
@@ -105,7 +101,6 @@ class ThreadPool:
                    _err_kwargs: dict = None,
                    _task_id: str = None
                    ):
-
         """
         Inserts a task into the queue
         :param _task_id: gives an ID to the task in order to parse the result against something tangible
@@ -142,7 +137,6 @@ class ThreadPool:
             self.task_lock.release()
 
     def get_next_task(self):
-
         """ Retrieve the next task from the task queue.  For use
         only by ThreadPoolThread objects contained in the pool."""
 
@@ -156,7 +150,6 @@ class ThreadPool:
             self.task_lock.release()
 
     def join_all(self, wait_for_pending_tasks=True, wait_for_running_tasks=True):
-
         """ Clear the task queue and terminate all pooled threads,
         optionally allowing the tasks and threads to finish.
         :param wait_for_pending_tasks: whether or not to process pending tasks before joining
@@ -201,7 +194,6 @@ class ThreadPoolThread(threading.Thread):
     threadSleepTime = 0.1
 
     def __init__(self, _pool, _thread_name, _daemon):
-
         """ Initialize the thread and remember the pool. """
 
         threading.Thread.__init__(self, name=_thread_name, daemon=_daemon)
@@ -261,7 +253,6 @@ class ThreadPoolThread(threading.Thread):
             self.__pool.task_done()
 
     def run(self):
-
         """ Until told to quit, retrieve the next task and execute
         it, calling the callback if any.  """
 
@@ -277,7 +268,6 @@ class ThreadPoolThread(threading.Thread):
                     self.__run(cmd, args, kwargs, callback, err_call_back, err_args, err_kwargs, task_id)
 
     def kill(self):
-
         """ Exit the run loop next time through."""
 
         self.__isDying = True

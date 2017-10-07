@@ -269,7 +269,7 @@ class DCSInstalls:
 
     def __get_props(self, channel):
         return self.installs_props[channel]['install'], \
-               self.installs_props[channel]['sg'], self.installs_props[channel]['version'], channel
+            self.installs_props[channel]['sg'], self.installs_props[channel]['version'], channel
 
     @property
     def stable(self) -> DCSInstall:
