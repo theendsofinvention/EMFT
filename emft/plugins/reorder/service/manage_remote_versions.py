@@ -47,7 +47,10 @@ class ManageRemoteVersions:
             jobs = build.build.jobs.successful_only()
             if not jobs:
                 raise RuntimeError('something')
-            job = list(jobs)[0]
+            try:
+                job = list(jobs)[0]
+            except IndexError:
+                return
             artifacts = AVSession().get_artifacts(job.jobId)
             if not artifacts:
                 raise RuntimeError('another something')
