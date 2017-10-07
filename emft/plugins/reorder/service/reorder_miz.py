@@ -46,22 +46,27 @@ class ReorderMiz:
 
     @staticmethod
     def auto_reorder():
+
+        def _error(txt: str):
+            LOGGER.error(txt)
+            I().error(txt.capitalize())
+
         profile = FindProfile.get_active_profile()
-        error = None
         if not profile:
-            error = 'no active profile'
+            _error('no active profile')
+            return
         latest = FindRemoteVersion.get_latest()
         if not latest:
-            error = 'no remote version'
+            _error('no remote version')
+            return
         local_file = Path(profile.src_folder).joinpath(latest.remote_file_name).abspath()
         if not local_file.exists():
-            error = f'local file not found: {local_file.abspath()}'
-        if not local_file.isfile() or not local_file.basename().endswith('miz'):
-            error = f'please select a valid miz file'
-        if error:
-            LOGGER.error(error)
-            I().error(error.capitalize())
+            _error(f'local file not found: {local_file.abspath()}')
             return
+        if not local_file.isfile() or not local_file.basename().endswith('miz'):
+            _error(f'please select a valid miz file')
+            return
+
         ReorderMiz.reorder_miz_file(
             miz_file_path=str(local_file.abspath()),
             output_folder_path=profile.output_folder,
