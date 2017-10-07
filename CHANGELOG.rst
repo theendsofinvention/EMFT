@@ -1,3 +1,16 @@
+(unreleased)
+------------
+
+Fix
+~~~
+- Fix remote version check on pending job. [132nd-etcher]
+
+  closes #164
+- Fixed reorder function. [132nd-etcher]
+
+  closes #163
+
+
 0.5.1 (2017-08-14)
 ------------------
 

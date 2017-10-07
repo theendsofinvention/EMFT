@@ -2,26 +2,25 @@ certifi==2017.7.27.1
 chardet==3.0.4            # via requests
 click==6.7
 colorama==0.3.9
-contextlib2==0.5.5        # via raven
 future==0.16.0            # via pefile
-geographiclib==1.48       # via polycircles
+geographiclib==1.49       # via polycircles
 humanize==0.5.1
-idna==2.5                 # via requests
+idna==2.6                 # via requests
 metar==1.5.0
-mpmath==0.19
-natsort==5.0.3
-path.py==10.3.1
-pefile==2017.8.1
+mpmath==1.0.0
+natsort==5.1.0
+path.py==10.4
+pefile==2017.9.3
 polycircles==0.3.7
 pyinstrument==0.13.2
 pyqt5==5.9
 pytaf==1.1.1
-raven==6.1.0
-requests==2.18.3
-ruamel.yaml==0.15.30
+raven==6.2.1
+requests==2.18.4
+ruamel.yaml==0.15.34
 semantic-version==2.6.0
 simplekml==1.3.0
 sip==4.19.3               # via pyqt5
-six==1.10.0               # via transitions
-transitions==0.5.3
+six==1.11.0               # via transitions
+transitions==0.6.1
 urllib3==1.22
