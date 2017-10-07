@@ -25,6 +25,8 @@ class TestConvertUrl:
         'url, repo_owner, repo_name',
         [
             (r'https://ci.appveyor.com/project/132nd-etcher/emft/build/artifacts', '132nd-etcher', 'emft'),
+            (r'https://ci.appveyor.com/project/132nd-VirtualWing/132nd-virtual-wing-training-mission-tblisi',
+             '132nd-VirtualWing', '132nd-virtual-wing-training-mission-tblisi'),
         ]
     )
     def test_convert_av_url(self, url, repo_owner, repo_name):
