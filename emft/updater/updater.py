@@ -338,7 +338,7 @@ class Updater(Machine):
         subprocess.Popen(args)
         nice_exit()
 
-        return True  # for testing purpose 
+        return True  # for testing purpose
 
     @WatchedProperty(default_value=None)
     def error(self, value):
