@@ -7,7 +7,7 @@ import click
 
 # noinspection PyUnresolvedReferences
 import emft.core.filter_warnings  # noqa: F401 # pylint: disable=unused-import
-from emft import cli
+# from emft import cli
 from emft.core import nice_exit
 
 LOGGER = None
@@ -181,8 +181,8 @@ def main(ctx, test, profile, verbose, quiet):  # pylint: disable=too-many-locals
             nice_exit(exit_code)
 
 
-main.add_command(cli.set_weather)
-main.add_command(cli.set_time)
+# main.add_command(cli.set_weather)
+# main.add_command(cli.set_time)
 
 if __name__ == '__main__':
     main()  # pylint: disable=no-value-for-parameter
