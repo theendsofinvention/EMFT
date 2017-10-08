@@ -61,6 +61,8 @@ class Miz:
         self._l10n_qual = None
         self._map_res = None
         self._map_res_qual = None
+        self._warehouses = None
+        self._warehouses_qual = None
 
     def __enter__(self):
         LOGGER.debug('instantiating new Mission object as a context')
@@ -93,6 +95,10 @@ class Miz:
         return self.tmpdir.joinpath('l10n', 'DEFAULT', 'mapResource')
 
     @property
+    def warehouses_file(self):
+        return self.tmpdir.joinpath('warehouses')
+
+    @property
     def mission(self) -> Mission:
         if self._mission is None:
             raise RuntimeError()
@@ -105,7 +111,7 @@ class Miz:
         return self._l10n
 
     @property
-    def map_res(self) -> dict:
+    def warehouses(self) -> dict:
         if self._map_res is None:
             raise RuntimeError()
         return self._map_res
@@ -161,7 +167,7 @@ class Miz:
         if not self.zip_content:
             self.unzip(overwrite=False)
 
-        Progress.start('Decoding MIZ file', length=3)
+        Progress.start('Decoding MIZ file', length=4)
 
         Progress.set_label('Decoding map resource')
         LOGGER.debug('reading map resource file')
@@ -182,13 +188,19 @@ class Miz:
             self._mission = Mission(mission_data, self._l10n)
         Progress.set_value(3)
 
+        Progress.set_label('Decoding warehouses')
+        LOGGER.debug('reading warehouses file')
+        with open(self.warehouses_file, encoding=ENCODING) as f:
+            self._warehouses, self._warehouses_qual = SLTP().decode(f.read())
+        Progress.set_value(4)
+
         LOGGER.debug('decoding done')
 
     def _encode(self):
 
         LOGGER.debug('encoding lua tables')
 
-        Progress.start('Encoding MIZ file', length=3)
+        Progress.start('Encoding MIZ file', length=4)
 
         Progress.set_label('Encoding map resource')
         LOGGER.debug('encoding map resource')
@@ -207,6 +219,12 @@ class Miz:
         with open(self.mission_file, mode='w', encoding=ENCODING) as f:
             f.write(SLTP().encode(self.mission.d, self._mission_qual))
         Progress.set_value(3)
+
+        Progress.set_label('Encoding warehouses')
+        LOGGER.debug('encoding warehouses')
+        with open(self.warehouses_file, mode='w', encoding=ENCODING) as f:
+            f.write(SLTP().encode(self._warehouses, self._warehouses_qual))
+        Progress.set_value(4)
 
         LOGGER.debug('encoding done')
 

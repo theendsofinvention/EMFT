@@ -72,7 +72,7 @@ class SLTP:
             raise SLTPParsingError(ERRORS['unexp_type_str'])
 
         LOGGER.debug('extracting qualifier')
-        qual = re.compile(r'^(?P<value>(dictionary|mission|mapResource) = ?)\n')
+        qual = re.compile(r'^(?P<value>(dictionary|mission|mapResource|warehouses) = ?)\n')
         match = qual.match(text)
 
         if match is None:
