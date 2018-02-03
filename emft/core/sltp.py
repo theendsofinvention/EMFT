@@ -328,6 +328,7 @@ class SLTP:
         try:
             return int(n, 0)
         except ValueError:
+            return float(n)
             return mpmath.mpf(n)
 
     # noinspection PyMissingOrEmptyDocstring

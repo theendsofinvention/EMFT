@@ -15,6 +15,29 @@ from emft.resources.dummy_miz import dummy_miz
 LOGGER = make_logger('miz')
 
 
+def mirror_dir(src, dst, ignore):
+    LOGGER.debug('{} -> {}'.format(src, dst))
+    diff_ = dircmp(src, dst, ignore)
+    diff_list = diff_.left_only + diff_.diff_files
+    LOGGER.debug('differences: {}'.format(diff_list))
+    for x in diff_list:
+        source = Path(diff_.left).joinpath(x)
+        target = Path(diff_.right).joinpath(x)
+        LOGGER.debug('looking at: {}'.format(x))
+        if source.isdir():
+            LOGGER.debug('isdir: {}'.format(x))
+            if not target.exists():
+                LOGGER.debug('creating: {}'.format(x))
+                target.mkdir()
+            mirror_dir(source, target, ignore)
+        else:
+            LOGGER.debug('copying: {}'.format(x))
+            source.copy2(diff_.right)
+    for sub in diff_.subdirs.values():
+        assert isinstance(sub, dircmp)
+        mirror_dir(sub.left, sub.right, ignore)
+
+
 # noinspection PyAbstractClass
 class MizPath(Path):
     def __init__(self, path):
@@ -129,28 +152,6 @@ class Miz:
 
         with Miz(miz_file_path, overwrite=True) as m:
 
-            def mirror_dir(src, dst):
-                LOGGER.debug('{} -> {}'.format(src, dst))
-                diff_ = dircmp(src, dst, ignore)
-                diff_list = diff_.left_only + diff_.diff_files
-                LOGGER.debug('differences: {}'.format(diff_list))
-                for x in diff_list:
-                    source = Path(diff_.left).joinpath(x)
-                    target = Path(diff_.right).joinpath(x)
-                    LOGGER.debug('looking at: {}'.format(x))
-                    if source.isdir():
-                        LOGGER.debug('isdir: {}'.format(x))
-                        if not target.exists():
-                            LOGGER.debug('creating: {}'.format(x))
-                            target.mkdir()
-                        mirror_dir(source, target)
-                    else:
-                        LOGGER.debug('copying: {}'.format(x))
-                        source.copy2(diff_.right)
-                for sub in diff_.subdirs.values():
-                    assert isinstance(sub, dircmp)
-                    mirror_dir(sub.left, sub.right)
-
             m._encode()
 
             if skip_options_file:
@@ -158,7 +159,7 @@ class Miz:
             else:
                 ignore = []
 
-            mirror_dir(m.tmpdir, target_dir)
+            mirror_dir(m.tmpdir, target_dir, ignore)
 
     def _decode(self):
 
@@ -317,3 +318,84 @@ class Miz:
                 _z.write(abs_path, arcname=f)
 
         return destination
+
+
+if __name__ == '__main__':
+    # import yaml
+    import os
+    import sys
+    import shutil
+    from ruamel import yaml
+    from ruamel.yaml import YAML
+    import pyprind
+
+    test_output = r'F:\DEV\test_flatten\mission'
+    make_logger()
+
+
+    def flatten(d: dict, l10n: dict, path: str, filename: str):
+
+        def _count(d_: dict):
+            count_ = 0
+            for k_, v_ in d_.items():
+                if type(v_) is dict:
+                    count_ += _count(v_)
+                else:
+                    count_ += 1
+            return count_
+
+        def _flatten(d_: dict, path_: str, filename_: str, bar_: pyprind.ProgBar):
+
+            path_ = os.path.abspath(path_)
+
+            if not os.path.exists(path_):
+                os.makedirs(path_)
+
+            out = YAML().load('__dummy__: dummy')
+
+            for k, v in d_.items():
+                if type(v) is dict:
+                    _flatten(v, os.path.join(path_, filename_), str(k), bar_)
+                else:
+                    if isinstance(v, str) and v.startswith('DictKey_'):
+                        if l10n[v]:
+                            out.insert(len(out) - 1, k, v, comment=l10n[v])
+                        else:
+                            out.insert(len(out) - 1, k, v, comment='NO_NAME')
+                    else:
+                        out.insert(len(out) - 1, k, v)
+                    bar.update()
+
+            del out['__dummy__']
+
+            if out:
+                with open(os.path.join(path_, f'{filename_}.yml'), 'w') as stream:
+                    yaml.round_trip_dump(out, stream, )
+
+        LOGGER.debug('counting items...')
+        count = _count(d)
+        LOGGER.debug(f'items to process: {count}')
+
+        bar = pyprind.ProgBar(count+1, stream=sys.stdout)
+
+        _flatten(d, path, filename, bar)
+
+        bar.stop()
+
+
+    def aggregate(path):
+        for root, folders, files in os.walk(path):
+            print(root)
+
+
+    if os.path.exists(test_output):
+        shutil.rmtree(test_output)
+    with Miz(r'C:\Users\bob\Saved Games\DCS\Missions\132nd\TRMT_3.8.1.587.miz') as miz:
+        flatten(miz.mission.d, miz.mission.l10n, test_output, 'mission')
+        # with open('output.yml', 'w') as stream:
+        #     # print(miz.mission.l10n['DictKey_sortie_4'])
+        #     yaml.round_trip_dump(miz.mission.d, stream)
+        # with open('l10n.yml', 'w') as stream:
+        #     yaml.round_trip_dump(miz.mission.l10n, stream)
+
+    aggregate(test_output)

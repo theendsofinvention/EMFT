@@ -1,4 +1,9 @@
 # coding=utf-8
 
-from .weather import set_weather
-from .time import set_time
+from emft.__version__ import __version__
+from emft.core import nice_exit
+
+
+def version():
+    print(__version__)
+    nice_exit(0)
