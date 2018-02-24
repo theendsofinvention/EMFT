@@ -85,7 +85,7 @@ before_build:
 build_script:
   - cmd: pip install -e .
 #  - cmd: emft-build pin_version flake8 pytest safety chglog doc --publish reqs pyrcc freeze patch test_build
-  - cmd: emft-build pytest pyrcc freeze patch test_build
+  - cmd: emft-build pyrcc freeze patch test_build
 
 after_build:
   - cmd: move dist\emft.exe emft.exe
