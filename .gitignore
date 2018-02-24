@@ -25,3 +25,4 @@ __version_frozen__.py
 /test/test_files/time_output/
 /test/test_files/time/
 /test/test_files/empty/
+/Pipfile.lock

@@ -1,0 +1,39 @@
+[[source]]
+
+url = "https://pypi.python.org/simple"
+verify_ssl = true
+name = "pypi"
+
+
+[packages]
+
+certifi = "*"
+chardet = "*"
+click = "*"
+colorama = "*"
+future = "*"
+geographiclib = "*"
+humanize = "*"
+idna = "*"
+metar = "*"
+mpmath = "*"
+natsort = "*"
+"path.py" = "*"
+pefile = "*"
+polycircles = "*"
+pyinstrument = "*"
+"pyqt5" = "*"
+pytaf = "*"
+raven = "*"
+requests = "*"
+"ruamel.yaml" = "*"
+semantic-version = "*"
+simplekml = "*"
+sip = "*"
+transitions = "*"
+"urllib3" = "*"
+
+
+[dev-packages]
+pyinstaller = "*"
+
