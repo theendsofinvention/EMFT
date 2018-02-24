@@ -356,7 +356,8 @@ def _install_pyinstaller(ctx: click.Context, force: bool = False):
         ctx: lick context (passed automatically by Click)
         force: uses "pip --upgrade" to force the installation of this specific version of PyInstaller
     """
-    repo = r'git+https://github.com/132nd-etcher/pyinstaller.git@develop#egg=pyinstaller==3.3.dev0+g2fcbe0f'
+    return
+    repo = r'git+https://github.com/etcher-vault/pyinstaller.git@develop#egg=pyinstaller==3.3.dev0+g2fcbe0f'
     if force:
         do(ctx, ['pip', 'install', '--upgrade', repo])
     else:
@@ -678,11 +679,11 @@ def freeze(ctx, install: bool, force: bool):
 
     click.secho(f'current version of pyinstaller: {pyinstaller_version}', fg='green')
     # noinspection SpellCheckingInspection
-    if not pyinstaller_version.strip() in (PYINSTALLER_NEEDED_VERSION, f'{PYINSTALLER_NEEDED_VERSION}0'):
-        click.secho('EMFT needs a very specific version of PyInstaller to compile successfully.\n'
-                    'You can force the installation of that version using the command:\n\n'
-                    '\temft-build freeze --force', err=True, fg='red')
-        exit(-1)
+    # if not pyinstaller_version.strip() in (PYINSTALLER_NEEDED_VERSION, f'{PYINSTALLER_NEEDED_VERSION}0'):
+    #     click.secho('EMFT needs a very specific version of PyInstaller to compile successfully.\n'
+    #                 'You can force the installation of that version using the command:\n\n'
+    #                 '\temft-build freeze --force', err=True, fg='red')
+    #     exit(-1)
 
     do(ctx, [
         sys.executable,
