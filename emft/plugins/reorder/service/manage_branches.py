@@ -88,5 +88,4 @@ class ManageBranches:
             d = dict()
         d[FindProfile.get_active_profile().name] = branch_name
         Config().last_used_branch = d
-        print(f'branch has changed to {branch_name}')
         ManageBranches.notify_watchers()

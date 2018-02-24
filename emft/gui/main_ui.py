@@ -93,17 +93,17 @@ def start_ui(show: bool = True):
     # from src.misc.fs import dcs_installs
     # dcs_installs.discover_dcs_installations()
 
-    LOGGER.info('loading tab: skins')
-    from emft.gui.tab_skins import TabChildSkins
-    constant.MAIN_UI.add_tab(TabChildSkins(main_ui))
-
-    LOGGER.info('loading tab: roster')
-    from emft.gui.tab_roster import TabChildRoster
-    constant.MAIN_UI.add_tab(TabChildRoster(main_ui))
-
-    LOGGER.info('loading tab: radios')
-    from emft.gui.tab_radios import TabChildRadios
-    constant.MAIN_UI.add_tab(TabChildRadios(main_ui))
+    # LOGGER.info('loading tab: skins')
+    # from emft.gui.tab_skins import TabChildSkins
+    # constant.MAIN_UI.add_tab(TabChildSkins(main_ui))
+    #
+    # LOGGER.info('loading tab: roster')
+    # from emft.gui.tab_roster import TabChildRoster
+    # constant.MAIN_UI.add_tab(TabChildRoster(main_ui))
+    #
+    # LOGGER.info('loading tab: radios')
+    # from emft.gui.tab_radios import TabChildRadios
+    # constant.MAIN_UI.add_tab(TabChildRadios(main_ui))
 
     LOGGER.info('loading tab: config')
     from emft.gui.tab_config import TabChildConfig
