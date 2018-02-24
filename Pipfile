@@ -32,8 +32,10 @@ simplekml = "*"
 sip = "*"
 transitions = "*"
 "urllib3" = "*"
+emiz = "*"
 
 
 [dev-packages]
-pyinstaller = "*"
 
+pyinstaller = "*"
+epab = "*"
