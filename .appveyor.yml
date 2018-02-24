@@ -94,12 +94,12 @@ test_script:
   - cmd: emft.exe --test
 
 after_test:
-  - "%PYTHON%/Scripts/pip.exe install git+https://github.com/132nd-etcher/ocular.py.git"
-  - "%PYTHON%/Scripts/ocular.exe --access-token %SCRUTINIZER_TOKEN% & exit 0"
-  - "%PYTHON%/Scripts/pip.exe install codacy-coverage"
-  - "%PYTHON%/Scripts/python-codacy-coverage.exe -r coverage.xml & exit 0"
-  - "%PYTHON%/Scripts/pip.exe install codecov"
-  - "%PYTHON%/Scripts/codecov.exe & exit 0"
+#  - "%PYTHON%/Scripts/pip.exe install ocular"
+#  - "%PYTHON%/Scripts/ocular.exe --access-token %SCRUTINIZER_TOKEN% & exit 0"
+#  - "%PYTHON%/Scripts/pip.exe install codacy-coverage"
+#  - "%PYTHON%/Scripts/python-codacy-coverage.exe -r coverage.xml & exit 0"
+#  - "%PYTHON%/Scripts/pip.exe install codecov"
+#  - "%PYTHON%/Scripts/codecov.exe & exit 0"
   - cmd: md5sum emft.exe > emft.md5
 
 
