@@ -40,7 +40,7 @@ pylint-flask==0.6         # via prospector
 pylint-plugin-utils==0.6  # via prospector, pylint-celery, pylint-common, pylint-django, pylint-flask
 pylint==2.5.3
 pyparsing==2.4.7          # via packaging
-pytz==2017.2              # via babel
+pytz==2020.1              # via babel
 pyyaml==3.12              # via dparse, prospector
 requests==2.18.4          # via safety, sphinx
 requirements-detector==0.5.2  # via prospector
