@@ -9,7 +9,7 @@ idna==2.9                 # via requests
 metar==1.7.0
 mpmath==1.1.0
 natsort==7.0.1
-path.py==10.4
+path.py==12.4.0
 pefile==2017.9.3
 polycircles==0.3.7
 pyinstrument==0.13.2
