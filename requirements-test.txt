@@ -6,7 +6,7 @@ chardet==3.0.4            # via requests
 colorama==0.4.3           # via pytest
 coverage==5.1
 datadiff==2.0.0
-execnet==1.4.1            # via pytest-cache
+execnet==1.7.1            # via pytest-cache
 httmock==1.2.6
 hypothesis==3.31.3
 idna==2.9                 # via requests
