@@ -48,7 +48,7 @@ safety==1.9.0
 setoptconf==0.2.0         # via prospector
 six==1.15.0               # via astroid, dparse, packaging, pip-tools, pydocstyle, pylint, sphinx, sphinx-git, tox
 smmap2==3.0.0             # via gitdb2
-snowballstemmer==1.2.1    # via pydocstyle, sphinx
+snowballstemmer==2.0.0    # via pydocstyle, sphinx
 sphinx-autodoc-typehints==1.2.3
 sphinx-click==1.0.3
 sphinx-git==10.0.0
