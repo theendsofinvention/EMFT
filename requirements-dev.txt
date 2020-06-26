@@ -39,7 +39,7 @@ pylint-django==2.0.15      # via prospector
 pylint-flask==0.6         # via prospector
 pylint-plugin-utils==0.6  # via prospector, pylint-celery, pylint-common, pylint-django, pylint-flask
 pylint==2.5.3
-pyparsing==2.2.0          # via packaging
+pyparsing==2.4.7          # via packaging
 pytz==2017.2              # via babel
 pyyaml==3.12              # via dparse, prospector
 requests==2.18.4          # via safety, sphinx
