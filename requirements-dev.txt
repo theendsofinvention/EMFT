@@ -24,7 +24,7 @@ markupsafe==1.1.1           # via jinja2
 mccabe==0.6.1             # via flake8, prospector, pylint
 packaging==20.4           # via dparse, safety
 pbr==5.4.5                # via sphinx-click
-pep8-naming==0.4.1        # via prospector
+pep8-naming==0.11.1        # via prospector
 pip-tools==1.10.1
 pluggy==0.5.2             # via tox
 prospector==0.12.7
