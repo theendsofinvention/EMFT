@@ -37,7 +37,7 @@ pylint-celery==0.3        # via prospector
 pylint-common==0.2.5      # via prospector
 pylint-django==2.0.15      # via prospector
 pylint-flask==0.6         # via prospector
-pylint-plugin-utils==0.2.6  # via prospector, pylint-celery, pylint-common, pylint-django, pylint-flask
+pylint-plugin-utils==0.6  # via prospector, pylint-celery, pylint-common, pylint-django, pylint-flask
 pylint==1.7.4
 pyparsing==2.2.0          # via packaging
 pytz==2017.2              # via babel
