@@ -1,7 +1,7 @@
 -r requirements.txt
 -r requirements-test.txt
 alabaster==0.7.12         # via sphinx
-astroid==1.5.3            # via pylint, pylint-celery, pylint-flask, pylint-plugin-utils, requirements-detector
+astroid==2.4.2            # via pylint, pylint-celery, pylint-flask, pylint-plugin-utils, requirements-detector
 babel==2.5.1              # via sphinx
 certifi==2017.7.27.1
 chardet==3.0.4            # via requests
