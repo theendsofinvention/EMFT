@@ -28,7 +28,7 @@ pep8-naming==0.11.1        # via prospector
 pip-tools==5.2.1
 pluggy==0.13.1             # via tox
 prospector==1.2.0
-py==1.4.34                # via tox
+py==1.9.0                # via tox
 pycodestyle==2.0.0        # via flake8, prospector
 pydocstyle==2.0.0         # via prospector
 pyflakes==1.5.0           # via flake8, prospector
