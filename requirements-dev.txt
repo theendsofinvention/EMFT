@@ -50,7 +50,7 @@ six==1.15.0               # via astroid, dparse, packaging, pip-tools, pydocstyl
 smmap2==3.0.0             # via gitdb2
 snowballstemmer==2.0.0    # via pydocstyle, sphinx
 sphinx-autodoc-typehints==1.11.0
-sphinx-click==1.0.3
+sphinx-click==2.3.2
 sphinx-git==10.0.0
 sphinx==1.6.4
 sphinxcontrib-websupport==1.0.1  # via sphinx
