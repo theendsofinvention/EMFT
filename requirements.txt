@@ -6,7 +6,7 @@ future==0.18.2            # via pefile
 geographiclib==1.49       # via polycircles
 humanize==2.4.0
 idna==2.9                 # via requests
-metar==1.5.0
+metar==1.7.0
 mpmath==1.0.0
 natsort==5.1.0
 path.py==10.4
