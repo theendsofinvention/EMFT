@@ -9,7 +9,7 @@ datadiff==2.0.0
 execnet==1.4.1            # via pytest-cache
 httmock==1.2.6
 hypothesis==3.31.3
-idna==2.6                 # via requests
+idna==2.9                 # via requests
 pep8==1.7.0               # via pytest-pep8
 py==1.4.34                # via pytest, pytest-catchlog
 pytest-cache==1.0
