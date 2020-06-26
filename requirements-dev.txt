@@ -25,7 +25,7 @@ mccabe==0.6.1             # via flake8, prospector, pylint
 packaging==20.4           # via dparse, safety
 pbr==5.4.5                # via sphinx-click
 pep8-naming==0.11.1        # via prospector
-pip-tools==1.10.1
+pip-tools==5.2.1
 pluggy==0.5.2             # via tox
 prospector==0.12.7
 py==1.4.34                # via tox
