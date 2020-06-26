@@ -1,5 +1,5 @@
 -r requirements.txt
-apipkg==1.4               # via execnet
+apipkg==1.5               # via execnet
 attrs==17.2.0             # via hypothesis
 certifi==2020.6.20      # via requests
 chardet==3.0.4            # via requests
