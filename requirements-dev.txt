@@ -1,61 +1,61 @@
 -r requirements.txt
 -r requirements-test.txt
-alabaster==0.7.10         # via sphinx
-astroid==1.5.3            # via pylint, pylint-celery, pylint-flask, pylint-plugin-utils, requirements-detector
-babel==2.5.1              # via sphinx
-certifi==2017.7.27.1
+alabaster==0.7.12         # via sphinx
+astroid==2.4.2            # via pylint, pylint-celery, pylint-flask, pylint-plugin-utils, requirements-detector
+babel==2.8.0              # via sphinx
+certifi==2020.6.20
 chardet==3.0.4            # via requests
-click==6.7                # via pip-tools, safety
-colorama==0.3.9           # via pylint, sphinx
-docutils==0.14            # via sphinx
+click==7.1.2                # via pip-tools, safety
+colorama==0.4.3           # via pylint, sphinx
+docutils==0.16            # via sphinx
 dodgy==0.1.9              # via prospector
-dparse==0.2.1             # via safety
-first==2.0.1              # via pip-tools
-flake8==3.4.1
-gitchangelog==3.0.3
-gitdb2==2.0.3             # via gitpython
-gitpython==2.1.7          # via sphinx-git
-idna==2.6                 # via requests
-imagesize==0.7.1          # via sphinx
-isort==4.2.15             # via pylint
-jinja2==2.9.6             # via sphinx
-lazy-object-proxy==1.3.1  # via astroid
-markupsafe==1.0           # via jinja2
+dparse==0.5.1             # via safety
+first==2.0.2              # via pip-tools
+flake8==3.8.3
+gitchangelog==3.0.4
+gitdb2==4.0.1             # via gitpython
+gitpython==3.1.3          # via sphinx-git
+idna==2.9                 # via requests
+imagesize==1.2.0          # via sphinx
+isort==4.3.21             # via pylint
+jinja2==2.11.2             # via sphinx
+lazy-object-proxy==1.5.0  # via astroid
+markupsafe==1.1.1           # via jinja2
 mccabe==0.6.1             # via flake8, prospector, pylint
-packaging==16.8           # via dparse, safety
-pbr==3.1.1                # via sphinx-click
-pep8-naming==0.4.1        # via prospector
-pip-tools==1.10.1
-pluggy==0.5.2             # via tox
-prospector==0.12.7
-py==1.4.34                # via tox
-pycodestyle==2.0.0        # via flake8, prospector
-pydocstyle==2.0.0         # via prospector
-pyflakes==1.5.0           # via flake8, prospector
-pygments==2.2.0           # via sphinx
+packaging==20.4           # via dparse, safety
+pbr==5.4.5                # via sphinx-click
+pep8-naming==0.11.1        # via prospector
+pip-tools==5.2.1
+pluggy==0.13.1             # via tox
+prospector==1.2.0
+py==1.9.0                # via tox
+pycodestyle==2.6.0        # via flake8, prospector
+pydocstyle==5.0.2         # via prospector
+pyflakes==2.2.0           # via flake8, prospector
+pygments==2.6.1           # via sphinx
 pylint-celery==0.3        # via prospector
 pylint-common==0.2.5      # via prospector
-pylint-django==0.7.2      # via prospector
-pylint-flask==0.5         # via prospector
-pylint-plugin-utils==0.2.6  # via prospector, pylint-celery, pylint-common, pylint-django, pylint-flask
-pylint==1.7.4
-pyparsing==2.2.0          # via packaging
-pytz==2017.2              # via babel
-pyyaml==3.12              # via dparse, prospector
-requests==2.18.4          # via safety, sphinx
-requirements-detector==0.5.2  # via prospector
-safety==1.5.1
+pylint-django==2.0.15      # via prospector
+pylint-flask==0.6         # via prospector
+pylint-plugin-utils==0.6  # via prospector, pylint-celery, pylint-common, pylint-django, pylint-flask
+pylint==2.5.3
+pyparsing==2.4.7          # via packaging
+pytz==2020.1              # via babel
+pyyaml==5.3.1              # via dparse, prospector
+requests==2.24.0          # via safety, sphinx
+requirements-detector==0.7  # via prospector
+safety==1.9.0
 setoptconf==0.2.0         # via prospector
-six==1.11.0               # via astroid, dparse, packaging, pip-tools, pydocstyle, pylint, sphinx, sphinx-git, tox
-smmap2==2.0.3             # via gitdb2
-snowballstemmer==1.2.1    # via pydocstyle, sphinx
-sphinx-autodoc-typehints==1.2.3
-sphinx-click==1.0.3
-sphinx-git==10.0.0
-sphinx==1.6.4
-sphinxcontrib-websupport==1.0.1  # via sphinx
-sphinxjp.themes.basicstrap==0.4.3
-tox==2.9.1
-urllib3==1.22             # via requests
-virtualenv==15.1.0        # via tox
-wrapt==1.10.11            # via astroid
+six==1.15.0               # via astroid, dparse, packaging, pip-tools, pydocstyle, pylint, sphinx, sphinx-git, tox
+smmap2==3.0.0             # via gitdb2
+snowballstemmer==2.0.0    # via pydocstyle, sphinx
+sphinx-autodoc-typehints==1.11.0
+sphinx-click==2.3.2
+sphinx-git==11.0.0
+sphinx==3.1.1
+sphinxcontrib-websupport==1.2.2  # via sphinx
+sphinxjp.themes.basicstrap==0.5.0
+tox==3.15.2
+urllib3==1.25.9             # via requests
+virtualenv==20.0.25        # via tox
+wrapt==1.12.1            # via astroid
