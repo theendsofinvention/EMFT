@@ -43,7 +43,7 @@ pyparsing==2.4.7          # via packaging
 pytz==2020.1              # via babel
 pyyaml==5.3.1              # via dparse, prospector
 requests==2.24.0          # via safety, sphinx
-requirements-detector==0.5.2  # via prospector
+requirements-detector==0.7  # via prospector
 safety==1.5.1
 setoptconf==0.2.0         # via prospector
 six==1.11.0               # via astroid, dparse, packaging, pip-tools, pydocstyle, pylint, sphinx, sphinx-git, tox
