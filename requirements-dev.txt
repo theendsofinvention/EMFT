@@ -30,7 +30,7 @@ pluggy==0.13.1             # via tox
 prospector==1.2.0
 py==1.9.0                # via tox
 pycodestyle==2.6.0        # via flake8, prospector
-pydocstyle==2.0.0         # via prospector
+pydocstyle==5.0.2         # via prospector
 pyflakes==1.5.0           # via flake8, prospector
 pygments==2.2.0           # via sphinx
 pylint-celery==0.3        # via prospector
