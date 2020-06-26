@@ -15,7 +15,7 @@ polycircles==0.3.7
 pyinstrument==3.1.3
 pyqt5==5.9
 pytaf==1.2.1
-raven==6.2.1
+raven==6.10.0
 requests==2.24.0
 ruamel.yaml==0.15.34
 semantic-version==2.6.0
