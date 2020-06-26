@@ -12,7 +12,7 @@ dodgy==0.1.9              # via prospector
 dparse==0.5.1             # via safety
 first==2.0.2              # via pip-tools
 flake8==3.8.3
-gitchangelog==3.0.3
+gitchangelog==3.0.4
 gitdb2==2.0.3             # via gitpython
 gitpython==2.1.7          # via sphinx-git
 idna==2.6                 # via requests
