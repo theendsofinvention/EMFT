@@ -8,7 +8,7 @@ chardet==3.0.4            # via requests
 click==7.1.2                # via pip-tools, safety
 colorama==0.4.3           # via pylint, sphinx
 docutils==0.16            # via sphinx
-dodgy==0.1.9              # via prospector
+dodgy==0.2.1              # via prospector
 dparse==0.5.1             # via safety
 first==2.0.2              # via pip-tools
 flake8==3.8.3
