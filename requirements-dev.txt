@@ -53,7 +53,7 @@ sphinx-autodoc-typehints==1.11.0
 sphinx-click==2.5.0
 sphinx-git==11.0.0
 sphinx==3.1.2
-sphinxcontrib-websupport==1.2.3  # via sphinx
+sphinxcontrib-websupport==1.2.4  # via sphinx
 sphinxjp.themes.basicstrap==0.5.0
 tox==3.18.1
 urllib3==1.25.10             # via requests
