@@ -1,6 +1,6 @@
 -r requirements.txt
 apipkg==1.5               # via execnet
-attrs==19.3.0             # via hypothesis
+attrs==20.1.0             # via hypothesis
 certifi==2020.6.20      # via requests
 chardet==3.0.4            # via requests
 colorama==0.4.3           # via pytest
