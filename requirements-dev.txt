@@ -17,7 +17,7 @@ gitdb2==4.0.2             # via gitpython
 gitpython==3.1.7          # via sphinx-git
 idna==2.10                 # via requests
 imagesize==1.2.0          # via sphinx
-isort==5.2.1             # via pylint
+isort==5.5.1             # via pylint
 jinja2==2.11.2             # via sphinx
 lazy-object-proxy==1.5.1  # via astroid
 markupsafe==1.1.1           # via jinja2
