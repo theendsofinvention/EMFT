@@ -13,7 +13,7 @@ path.py==12.5.0
 pefile==2019.4.18
 polycircles==0.3.7
 pyinstrument==3.1.3
-pyqt5==5.15.0
+pyqt5==5.15.1
 pytaf==1.2.1
 raven==6.10.0
 requests==2.24.0
