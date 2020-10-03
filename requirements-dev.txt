@@ -11,7 +11,7 @@ docutils==0.16            # via sphinx
 dodgy==0.2.1              # via prospector
 dparse==0.5.1             # via safety
 first==2.0.2              # via pip-tools
-flake8==3.8.3
+flake8==3.8.4
 gitchangelog==3.0.4
 gitdb2==4.0.2             # via gitpython
 gitpython==3.1.7          # via sphinx-git
