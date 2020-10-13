@@ -57,5 +57,5 @@ sphinxcontrib-websupport==1.2.3  # via sphinx
 sphinxjp.themes.basicstrap==0.5.0
 tox==3.18.1
 urllib3==1.25.10             # via requests
-virtualenv==20.0.28        # via tox
+virtualenv==20.0.34        # via tox
 wrapt==1.12.1            # via astroid
