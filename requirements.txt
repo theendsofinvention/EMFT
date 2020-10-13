@@ -1,7 +1,7 @@
 certifi==2020.6.20
 chardet==3.0.4            # via requests
 click==7.1.2
-colorama==0.4.3
+colorama==0.4.4
 future==0.18.2            # via pefile
 geographiclib==1.50       # via polycircles
 humanize==2.5.0
