@@ -45,7 +45,7 @@ install_requires = [
     'requests',
     'ruamel.yaml',
     'simplekml',
-    'urllib3>=1.21.1,<1.26',  # Specific from requests
+    'urllib3>=1.21.1,<1.27',  # Specific from requests
     'pytaf',
     'metar',
 ]
