@@ -8,7 +8,7 @@ humanize==2.5.0
 idna==2.10                 # via requests
 metar==1.7.0
 mpmath==1.1.0
-natsort==7.0.1
+natsort==7.1.0
 path.py==12.5.0
 pefile==2019.4.18
 polycircles==0.3.7
