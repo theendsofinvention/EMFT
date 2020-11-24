@@ -20,7 +20,7 @@ requests==2.24.0
 ruamel.yaml==0.16.10
 semantic-version==2.8.5
 simplekml==1.3.5
-sip==5.3.0               # via pyqt5
+sip==5.5.0               # via pyqt5
 six==1.15.0               # via transitions
 transitions==0.8.2
 urllib3==1.25.10
