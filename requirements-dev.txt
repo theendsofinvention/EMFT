@@ -22,7 +22,7 @@ jinja2==2.11.2             # via sphinx
 lazy-object-proxy==1.5.1  # via astroid
 markupsafe==1.1.1           # via jinja2
 mccabe==0.6.1             # via flake8, prospector, pylint
-packaging==20.4           # via dparse, safety
+packaging==20.8           # via dparse, safety
 pbr==5.4.5                # via sphinx-click
 pep8-naming==0.11.1        # via prospector
 pip-tools==5.3.0
