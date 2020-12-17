@@ -20,5 +20,5 @@ pytest-pep8==1.0.6
 pytest-pycharm==0.6.0
 pytest-qt==3.3.0
 pytest==5.4.3
-requests==2.24.0          # via httmock
+requests==2.25.1          # via httmock
 urllib3==1.25.10             # via requests
