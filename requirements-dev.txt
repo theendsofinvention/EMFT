@@ -44,7 +44,7 @@ pytz==2020.1              # via babel
 pyyaml==5.3.1              # via dparse, prospector
 requests==2.24.0          # via safety, sphinx
 requirements-detector==0.7  # via prospector
-safety==1.9.0
+safety==1.10.0
 setoptconf==0.2.0         # via prospector
 six==1.15.0               # via astroid, dparse, packaging, pip-tools, pydocstyle, pylint, sphinx, sphinx-git, tox
 smmap2==3.0.1             # via gitdb2
