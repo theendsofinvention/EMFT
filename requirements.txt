@@ -5,7 +5,7 @@ colorama==0.4.3
 future==0.18.2            # via pefile
 geographiclib==1.50       # via polycircles
 humanize==2.5.0
-idna==2.10                 # via requests
+idna==3.0                 # via requests
 metar==1.7.0
 mpmath==1.1.0
 natsort==7.0.1
