@@ -41,7 +41,7 @@ pylint-plugin-utils==0.6  # via prospector, pylint-celery, pylint-common, pylint
 pylint==2.5.3
 pyparsing==2.4.7          # via packaging
 pytz==2020.1              # via babel
-pyyaml==5.3.1              # via dparse, prospector
+pyyaml==5.4              # via dparse, prospector
 requests==2.24.0          # via safety, sphinx
 requirements-detector==0.7  # via prospector
 safety==1.9.0
