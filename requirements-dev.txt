@@ -18,7 +18,7 @@ gitpython==3.1.7          # via sphinx-git
 idna==2.10                 # via requests
 imagesize==1.2.0          # via sphinx
 isort==5.2.1             # via pylint
-jinja2==2.11.2             # via sphinx
+jinja2==2.11.3             # via sphinx
 lazy-object-proxy==1.5.1  # via astroid
 markupsafe==1.1.1           # via jinja2
 mccabe==0.6.1             # via flake8, prospector, pylint
@@ -41,7 +41,7 @@ pylint-plugin-utils==0.6  # via prospector, pylint-celery, pylint-common, pylint
 pylint==2.5.3
 pyparsing==2.4.7          # via packaging
 pytz==2020.1              # via babel
-pyyaml==5.3.1              # via dparse, prospector
+pyyaml==5.4              # via dparse, prospector
 requests==2.24.0          # via safety, sphinx
 requirements-detector==0.7  # via prospector
 safety==1.9.0
