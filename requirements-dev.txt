@@ -32,7 +32,7 @@ py==1.9.0                # via tox
 pycodestyle==2.6.0        # via flake8, prospector
 pydocstyle==5.0.2         # via prospector
 pyflakes==2.2.0           # via flake8, prospector
-pygments==2.6.1           # via sphinx
+pygments==2.7.4           # via sphinx
 pylint-celery==0.3        # via prospector
 pylint-common==0.2.5      # via prospector
 pylint-django==2.2.0      # via prospector
